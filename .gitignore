@@ -2,6 +2,7 @@
 
 # Custom added
 temp/
+build/
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

@@ -16,7 +16,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Set the sources
 set(SOURCES # ${CMAKE_CURRENT_SOURCE_DIR}/src/Benchmarking/Monitoring.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/Benchmarking/Linux/Monitoring.cpp
+    #        ${CMAKE_CURRENT_SOURCE_DIR}/src/Benchmarking/Linux/Monitoring.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/shared_memory.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/base_class.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/modules/filestream/filestream.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/config_parser.cpp
         )
 
 # add the executable
@@ -26,29 +30,52 @@ add_executable(${PROJECT_NAME} main.cpp ${SOURCES})
 if(MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4100 /wd4200 /wd4250 /wd4355 /wd4505 )
 else()
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wunused-parameter )
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wunused-parameter )                                                                                                                                                                                                                                                                                 
 endif()
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-message("Downloading external projects")
+message(" - Downloading external projects")
 
-message("Downloading Linux System Monitoring Library")
-FetchContent_Declare(
-        SystemMonitoring
-        PREFIX ${EXTERNAL_INSTALL_LOCATION}
-        BINARY_DIR ${EXTERNAL_INSTALL_LOCATION}
-        INSTALL_DIR ${EXTERNAL_INSTALL_LOCATION}
-        GIT_REPOSITORY "https://github.com/fuxey/Linux-System-Monitoring-Library"
-        GIT_TAG "master"
-        GIT_SUBMODULES "example"
-)
-FetchContent_MakeAvailable(SystemMonitoring)
-message(${systemmonitoring_SOURCE_DIR} " or " ${systemmonitoring_BINARY_DIR} " or " ${systemmonitoring_POPULATED})
+################## Linux System Monitoring Library ##################
+# message(" -- Downloading Linux System Monitoring Library")
+# FetchContent_Declare(
+#         SystemMonitoring
+#         PREFIX ${EXTERNAL_INSTALL_LOCATION}
+#         BINARY_DIR ${EXTERNAL_INSTALL_LOCATION}
+#         INSTALL_DIR ${EXTERNAL_INSTALL_LOCATION}
+#         GIT_REPOSITORY "https://github.com/fuxey/Linux-System-Monitoring-Library"
+#         GIT_TAG "master"
+#         GIT_SUBMODULES "example"
+# )
+# FetchContent_MakeAvailable(SystemMonitoring)
+# find_library(SYSMON_LINUX liblinuxmonitoring REQUIRED)
+# message(${systemmonitoring_SOURCE_DIR})
+# message(${SYSMON_LINUX_INCLUDE_DIR})
+# target_include_directories(${PROJECT_NAME} PRIVATE ${systemmonitoring_SOURCE_DIR} ${SYSMON_LINUX_INCLUDE_DIR})
+# target_link_libraries(${PROJECT_NAME} ${SYSMON_LINUX_LIBRARIES}) # No libraries to link (yet)
 
-find_library(SYSMON_LINUX liblinuxmonitoring REQUIRED)
-message(${SYSMON_LINUX} "  orr   " ${SYSMON_LINUX_INCLUDE_DIR})
-message("include directories")
-target_include_directories(${projectname} ${systemmonitoring_SOURCE_DIR} ${SYSMON_LINUX_INCLUDE_DIR})
+# message(" -- Linux System Monitoring Library downloaded")
+
+################## JSON Library ##################
+message(" -- Downloading JSON library")
+include(FetchContent)
+
+FetchContent_Declare(json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.7.3)
+
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+  FetchContent_Populate(json)
+  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+find_library(LIBRT rt)     # Note: LIBRT is not a Windows library. Therefore, for Windows this should be ignored  
+if(LIBRT)
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json)
+endif()
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+message(" -- JSON library downloaded")
+
 
 # Link libraries 
-target_link_libraries(${projectname} ${SYSMON_LINUX_LIBRARIES}) # No libraries to link (yet)

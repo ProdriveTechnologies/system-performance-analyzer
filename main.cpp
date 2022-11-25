@@ -1,170 +1,70 @@
-/**
- * @author: Daniel Fuchs
- * @contact: fuxeysolutions@gmail.com
- *
- * distributed under the MIT License (MIT).
- * Copyright (c) Daniel Fuchs
- *
- */
-#include "linux_cpuload.hpp"
-#include "linux_memoryload.hpp"
-#include "linux_networkload.hpp"
-#include "linux_process_load.hpp"
-#include "util/record_value.hpp"
-#include "util/timer.hpp"
-#include <atomic>
-#include <csignal>
 #include <iostream>
-#include <lib/linux_systemutil.hpp>
-#include <memory>
+
+#include "modules/filestream/filestream.h"
+#include "src/helpers/stopwatch.h"
+#include "src/json_config/config_parser.h"
+#include "src/linux/shared_memory.h"
+#include "src/modules/unit_handler.h"
+#include <chrono>
+#include <sys/wait.h>
 #include <thread>
 
-static void signalHandler(int signum)
+void print_func() { std::cout << "Printing the world" << std::endl; }
+
+struct CommPipes
 {
-  std::cerr << "Signal " << signum << " was catched, shutdown app" << std::endl;
-  Timer::stop();
-}
+  int pipes[2];
+  Module::Config childInfo;
+};
 
-static void installHandler()
+int main()
 {
-  std::signal(SIGKILL, signalHandler);
-  std::signal(SIGTERM, signalHandler);
-  std::signal(SIGPIPE, signalHandler);
-}
-
-int main(int argc, char *argv[])
-{
-  (void)argc;
-  (void)argv;
-  installHandler();
-
-  auto processes = std::make_unique<linuxProcessLoad>();
-  auto memoryMonitoring = std::make_unique<memoryLoad>();
-  auto cpuMonitoring = std::make_unique<cpuLoad>("/proc/stat");
-  auto ethernetMonitoring = networkLoad::createLinuxEthernetScanList();
-  cpuMonitoring->initCpuUsage();
-
-  for (auto elem : ethernetMonitoring)
+  auto config = Core::ConfigParser::Parse("./json_example.json");
+  std::cout << "Done parsing" << std::endl;
+  std::cout << "Parsed: " << config.getStr() << std::endl;
+  Core::UnitHandler unitHandler;
+  pid_t childPid;
+  std::vector<CommPipes> childPipes;
+  std::vector<Linux::SharedMemory> memoryBlocks;
+  for (const auto &e : config.tasks)
   {
-    std::cout << "get Mac adr of dev: " << elem->getDeviceName() << " : "
-              << linuxUtil::getIFaceMacAddress(elem.get()->getDeviceName())
-              << std::endl;
+    Module::Config moduleConfig;
+    moduleConfig.moduleName = e.type;
+    moduleConfig.taskConfig = e;
+    CommPipes childInfo;
+    childInfo.childInfo = moduleConfig;
+    pipe(childInfo.pipes); // Get the pipes for the communication
+    moduleConfig.readPipeParent = childInfo.pipes[0];
+    moduleConfig.writePipeParent = childInfo.pipes[1];
+    if (e.outIds.size() == 1)
+    {
+      Linux::SharedMemory::Configuration config;
+      config.fileName = "/filename1";
+      config.memorySize = 100000;
+      config.mode = Linux::SharedMemory::Mode::READ_WRITE;
+      Linux::SharedMemory memory(config);
+      memoryBlocks.push_back(memory);
+      memoryBlocks.back().Allocate();
+      Module::Config::Stream outputStream;
+      outputStream.memorySize = 100000000;
+      outputStream.blockSize = 10000000;
+      outputStream.addressPtr = memoryBlocks.back().GetAddress();
+      outputStream.unitId = e.outIds.at(0);
+      printf("Address of parent is %p\n", (void *)outputStream.addressPtr);
+      moduleConfig.outputStreams.push_back(outputStream);
+    }
+    // Loop through the tasks and start them
+    if (e.type == "filestream")
+      childPid = unitHandler.AddUnit<Module::FileStream>(moduleConfig);
   }
+  Stopwatch stopwatch;
+  stopwatch.start();
 
-  // print process cpu load > 1.0%
-  Timer::periodicShot(
-      [&processes]()
-      {
-        auto procCPUUsage = processes->getProcessCpuLoad();
-        for (const auto &elem : procCPUUsage)
-        {
-          if (elem.second > 1.0)
-          {
-            std::cout << " proc: " << elem.first << " usage: " << elem.second
-                      << " % " << std::endl;
-          }
-        }
-      },
-      std::chrono::milliseconds(3003));
+  std::cout << "Child process ID: " << childPid << std::endl;
+  int statusRes;
+  waitpid(childPid, &statusRes, 0);
 
-  // print cpu usage of all cpu cores
-  Timer::periodicShot(
-      [&]
-      {
-        auto cpus = cpuMonitoring->getCurrentMultiCoreUsage();
-        uint32_t i{0};
-        for (auto elem : cpus)
-        {
-          std::cout << "cpu" << std::to_string(i++) << ": "
-                    << std::to_string(elem) << "%  ";
-        }
-        std::cout << std::endl;
-      },
-      std::chrono::milliseconds(5007));
-
-  auto recordTest = std::make_unique<recordValue<double>>(
-      std::chrono::hours(1), std::chrono::seconds(1));
-  auto recordTest2 = std::make_unique<recordValue<double>>(
-      std::chrono::hours(6), std::chrono::minutes(5));
-
-  // print cpu usage + calculate average + min&max
-  Timer::periodicShot(
-      [&]()
-      {
-        double currentCpuLoad = cpuMonitoring->getCurrentCpuUsage();
-        recordTest->addRecord(currentCpuLoad);
-
-        std::cout << "----------------------------------------------"
-                  << std::endl
-                  << " current CPULoad:" << currentCpuLoad << std::endl
-                  << " average CPULoad " << recordTest->getAverageRecord()
-                  << std::endl
-                  << " Max     CPULoad " << recordTest->getMaxRecord()
-                  << std::endl
-                  << " Min     CPULoad " << recordTest->getMinRecord()
-                  << std::endl
-                  << " CPU: " << cpuMonitoring->getCPUName() << std::endl;
-      },
-      std::chrono::milliseconds(1003));
-
-  Timer::periodicShot(
-      [&]() { recordTest2->addRecord(recordTest->getAverageRecord()); },
-      std::chrono::minutes(5));
-
-  // print memory load
-  Timer::periodicShot(
-      [&]()
-      {
-        std::cout << "----------------------------------------------";
-        std::cout << "----------------------------------------------"
-                  << std::endl;
-        std::cout << " memory load: "
-                  << memoryMonitoring->getCurrentMemUsageInPercent()
-                  << "% maxmemory: " << memoryMonitoring->getTotalMemoryInKB()
-                  << " Kb used: " << memoryMonitoring->getCurrentMemUsageInKB()
-                  << " Kb  Memload of this Process "
-                  << memoryMonitoring->getMemoryUsageByThisProcess() << " KB "
-                  << std::endl;
-      },
-      std::chrono::milliseconds(2009));
-
-  // print networkload of "wlp0s20f3"
-  Timer::periodicShot(
-      [&]()
-      {
-        for (auto elem : ethernetMonitoring)
-        {
-          // get available networkdevices with command ifconfig
-          if (elem->getDeviceName() == "wlp0s20f3")
-          {
-            std::cout << "----------------------------------------------"
-                      << std::endl;
-            std::cout
-                << " network load: " << elem->getDeviceName() << " : "
-                << elem->getBitsPerSeceondString(elem->getParamPerSecond(
-                       networkLoad::mapEnumToString(networkLoad::RXbytes)))
-                << " : "
-                << elem->getBitsPerSeceondString(elem->getParamPerSecond(
-                       networkLoad::mapEnumToString(networkLoad::TXbytes)))
-                << " : "
-                << " RX Bytes Startup: "
-                << elem->getBytesString(elem->getParamSinceStartup(
-                       networkLoad::mapEnumToString(networkLoad::RXbytes)))
-                << " TX Bytes Startup: "
-                << elem->getBytesString(elem->getParamSinceStartup(
-                       networkLoad::mapEnumToString(networkLoad::TXbytes)))
-                << std::endl;
-          }
-        }
-      },
-      std::chrono::milliseconds(5007));
-
-  while (Timer::isRunning())
-  {
-    std::this_thread::sleep_for(std::chrono::minutes(5));
-    Timer::stop();
-    std::cout << " Bye bye!" << std::endl;
-  }
-
-  std::exit(1);
+  std::cout << WIFEXITED(statusRes)
+            << "Child is done after: " << stopwatch.getTime<std::micro>()
+            << " microseconds" << std::endl;
 }
