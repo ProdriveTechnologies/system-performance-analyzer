@@ -29,22 +29,15 @@ namespace Measurements
 class CSensors
 {
 public:
-  //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CSensors(const std::string &configFile);
 
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
   Exports::SMeasurementItem GetConfig() const;
-  // std::vector<Measurements::SMeasuredItem> GetMeasurements();
+
   std::vector<Measurements::SMeasuredItem> GetMeasurements();
 
   std::vector<SSensors> GetSensors(const bool summarizeData = true) const;
-
-  // Should be removed
-  std::vector<PlatformConfig::SDatafields> GetDefinition() const
-  {
-    return measureFieldsDefinition_;
-  }
 
 private:
   const std::string configFile_;

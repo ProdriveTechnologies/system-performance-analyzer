@@ -10,8 +10,18 @@
 
 namespace Measurements
 {
+/**
+ * @brief Constructor of the System Measurements class
+ *
+ * @param configFile
+ */
 CSensors::CSensors(const std::string &configFile) : configFile_{configFile} {}
 
+/**
+ * @brief Initializes the System measurements class
+ *
+ * @param allData
+ */
 void CSensors::Initialize(std::vector<Measurements::SMeasurementsData> *allData)
 {
   SetDataHandlers();
@@ -26,6 +36,11 @@ void CSensors::Initialize(std::vector<Measurements::SMeasurementsData> *allData)
   dataHandler_.Initialize(datahandlerMap, measureFieldsDefinition_);
 }
 
+/**
+ * @brief Sets the dataHandlers_ variable for correctly handling and reading the
+ * system sensors that are configured in the JSON
+ * @note This function should be called before the dataHandlers_ are being used
+ */
 void CSensors::SetDataHandlers()
 {
   dataHandlers_.push_back(Linux::SDataHandlers{
@@ -40,29 +55,16 @@ void CSensors::SetDataHandlers()
       std::make_unique<Linux::CProcStatHandler>(Linux::CProcStatHandler())});
 }
 
-Exports::SMeasurementItem CSensors::GetConfig() const
-{
-  Exports::SMeasurementItem config;
-  config.name = "SystemResources";
-  config.type = Exports::EType::INFO;
-  config.value = GetMeasurementFields();
-  return config;
-}
-
-std::vector<Exports::SMeasurementItem> CSensors::GetMeasurementFields() const
-{
-  std::vector<Exports::SMeasurementItem> result;
-  for (const auto &e : measureFieldsDefinition_)
-  {
-    Exports::SMeasurementItem config;
-    config.name = e.name;
-    config.type = Exports::EType::INFO;
-    config.value = GetDefinitionItems(e);
-    result.push_back(config);
-  }
-  return result;
-}
-
+/**
+ * @brief Returns the sensors that are configurated in the sensor_config.json
+ * file
+ *
+ * @param summarizeData [true]: summarizes the data and calculates the average
+ * measured value for each sensor
+ *                      [false]: Does not summarize the data, therefore the
+ * "data" field in the SSensors struct will be empty
+ * @return std::vector<SSensors>
+ */
 std::vector<SSensors> CSensors::GetSensors(const bool summarizeData) const
 {
   std::vector<SSensors> result;
@@ -111,6 +113,56 @@ std::vector<SSensors> CSensors::GetSensors(const bool summarizeData) const
   return result;
 }
 
+/**
+ * @brief reads the measurements of the configured sensors, parses the
+ * measurements, and returns them
+ *
+ * @return std::vector<SMeasuredItem>
+ */
+std::vector<SMeasuredItem> CSensors::GetMeasurements()
+{
+  std::vector<SMeasuredItem> items;
+  auto returnSuccess = dataHandler_.ParseMeasurements();
+  if (returnSuccess)
+  {
+    items = dataHandler_.GetMeasurements();
+  }
+  else
+  {
+    CLogger::Log(CLogger::Types::WARNING,
+                 "Could not measure system measurements!");
+  }
+  return items;
+}
+
+/**
+ * @brief Returns the configuration used for the JSON export
+ *
+ * @return Exports::SMeasurementItem
+ */
+Exports::SMeasurementItem CSensors::GetConfig() const
+{
+  Exports::SMeasurementItem config;
+  config.name = "SystemResources";
+  config.type = Exports::EType::INFO;
+  config.value = GetMeasurementFields();
+  return config;
+}
+
+std::vector<Exports::SMeasurementItem> CSensors::GetMeasurementFields() const
+{
+  std::vector<Exports::SMeasurementItem> result;
+  for (const auto &e : measureFieldsDefinition_)
+  {
+    Exports::SMeasurementItem config;
+    config.name = e.name;
+    config.type = Exports::EType::INFO;
+    config.value = GetDefinitionItems(e);
+    result.push_back(config);
+  }
+  return result;
+}
+
 std::vector<Exports::SMeasurementItem>
 CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
 {
@@ -128,22 +180,6 @@ CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
     result.push_back(item3);
   }
   return result;
-}
-
-std::vector<SMeasuredItem> CSensors::GetMeasurements()
-{
-  std::vector<SMeasuredItem> items;
-  auto returnSuccess = dataHandler_.ParseMeasurements();
-  if (returnSuccess)
-  {
-    items = dataHandler_.GetMeasurements();
-  }
-  else
-  {
-    CLogger::Log(CLogger::Types::WARNING,
-                 "Could not measure system measurements!");
-  }
-  return items;
 }
 
 CSensors::MeasureCombo CSensors::GetFields(
