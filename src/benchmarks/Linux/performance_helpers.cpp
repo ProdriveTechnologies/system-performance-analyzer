@@ -67,7 +67,8 @@ GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
     }
   }
   Measurements::Sensors result{GStreamer::GetMeasureType(type),
-                               PerformanceHelpers::GetUniqueId()};
+                               PerformanceHelpers::GetUniqueId(),
+                               PlatformConfig::Class::PIPELINE_MEASUREMENTS};
   result.data = summarizedData.GetSensorData();
   return result;
 }
@@ -172,7 +173,8 @@ GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
         summarizedData.AddDataPoint(e2);
     }
   }
-  Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId()};
+  Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId(),
+                               PlatformConfig::Class::SYS_RESOURCE_USAGE};
   result.data = summarizedData.GetSensorData();
   return result;
 }

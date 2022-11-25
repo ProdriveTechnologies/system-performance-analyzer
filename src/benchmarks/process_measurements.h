@@ -76,15 +76,7 @@ private:
                      const int processId) const;
   void SetInactive(const int processId);
 
-  struct DataHandler
-  {
-    PlatformConfig::Types type;
-    std::variant<std::unique_ptr<Linux::CPidStatHandler>,
-                 std::unique_ptr<Linux::CDirectHandler>,
-                 std::unique_ptr<Linux::CPidStatmHandler>>
-        datahandler;
-  };
-  std::vector<DataHandler> dataHandlers_;
+  std::vector<Linux::SDataHandlers> dataHandlers_;
 
   /**
    * @brief Necessary for parsing the configuration file for the sensors

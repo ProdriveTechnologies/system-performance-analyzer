@@ -290,6 +290,7 @@ void CPerfMeasurements::AnalyzeData()
   auto gstSensors = gstMeasurements_.GetSensors();
   auto sysSensors = sensorMeasurements_.GetSensors();
   auto processSensors = processMeasurements_.GetSensors();
+  std::cout << "Process sensors size: " << processSensors.size() << std::endl;
   Exports::AllSensors allSensors;
   allSensors.AddSensors(Measurements::Classification::PIPELINE, gstSensors);
   allSensors.AddSensors(Measurements::Classification::SYSTEM, sysSensors);
@@ -303,8 +304,9 @@ void CPerfMeasurements::AnalyzeData()
   // pExportObj_ = std::make_unique<Exports::CExport>(
   //     new Exports::CSummaryGenerator{}, "filename", true);
   Exports::CSummaryGenerator generator;
-  generator.Generate(*pMeasurementsData_, sensorMeasurements_.GetDefinition());
-  generator.GenerateProcesses(*pProcessesData_);
+  // generator.Generate(*pMeasurementsData_,
+  // sensorMeasurements_.GetDefinition());
+  // generator.GenerateProcesses(*pProcessesData_);
 
   std::vector<Exports::MeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());

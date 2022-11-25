@@ -21,7 +21,11 @@ constexpr std::string_view lineSize{"Line size"};
 constexpr std::string_view type{"Type"};
 
 constexpr std::string_view systemSummaryTitle{"System Resource Usage"};
+constexpr std::string_view processSummaryTitle{"Processes Resource Usage"};
+constexpr std::string_view pipelineSummaryTitle{"Pipeline Measurements"};
 constexpr std::string_view average{"Average "};
+constexpr std::string_view minimum{"Minimum "};
+constexpr std::string_view maximum{"Maximum "};
 
 constexpr std::string_view thresholdTitle{"Thresholds"};
 constexpr std::string_view thresholdExceeded{"No thresholds were exceeded!"};

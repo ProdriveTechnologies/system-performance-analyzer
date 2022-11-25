@@ -31,11 +31,11 @@ void TraceHandler::TraceCallbackFunction(
     // No proper structure included, returning as there is no data to parse
     return;
   }
-  if (object == nullptr || object == NULL)
-    std::cout << "Ofcourse! Object pointer is a null pointer, how related..."
-              << std::endl;
-  std::cout << "File: " << file << " and functor" << function << std::endl;
-  std::cout << gst_debug_message_get(message) << std::endl;
+  // if (object == nullptr || object == NULL)
+  //   std::cout << "Ofcourse! Object pointer is a null pointer, how related..."
+  //             << std::endl;
+  // std::cout << "File: " << file << " and functor" << function << std::endl;
+  // std::cout << gst_debug_message_get(message) << std::endl;
   // if (gstStructure->)
   logData->parent->ParseTraceStructure(gstStructure.get());
 }

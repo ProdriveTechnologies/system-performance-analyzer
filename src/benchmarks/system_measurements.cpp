@@ -48,7 +48,7 @@ std::vector<Sensors> CSensors::GetSensors() const
   std::vector<Sensors> result;
   for (const auto &e : measureFieldsDefinition_)
   {
-    Sensors sensor{e.name, e.id};
+    Sensors sensor{e.name, e.id, e.classType};
     sensor.data = PerformanceHelpers::GetSummarizedDataSensors(allData_, e.id);
     result.push_back(sensor);
   }

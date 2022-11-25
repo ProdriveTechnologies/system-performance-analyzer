@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "src/helpers/helper_functions.h"
+#include "src/json_config/sensor_config/config.h"
 
 namespace Measurements
 {
@@ -63,13 +64,15 @@ struct Sensors
                       // "xavier_config.json" file. If it is in an array, this
                       // userId will have a number of the array behind it
   int uniqueId;
+  PlatformConfig::Class classType;
   // std::string groupId; // Only applicable for arrays, this is the groupname
   // and therefore does not contain the array number. This is the "original"
   // user id of the sensor
 
   SensorData data;
-  Sensors(const std::string &userId_, const int uniqueId_)
-      : userId{userId_}, uniqueId{uniqueId_}
+  Sensors(const std::string &userId_, const int uniqueId_,
+          PlatformConfig::Class sensorClass_ = PlatformConfig::Class::NONE)
+      : userId{userId_}, uniqueId{uniqueId_}, classType{sensorClass_}
   {
   }
   // Something of a pointer to the necessary data
@@ -117,14 +120,12 @@ struct AllSensors
   };
 
   std::unordered_map<Classification, std::vector<SensorGroups>> data;
-  std::unordered_map<std::string, Measurements::Sensors *> mapByNameId;
-  std::unordered_map<SensorIdentifier, Measurements::Sensors *, SensorIdHash>
-      mapByNameId2;
 
   using SensorMap = std::unordered_map<std::string, Measurements::Sensors *>;
   using ProcessId = int;
   using SensorMapByProcess = std::unordered_map<ProcessId, SensorMap>;
   SensorMapByProcess mapByProcessId;
+
   /**
    * @brief Returns the sensors based on a group classification and
    * optionally a process ID

@@ -21,7 +21,8 @@ enum class Types
 enum class Class : int
 {
   NONE = 0,
-  SYS_RESOURCE_USAGE = 1
+  SYS_RESOURCE_USAGE = 1,
+  PIPELINE_MEASUREMENTS = 3,
 };
 
 inline Types GetType(const std::string &typeStr)

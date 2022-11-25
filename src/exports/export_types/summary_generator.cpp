@@ -5,6 +5,7 @@
 #include "src/exports/summary_writer.h"
 #include "src/exports/translations.h"
 // #include <infoware/cpu.hpp>
+#include "src/helpers/logger.h"
 #include <iostream>
 
 namespace Exports
@@ -29,6 +30,14 @@ bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
   {
   }
 
+  PrintSystemSummary(allSensors);
+  PrintThresholds(allSensors);
+
+  return true;
+}
+
+void CSummaryGenerator::PrintThresholds(const AllSensors &allSensors)
+{
   auto processIds = allSensors.GetProcesses();
 
   SummaryWriter::PrintSection(SummaryTranslations::thresholdTitle);
@@ -52,25 +61,25 @@ bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
   {
     SummaryWriter::PrintRow(SummaryTranslations::thresholdExceeded);
   }
-  return true;
 }
 
-bool CSummaryGenerator::Generate(
-    const std::vector<Exports::ExportData> &measurementsData,
-    const std::vector<PlatformConfig::SDatafields> &measurementsDef)
-{
-  SummaryWriter::PrintTitle(SummaryTranslations::headerName);
-  PrintApplicationInfo();
-  // PrintSystemInfo();
-  // PrintCacheInfo();
+// bool CSummaryGenerator::Generate(
+//     const std::vector<Exports::ExportData> &measurementsData,
+//     const std::vector<PlatformConfig::SDatafields> &measurementsDef)
+// {
+//   SummaryWriter::PrintTitle(SummaryTranslations::headerName);
+//   PrintApplicationInfo();
+//   // PrintSystemInfo();
+//   // PrintCacheInfo();
 
-  // Second, summarize system wide data
-  PrintSystemSummary(measurementsData, measurementsDef);
-  // Then, summarize each process the data
-  // Finish with the data of each GStreamer pipeline (FPS, most delaying module,
-  // CPU heavy module?)
-  return true;
-}
+//   // Second, summarize system wide data
+//   // PrintSystemSummary(measurementsData, measurementsDef);
+//   // Then, summarize each process the data
+//   // Finish with the data of each GStreamer pipeline (FPS, most delaying
+//   module,
+//   // CPU heavy module?)
+//   return true;
+// }
 
 void CSummaryGenerator::PrintApplicationInfo()
 {
@@ -97,12 +106,12 @@ void CSummaryGenerator::PrintSystemInfo()
   //                           GetArchitecture(iware::cpu::architecture()));
   SummaryWriter::PrintRow();
 }
-bool CSummaryGenerator::GenerateProcesses(
-    const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
-        &measuredProcesses)
-{
-  return true;
-}
+// bool CSummaryGenerator::GenerateProcesses(
+//     const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
+//         &measuredProcesses)
+// {
+//   return true;
+// }
 
 void CSummaryGenerator::PrintCacheInfo()
 {
@@ -130,23 +139,67 @@ void CSummaryGenerator::PrintCacheInfo()
 #endif
 }
 
-void CSummaryGenerator::PrintSystemSummary(
-    const std::vector<Exports::ExportData> &measurementsData,
-    const std::vector<PlatformConfig::SDatafields> &measurementsDef)
+/**
+ * @brief
+ */
+void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
 {
   SummaryWriter::PrintSection(SummaryTranslations::systemSummaryTitle);
-
-  for (const auto &e : measurementsDef)
+  auto systemRsc = allSensors.data.find(Measurements::Classification::SYSTEM);
+  if (systemRsc != allSensors.data.end())
   {
-    if (e.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE)
-      continue;
-    auto averageUsage = GetAverage(measurementsData, e.id);
-    std::string valName{SummaryTranslations::average};
-    valName += e.name;
-    SummaryWriter::PrintValue(valName, averageUsage);
+    if (systemRsc->second.size() > 1)
+      CLogger::Log(CLogger::Types::WARNING, "System size > 1");
+    for (const auto &systemRscSensors : systemRsc->second)
+    {
+      for (const auto &sensor : systemRscSensors.sensors)
+      {
+        if (sensor.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE)
+          continue;
+        PrintValue(SummaryTranslations::average, sensor,
+                   Measurements::ValueTypes::AVERAGE);
+      }
+    }
   }
-
-  // SummaryWriter::PrintValue(, measurementsData.at)
+  SummaryWriter::PrintRow();
+  SummaryWriter::PrintSection(SummaryTranslations::processSummaryTitle);
+  auto processRsc =
+      allSensors.data.find(Measurements::Classification::PROCESSES);
+  if (processRsc != allSensors.data.end())
+  {
+    for (const auto &processGroup : processRsc->second)
+    {
+      SummaryWriter::PrintSubSection("Process: " +
+                                     std::to_string(processGroup.processId));
+      for (const auto &sensor : processGroup.sensors)
+      {
+        // if (sensor.classType != PlatformConfig::Class::)
+        //   continue;
+        PrintValue(SummaryTranslations::average, sensor,
+                   Measurements::ValueTypes::AVERAGE);
+      }
+    }
+  }
+  SummaryWriter::PrintRow();
+  SummaryWriter::PrintSection(SummaryTranslations::pipelineSummaryTitle);
+  auto pipelineRsc =
+      allSensors.data.find(Measurements::Classification::PIPELINE);
+  if (pipelineRsc != allSensors.data.end())
+  {
+    for (const auto &pipelineGroup : pipelineRsc->second)
+    {
+      SummaryWriter::PrintSubSection("Pipeline: " +
+                                     std::to_string(pipelineGroup.processId));
+      for (const auto &sensor : pipelineGroup.sensors)
+      {
+        // if (sensor.classType != PlatformConfig::Class::)
+        //   continue;
+        PrintValue(SummaryTranslations::average, sensor,
+                   Measurements::ValueTypes::AVERAGE);
+      }
+    }
+  }
+  SummaryWriter::PrintRow();
 }
 
 double CSummaryGenerator::GetAverage(
@@ -169,6 +222,22 @@ double CSummaryGenerator::GetAverage(
   }
   const size_t dataSize = measurementsData.size();
   return dataSize > 0 ? (total / dataSize) : 0.0;
+}
+
+/**
+ * @brief Prints a value from a sensor to the summary
+ *
+ * @param translation
+ * @param sensor
+ * @param valueType
+ */
+void CSummaryGenerator::PrintValue(const std::string_view translation,
+                                   const Measurements::Sensors &sensor,
+                                   const Measurements::ValueTypes valueType)
+{
+  std::string valName{translation};
+  valName += sensor.userId;
+  SummaryWriter::PrintValue(valName, sensor.data.Get(valueType));
 }
 
 #if 0

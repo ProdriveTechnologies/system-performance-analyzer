@@ -1,14 +1,39 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "path_parser_base.h"
 #include "src/exports/export_struct.h"
 
+#include "src/linux/datahandlers/direct_handler.h"
+#include "src/linux/datahandlers/pidstat_handler.h"
+#include "src/linux/datahandlers/pidstatm_handler.h"
+#include "src/linux/datahandlers/procmeminfo_handler.h"
+#include "src/linux/datahandlers/procstat_handler.h"
+
 namespace Linux
 {
+// Pre-declaration, still needs to be included when used
+class CPidStatHandler;
+class CDirectHandler;
+class CPidStatmHandler;
+class CProcStatHandler;
+class CProcMeminfoHandler;
+
+struct SDataHandlers
+{
+  PlatformConfig::Types type;
+  std::variant<std::unique_ptr<Linux::CPidStatHandler>,
+               std::unique_ptr<Linux::CDirectHandler>,
+               std::unique_ptr<Linux::CPidStatmHandler>,
+               std::unique_ptr<Linux::CProcStatHandler>,
+               std::unique_ptr<Linux::CProcMeminfoHandler>>
+      datahandler;
+};
 class CDataHandler
 {
 public:

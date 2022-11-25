@@ -10,19 +10,19 @@
 
 namespace Linux
 {
-class CProcStatHandler : public CPathParserBase
+class CProcMeminfoHandler : public CPathParserBase
 {
 public:
-  CProcStatHandler() = default;
+  CProcMeminfoHandler() = default;
 
   /**
-   * @brief CProcStatHandler has nothing to initialize except for runtime
+   * @brief CProcMeminfoHandler has nothing to initialize except for runtime
    */
-  void Initialize() { procHandler_.ParseProcStat(); }
+  void Initialize() { procHandler_.ParseMeminfo(); }
 
   bool InitializeRuntime([[maybe_unused]] const std::string &replacement)
   {
-    procHandler_.ParseProcStat();
+    procHandler_.ParseMeminfo();
     return true;
   }
 
@@ -30,7 +30,7 @@ public:
                         [[maybe_unused]] const std::string &path,
                         [[maybe_unused]] const std::string &replacement = "")
   {
-    item_ = procHandler_.ParseProcField(datafield, path);
+    item_ = procHandler_.ParseMemField(datafield);
     return true;
   }
 

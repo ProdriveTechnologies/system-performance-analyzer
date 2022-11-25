@@ -14,12 +14,12 @@ namespace Exports
 class CSummaryGenerator : public CBase
 {
 public:
-  bool
-  Generate(const std::vector<Exports::ExportData> &measurementsData,
-           const std::vector<PlatformConfig::SDatafields> &measurementsDef);
-  bool GenerateProcesses(
-      const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
-          &measuredProcesses);
+  // bool
+  // Generate(const std::vector<Exports::ExportData> &measurementsData,
+  //          const std::vector<PlatformConfig::SDatafields> &measurementsDef);
+  // bool GenerateProcesses(
+  //     const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
+  //         &measuredProcesses);
 
   bool FullExport(const std::vector<MeasurementItem> &config,
                   const FullMeasurement data, const AllSensors &allSensors);
@@ -30,6 +30,7 @@ private:
   void PrintSystemInfo();
   void PrintCacheInfo();
   void PrintPcieInfo();
+  void PrintThresholds(const AllSensors &allSensors);
   std::string PrintValues(const Measurements::SensorData data)
   {
     std::string result = "\n";
@@ -42,9 +43,13 @@ private:
                     const int id);
 
   // Dynamic info based on the test which was executed
-  void PrintSystemSummary(
-      const std::vector<Exports::ExportData> &measurementsData,
-      const std::vector<PlatformConfig::SDatafields> &measurementsDef);
+  // void PrintSystemSummary(
+  //     const std::vector<Exports::ExportData> &measurementsData,
+  //     const std::vector<PlatformConfig::SDatafields> &measurementsDef);
+  void PrintSystemSummary(const AllSensors &allSensors);
+  void PrintValue(const std::string_view translation,
+                  const Measurements::Sensors &sensor,
+                  const Measurements::ValueTypes valueType);
 };
 
 } // namespace Exports

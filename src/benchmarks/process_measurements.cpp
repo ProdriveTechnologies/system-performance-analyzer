@@ -68,13 +68,13 @@ CProcessMeasurements::GetDatahandlerMap()
 
 void CProcessMeasurements::SetDataHandlers()
 {
-  dataHandlers_.push_back(DataHandler{
+  dataHandlers_.push_back(Linux::SDataHandlers{
       PlatformConfig::Types::DIRECT_PID,
       std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
-  dataHandlers_.push_back(DataHandler{
+  dataHandlers_.push_back(Linux::SDataHandlers{
       PlatformConfig::Types::PID_STAT,
       std::make_unique<Linux::CPidStatHandler>(Linux::CPidStatHandler())});
-  dataHandlers_.push_back(DataHandler{
+  dataHandlers_.push_back(Linux::SDataHandlers{
       PlatformConfig::Types::PID_STATM,
       std::make_unique<Linux::CPidStatmHandler>(Linux::CPidStatmHandler())});
 }
@@ -116,7 +116,6 @@ CProcessMeasurements::GetMeasurementFields() const
 std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 {
   std::vector<AllSensors::SensorGroups> result;
-
   for (const auto &e : processIds_)
   {
     AllSensors::SensorGroups sensorGroup;
@@ -124,11 +123,12 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 
     for (const auto &datafield : measureFieldsDefinition_)
     {
-      Sensors sensor{datafield.name, datafield.id};
+      Sensors sensor{datafield.name, datafield.id, datafield.classType};
       sensor.data = PerformanceHelpers::GetSummarizedDataProcesses(
           allData_, datafield.id);
       sensorGroup.sensors.push_back(sensor);
     }
+    result.push_back(sensorGroup);
   }
   return result;
 }
