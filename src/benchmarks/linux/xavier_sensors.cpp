@@ -66,14 +66,14 @@
  * @brief Returns the numeric value of a file
  *
  * @param datafield the data field
- * @return Exports::MeasuredItem the result
- *    [error]: MeasuredItem{} with ID being -1 (or -2 when datafield.id is -1),
+ * @return Measurements::SMeasuredItem the result
+ *    [error]: SMeasuredItem{} with ID being -1 (or -2 when datafield.id is -1),
  * thus ID != datafield.id
  */
-Exports::MeasuredItem
+Measurements::SMeasuredItem
 CXavierSensors::ParseDirect(const PlatformConfig::SMeasureField &datafield)
 {
-  Exports::MeasuredItem item;
+  Measurements::SMeasuredItem item;
   item.id = datafield.id;
   auto value = ReadLocation(datafield.path);
   if (value.empty())
@@ -108,10 +108,10 @@ std::string CXavierSensors::ReadLocation(const std::string &path)
 
 // Commented because these are not "noexcept" and don't allow for proper error
 // handling
-// Exports::MeasuredItem CXavierSensors::ParseDirect(const
+// Measurements::SMeasuredItem CXavierSensors::ParseDirect(const
 // PlatformConfig::SMeasureField &datafield)
 // {
-//   Exports::MeasuredItem item;
+//   Measurements::SMeasuredItem item;
 //   item.id = datafield.id;
 //   item.measuredValue = std::stoi(ReadLocation(datafield.path));
 //   return item;

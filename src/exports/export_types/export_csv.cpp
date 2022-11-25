@@ -9,7 +9,7 @@ namespace Exports
 {
 std::string CCsv::ParseData(const std::string &timeStr,
                             const std::vector<Measurements::Sensors> &sensors,
-                            const std::vector<MeasuredItem> &items)
+                            const std::vector<SMeasuredItem> &items)
 {
   std::string row{timeStr};
   for (const auto &e : sensors)

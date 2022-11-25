@@ -21,7 +21,7 @@ private:
 
   std::string ParseData(const std::string &timeStr,
                         const std::vector<Measurements::Sensors> &allSensors,
-                        const std::vector<MeasuredItem> &items);
+                        const std::vector<SMeasuredItem> &items);
   std::string ParseLabel(const std::vector<Measurements::Sensors> &sensors);
 };
 

@@ -156,7 +156,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
     {
       for (const auto &sensor : systemRscSensors.sensors)
       {
-        if (sensor.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE &&
+        if (sensor.classType != PlatformConfig::EClass::SYS_RESOURCE_USAGE &&
             !settings_.settings.verboseSummary)
           continue;
         PrintValue(SummaryTranslations::average, sensor,
@@ -176,7 +176,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
                                      std::to_string(processGroup.processId));
       for (const auto &sensor : processGroup.sensors)
       {
-        if (sensor.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE &&
+        if (sensor.classType != PlatformConfig::EClass::SYS_RESOURCE_USAGE &&
             !settings_.settings.verboseSummary)
           continue;
         PrintValue(SummaryTranslations::average, sensor,

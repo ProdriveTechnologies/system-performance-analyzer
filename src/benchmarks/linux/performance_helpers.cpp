@@ -49,16 +49,16 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
                      Core::SThreshold threshold)
 {
   auto parseSign = [](const double lhs, const double rhs,
-                      const Core::Sign sign) {
+                      const Core::ESign sign) {
     switch (sign)
     {
-    case Core::Sign::LE:
+    case Core::ESign::LE:
       return lhs <= rhs;
-    case Core::Sign::LT:
+    case Core::ESign::LT:
       return lhs < rhs;
-    case Core::Sign::GE:
+    case Core::ESign::GE:
       return lhs >= rhs;
-    case Core::Sign::GT:
+    case Core::ESign::GT:
       return lhs > rhs;
     }
     throw std::runtime_error("Cannot parse sign! Illegal sign!");
@@ -66,19 +66,19 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
 
   switch (threshold.type)
   {
-  case Core::ThresholdType::MAX:
+  case Core::EThresholdType::MAX:
     return parseSign(threshold.value,
                      sensor->data.Get(Measurements::ValueTypes::MAX),
                      threshold.sign);
-  case Core::ThresholdType::MIN:
+  case Core::EThresholdType::MIN:
     return parseSign(threshold.value,
                      sensor->data.Get(Measurements::ValueTypes::MIN),
                      threshold.sign);
-  case Core::ThresholdType::AVERAGE:
+  case Core::EThresholdType::AVERAGE:
     return parseSign(threshold.value,
                      sensor->data.Get(Measurements::ValueTypes::AVERAGE),
                      threshold.sign);
-  case Core::ThresholdType::MEDIAN:
+  case Core::EThresholdType::MEDIAN:
     return parseSign(threshold.value,
                      sensor->data.Get(Measurements::ValueTypes::MEDIAN),
                      threshold.sign);
@@ -99,15 +99,18 @@ GetSummarizedData(const Measurements::Classification classification,
   {
     auto datapoints = e.GetItems(classification);
     // This is the loop for the datapoints, only the uniqueId datapoint is used
+    std::cout << "I";
     for (const auto &e2 : datapoints)
     {
       if (e2.id == uniqueId)
       {
+        std::cout << "+";
         summarizedData.AddDataPoint(e2);
-        break; // May leave the (inner) loop for the datapoints, go to next
-               // datapoint
+        //  break; // May leave the (inner) loop for the datapoints, go to next
+        // datapoint
       }
     }
+    std::cout << "O" << std::endl;
   }
   summarizedData.SetMultiplier(multiplication);
   return summarizedData.GetSensorData();

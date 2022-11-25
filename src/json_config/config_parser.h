@@ -33,7 +33,10 @@ inline void from_json(const nlohmann::json &j, SThreshold &p)
 
 inline void from_json(const nlohmann::json &j, SProcess &p)
 {
-  j.at("type").get_to(p.type);
+  std::string typeStr;
+  j.at("type").get_to(typeStr);
+  p.type = GetProcessType(typeStr);
+
   j.at("command").get_to(p.command);
   if (j.contains("start_delay"))
     j.at("start_delay").get_to(p.startDelay);

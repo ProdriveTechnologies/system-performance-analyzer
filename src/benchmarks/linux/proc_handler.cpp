@@ -23,7 +23,7 @@ void ProcHandler::ParseMeminfo()
 {
   meminfo_ = Linux::FileSystem::GetMemInfo("/proc/meminfo");
 }
-Exports::MeasuredItem
+Measurements::SMeasuredItem
 ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
                             const std::string &fieldName)
 {
@@ -34,7 +34,7 @@ ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
                              "\" for /proc/stat");
   }
 
-  Exports::MeasuredItem measuredItem;
+  Measurements::SMeasuredItem measuredItem;
   measuredItem.id = procInfo.id;
   long long comparedTo = Linux::FileSystem::GetProcStatGroup(
       cpuField->second, procInfo.comparedTo);
@@ -44,13 +44,13 @@ ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
   return measuredItem;
 }
 
-Exports::MeasuredItem
+Measurements::SMeasuredItem
 ProcHandler::ParseMemField(const PlatformConfig::SDatafields &procInfo)
 {
   auto memValue = meminfo_.GetField(procInfo.value);
   auto comparedTo = meminfo_.GetField(procInfo.comparedTo, true);
 
-  Exports::MeasuredItem measuredItem;
+  Measurements::SMeasuredItem measuredItem;
   measuredItem.id = procInfo.id;
   measuredItem.measuredValue = static_cast<double>(memValue) / comparedTo;
   return measuredItem;

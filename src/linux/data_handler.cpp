@@ -7,11 +7,12 @@ namespace Linux
  * @brief creates a map with the format necessary for initializing the
  * CDataHandler class
  */
-std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
+std::unordered_map<PlatformConfig::ETypes, Linux::CDataHandler::Config>
 GetDatahandlerMap(const std::vector<Linux::SDataHandlers> &dataHandlers,
                   const std::string &replacementTag)
 {
-  std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config> result;
+  std::unordered_map<PlatformConfig::ETypes, Linux::CDataHandler::Config>
+      result;
   for (auto &e : dataHandlers)
   {
     Linux::CDataHandler::Config config;
@@ -29,7 +30,7 @@ GetDatahandlerMap(const std::vector<Linux::SDataHandlers> &dataHandlers,
 }
 
 void CDataHandler::Initialize(
-    std::unordered_map<PlatformConfig::Types, Config> parsers,
+    std::unordered_map<PlatformConfig::ETypes, Config> parsers,
     const std::vector<PlatformConfig::SDatafields> &datafields)
 {
   parsers_ = parsers;
@@ -43,7 +44,7 @@ void CDataHandler::Initialize(
 bool CDataHandler::ParseMeasurements(const std::string &replacement,
                                      const int masterId)
 {
-  lastMeasurements_ = std::vector<Exports::MeasuredItem>{};
+  lastMeasurements_ = std::vector<Measurements::SMeasuredItem>{};
 
   // Initializes the parameters that need to be loaded once during every
   // measurement, such as retrieving data from the /proc/stat file

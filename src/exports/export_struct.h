@@ -20,10 +20,10 @@ struct Process
   int pid;
   std::string appName;
 };
-using MeasuredItem = Measurements::SMeasuredItem;
+using SMeasuredItem = Measurements::SMeasuredItem;
 
-static inline MeasuredItem
-FindMeasuredItem(const std::vector<MeasuredItem> &items, const int id)
+static inline SMeasuredItem
+FindMeasuredItem(const std::vector<SMeasuredItem> &items, const int id)
 {
   for (const auto &e : items)
   {

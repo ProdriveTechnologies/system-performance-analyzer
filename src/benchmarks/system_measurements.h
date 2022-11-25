@@ -35,10 +35,10 @@ public:
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
   Exports::MeasurementItem GetConfig() const;
-  // std::vector<Exports::MeasuredItem> GetMeasurements();
+  // std::vector<Measurements::SMeasuredItem> GetMeasurements();
   std::vector<Measurements::SMeasuredItem> GetMeasurements();
 
-  std::vector<Sensors> GetSensors() const;
+  std::vector<Sensors> GetSensors(const bool summarizeData = true) const;
 
   // Should be removed
   std::vector<PlatformConfig::SDatafields> GetDefinition() const

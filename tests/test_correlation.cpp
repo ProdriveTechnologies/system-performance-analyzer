@@ -59,7 +59,7 @@ TEST(Correlation, CorrelationFull)
 {
   Measurements::AllSensors allsensors;
   Measurements::Sensors sensor{"name", 1,
-                               PlatformConfig::Class::PIPELINE_MEASUREMENTS};
+                               PlatformConfig::EClass::PIPELINE_MEASUREMENTS};
   sensor.performanceIndicator = true;
   Measurements::Sensors sensor2{"name", 2};
   sensor2.performanceIndicator = false;

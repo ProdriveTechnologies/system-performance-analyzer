@@ -7,7 +7,6 @@
 #include <thread>
 #include <unistd.h> // getpid()
 
-#include "Helpers.h"
 #include "src/benchmarks/linux/xavier_sensors.h"
 #include "src/helpers/synchronizer.h"
 #include "src/linux/filesystem.h"
@@ -99,9 +98,9 @@ void CPerfMeasurements::Initialize()
   processMeasurements_.Initialize(&measurementsData_, linuxProcesses);
 
   allSensors_.AddSensors(Measurements::Classification::SYSTEM,
-                         sensorMeasurements_.GetSensors());
+                         sensorMeasurements_.GetSensors(false));
   allSensors_.AddSensors(Measurements::Classification::PROCESSES,
-                         processMeasurements_.GetSensors());
+                         processMeasurements_.GetSensors(false));
 
   cpuUtilizationTimer_.restart();
   while (!cpuUtilizationTimer_.elapsed())
@@ -158,7 +157,7 @@ void CPerfMeasurements::StartMeasurementsLoop()
       // Have to add the sensors of the pipeline each time as they are
       // dynamically added (the old sensors are cleared when adding new ones)
       allSensors_.AddSensors(Measurements::Classification::PIPELINE,
-                             gstMeasurements_.GetSensors());
+                             gstMeasurements_.GetSensors(false));
       exportObj_.AddMeasurements(measurementData);
     }
 

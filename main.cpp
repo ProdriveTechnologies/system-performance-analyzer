@@ -1,26 +1,18 @@
 #include <iostream>
 
-#include <chrono>
-#include <sys/wait.h>
-#include <thread>
-#include <variant>
-
-#include "src/processes_struct.h"
-// #include "modules/filestream/filestream.h"
-#include "src/benchmarks/linux/perf_measurements.h"
-#include "src/benchmarks/linux/xavier_sensors.h"
-// #include "src/gstreamer/handler.h"
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/logger.h"
-#include "src/helpers/stopwatch.h"
-#include "src/helpers/synchronizer.h"
 #include "src/input_handler.h"
-#include "src/json_config/config_parser.h"
-#include "src/linux/filesystem.h"
+#include "src/spa.h"
 
 int VerifyArguments(const bool incorrectArgs, const int argc,
                     const CInputHandler::SUserArgs &userArgs);
 
+/**
+ * @brief Prints info when a wrong command is inserted or with parameter -h or
+ * --help
+ *
+ */
 void print_info()
 {
   std::cout
@@ -41,6 +33,10 @@ void print_info()
          "configuration!\n"
       << std::endl;
 }
+
+/**
+ * @brief The main function of the application
+ */
 int main(int argc, char *argv[])
 {
   // Input checks
@@ -50,47 +46,15 @@ int main(int argc, char *argv[])
   if (VerifyArguments(incorrectArgs, argc, userArgs) == -1)
     return -1; // Terminate application, arguments are incorrect
 
-  // Enabling/disabling logger components
+  // Enabling/disabling logger components (based on the input)
   CLogger::Enable(userArgs.enableInfoLog, userArgs.enableDebugLog);
   // Parsing user configuration
   auto config = Core::ConfigParser::Parse(userArgs.configFile);
+
   CLogger::Log(CLogger::Types::INFO, "Started application");
-  Synchronizer synchronizer{config.processes.size() +
-                            1}; // + 1 because of monitoring thread
-  // CGstreamerHandler gstreamer{&synchronizer}; //{config.gstreamerPipeline};
-  Linux::CPerfMeasurements measurements{&synchronizer, userArgs.sensorInfoFile,
-                                        config.thresholds};
-  // std::vector<std::variant<CGstreamerHandler>> processes;
-
-  std::vector<ProcessInfo> processes;
-
-  for (const auto &e : config.processes)
-  {
-    if (e.type == "linux_command")
-    {
-      processes.push_back(ProcessInfo{e, Linux::RunProcess{&synchronizer, e}});
-      CLogger::Log(CLogger::Types::INFO, "Added linux process: ", e.command);
-    }
-    else if (e.type == "gstreamer")
-    {
-      processes.push_back(
-          ProcessInfo{e, CGstreamerHandler{&synchronizer, e, config.settings,
-                                           e.processId}});
-      CLogger::Log(CLogger::Types::INFO,
-                   "Added GStreamer pipeline: ", e.command);
-    }
-  }
-  // Start the threads
-  for (auto &e : processes)
-  {
-    std::visit(
-        Overload{
-            [&e](auto &handler) { handler.StartThread(e.command); },
-        },
-        e.processes);
-  }
-
-  measurements.Start(config, &processes);
+  CSystemPerformanceAnalyzer spa{userArgs.configFile, userArgs.sensorInfoFile};
+  // Start the actual execution of the configured tasks and measurements
+  spa.StartExecution();
 }
 
 /**

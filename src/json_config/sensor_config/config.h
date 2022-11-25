@@ -8,7 +8,7 @@
 
 namespace PlatformConfig
 {
-enum class Types
+enum class ETypes
 {
   PROC_STAT,
   DIRECT,
@@ -18,46 +18,46 @@ enum class Types
   PID_STATM,
   DIRECT_PID
 };
-enum class Class : int
+enum class EClass : int
 {
   NONE = 0,
   SYS_RESOURCE_USAGE = 1,
   PIPELINE_MEASUREMENTS = 3,
 };
 
-inline Types GetType(const std::string &typeStr)
+inline ETypes GetType(const std::string &typeStr)
 {
   switch (Helpers::hash(typeStr))
   {
   case Helpers::hash("PROC"):
-    return Types::PROC_STAT;
+    return ETypes::PROC_STAT;
   case Helpers::hash("DIRECT"):
-    return Types::DIRECT;
+    return ETypes::DIRECT;
   case Helpers::hash("ARRAY"):
-    return Types::ARRAY;
+    return ETypes::ARRAY;
   case Helpers::hash("PROCMEM"):
-    return Types::PROC_MEM;
+    return ETypes::PROC_MEM;
   case Helpers::hash("PIDSTAT"):
-    return Types::PID_STAT;
+    return ETypes::PID_STAT;
   case Helpers::hash("PIDSTATM"):
-    return Types::PID_STATM;
+    return ETypes::PID_STATM;
   case Helpers::hash("DIRECT_PID"):
-    return Types::DIRECT_PID;
+    return ETypes::DIRECT_PID;
   default:
     throw std::runtime_error("Platform Config: Type unknown! Type: " + typeStr);
   }
 }
-inline Class GetClass(const int classNr)
+inline EClass GetClass(const int classNr)
 {
   switch (classNr)
   {
-  case Helpers::ToUnderlying(Class::SYS_RESOURCE_USAGE):
-    return Class::SYS_RESOURCE_USAGE;
+  case Helpers::ToUnderlying(EClass::SYS_RESOURCE_USAGE):
+    return EClass::SYS_RESOURCE_USAGE;
   default:
     CLogger::Log(CLogger::Types::WARNING,
                  "Class type not found! Number: " + std::to_string(classNr));
   }
-  return Class::NONE;
+  return EClass::NONE;
 }
 
 struct SDatafields
@@ -66,8 +66,8 @@ struct SDatafields
   std::string name;
   int id = 0;
   std::string userId;
-  Types type;
-  Class classType = Class::NONE;
+  ETypes type;
+  EClass classType = EClass::NONE;
   std::string suffix;
   double multiplier = 1.0;
   std::string enabledPath;
@@ -92,7 +92,7 @@ struct SMeasureField
 {
   int id = 0;
   std::string path;
-  Types type;
+  ETypes type;
 };
 struct SConfig
 {

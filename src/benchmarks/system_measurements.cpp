@@ -29,14 +29,14 @@ void CSensors::Initialize(std::vector<Measurements::SMeasurementsData> *allData)
 void CSensors::SetDataHandlers()
 {
   dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::Types::DIRECT,
+      PlatformConfig::ETypes::DIRECT,
       std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
   dataHandlers_.push_back(
-      Linux::SDataHandlers{PlatformConfig::Types::PROC_MEM,
+      Linux::SDataHandlers{PlatformConfig::ETypes::PROC_MEM,
                            std::make_unique<Linux::CProcMeminfoHandler>(
                                Linux::CProcMeminfoHandler())});
   dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::Types::PROC_STAT,
+      PlatformConfig::ETypes::PROC_STAT,
       std::make_unique<Linux::CProcStatHandler>(Linux::CProcStatHandler())});
 }
 
@@ -63,17 +63,23 @@ std::vector<Exports::MeasurementItem> CSensors::GetMeasurementFields() const
   return result;
 }
 
-std::vector<Sensors> CSensors::GetSensors() const
+std::vector<Sensors> CSensors::GetSensors(const bool summarizeData) const
 {
   std::vector<Sensors> result;
   for (const auto &datafield : measureFieldsDefinition_)
   {
     Sensors sensor{datafield};
-    sensor.data = PerformanceHelpers::GetSummarizedData(
-        Measurements::Classification::SYSTEM, allData_, datafield.id,
-        sensor.multiplier);
+    if (summarizeData)
+    {
+      sensor.data = PerformanceHelpers::GetSummarizedData(
+          Measurements::Classification::SYSTEM, allData_, datafield.id,
+          sensor.multiplier);
+    }
     result.push_back(sensor);
   }
+  // when not summarizing data, also don't create the collective groups
+  if (!summarizeData)
+    return result;
   // Add the collective groups, such as the combined cpu's instead of the single
   // cores
   std::unordered_map<std::string, std::unordered_set<int>> classes;
@@ -163,7 +169,7 @@ CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
 
   switch (dataField.type)
   {
-  case PlatformConfig::Types::ARRAY:
+  case PlatformConfig::ETypes::ARRAY:
   {
     // Check if it contains measurements for the system measurements (or if it's
     // empty or for specific processes)
@@ -172,9 +178,9 @@ CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
       result.Add(ParseArray(dataField));
   }
   break;
-  case PlatformConfig::Types::DIRECT:
-  case PlatformConfig::Types::PROC_STAT:
-  case PlatformConfig::Types::PROC_MEM:
+  case PlatformConfig::ETypes::DIRECT:
+  case PlatformConfig::ETypes::PROC_STAT:
+  case PlatformConfig::ETypes::PROC_MEM:
     result.Add(ParseField(dataField));
     break;
   default:;

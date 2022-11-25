@@ -11,7 +11,7 @@
 // the object type in
 struct ProcessInfo
 {
-  std::string type;
+  Core::ProcessType type;
   std::string command;
   std::variant<CGstreamerHandler, Linux::RunProcess> processes; // int
   ProcessInfo(const Core::SProcess &process, CGstreamerHandler streamHandler)

@@ -45,7 +45,7 @@ struct Sensors
                       // "xavier_config.json" file. If it is in an array, this
                       // userId will have a number of the array behind it
   int uniqueId;
-  PlatformConfig::Class classType;
+  PlatformConfig::EClass classType;
   std::string suffix;
   double multiplier = 1.0;
 
@@ -59,7 +59,7 @@ struct Sensors
 
   // Constructor with the name and unique id
   Sensors(const std::string &userId_, const int uniqueId_,
-          PlatformConfig::Class sensorClass_ = PlatformConfig::Class::NONE)
+          PlatformConfig::EClass sensorClass_ = PlatformConfig::EClass::NONE)
       : userId{userId_}, uniqueId{uniqueId_}, classType{sensorClass_}
   {
   }

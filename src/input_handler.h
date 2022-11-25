@@ -3,6 +3,11 @@
 #include <getopt.h>
 #include <string>
 
+/**
+ * @brief Used for handling the command-line input, such as the commands of -h,
+ * -s, or -c
+ *
+ */
 class CInputHandler
 {
 public:

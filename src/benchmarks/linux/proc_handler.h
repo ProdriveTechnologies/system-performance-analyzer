@@ -17,10 +17,10 @@ public:
   Linux::FileSystem::ProcStatData GetStats() const { return procStat_; };
   Linux::FileSystem::MemInfoData GetMemInfo() const { return meminfo_; };
 
-  Exports::MeasuredItem
+  Measurements::SMeasuredItem
   ParseProcField(const PlatformConfig::SDatafields &procInfo,
                  const std::string &fieldName);
-  Exports::MeasuredItem
+  Measurements::SMeasuredItem
   ParseMemField(const PlatformConfig::SDatafields &procInfo);
 
 private:

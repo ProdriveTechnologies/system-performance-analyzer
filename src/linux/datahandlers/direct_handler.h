@@ -31,7 +31,7 @@ public:
       if (enabledCheck.measuredValue == DISABLED)
       {
         // Disabled, thus set on 0
-        item_ = Exports::MeasuredItem{datafield.id, 0.0};
+        item_ = Measurements::SMeasuredItem{datafield.id, 0.0};
         return true;
       }
     }

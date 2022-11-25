@@ -45,13 +45,13 @@ void CProcessMeasurements::Initialize(
 void CProcessMeasurements::SetDataHandlers()
 {
   dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::Types::DIRECT_PID,
+      PlatformConfig::ETypes::DIRECT_PID,
       std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
   dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::Types::PID_STAT,
+      PlatformConfig::ETypes::PID_STAT,
       std::make_unique<Linux::CPidStatHandler>(Linux::CPidStatHandler())});
   dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::Types::PID_STATM,
+      PlatformConfig::ETypes::PID_STATM,
       std::make_unique<Linux::CPidStatmHandler>(Linux::CPidStatmHandler())});
 }
 
@@ -89,7 +89,8 @@ CProcessMeasurements::GetMeasurementFields() const
   return result;
 }
 
-std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
+std::vector<AllSensors::SensorGroups>
+CProcessMeasurements::GetSensors(const bool summarizeData) const
 {
   std::vector<AllSensors::SensorGroups> result;
 
@@ -105,9 +106,12 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
       {
         Sensors sensor{datafield};
         sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
-        sensor.data = PerformanceHelpers::GetSummarizedData(
-            Measurements::Classification::PROCESSES, allData_, sensor.uniqueId,
-            sensor.multiplier);
+        if (summarizeData)
+        {
+          sensor.data = PerformanceHelpers::GetSummarizedData(
+              Measurements::Classification::PROCESSES, allData_,
+              sensor.uniqueId, sensor.multiplier);
+        }
 
         sensorGroup.sensors.push_back(sensor);
       }
@@ -175,7 +179,7 @@ void CProcessMeasurements::SetProcesses()
  * SDatafields. It replaces the $PID$ tag with the pid of the processes
  * 2.
  *
- * @return std::vector<Exports::MeasuredItem>
+ * @return std::vector<Measurements::SMeasuredItem>
  */
 std::vector<Measurements::SMeasurementGroup>
 CProcessMeasurements::GetMeasurements()
@@ -245,7 +249,7 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(
 
   switch (dataField.type)
   {
-  case PlatformConfig::Types::ARRAY:
+  case PlatformConfig::ETypes::ARRAY:
   {
     // If it doesn't contain any PID measurements (and is therefore empty), dont
     // add them at all
@@ -254,14 +258,14 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(
       result.Add(datafields);
   }
   break;
-  case PlatformConfig::Types::PID_STAT:
-  case PlatformConfig::Types::DIRECT_PID:
-  case PlatformConfig::Types::PID_STATM:
+  case PlatformConfig::ETypes::PID_STAT:
+  case PlatformConfig::ETypes::DIRECT_PID:
+  case PlatformConfig::ETypes::PID_STATM:
     result.Add(ParseField(dataField));
     break;
-  case PlatformConfig::Types::PROC_STAT:
-  case PlatformConfig::Types::PROC_MEM:
-  case PlatformConfig::Types::DIRECT:
+  case PlatformConfig::ETypes::PROC_STAT:
+  case PlatformConfig::ETypes::PROC_MEM:
+  case PlatformConfig::ETypes::DIRECT:
     // Do nothing, pass through to "default", these are system-wide measurements
   default:;
   }

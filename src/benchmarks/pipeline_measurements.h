@@ -49,7 +49,8 @@ public:
   GetMeasurementLabels(const int pipelineNr) const;
   static std::vector<Measurements::SMeasurementGroup>
   SortData(const std::vector<Measurements::SMeasurementGroup> &data);
-  std::vector<Measurements::AllSensors::SensorGroups> GetSensors() const;
+  std::vector<Measurements::AllSensors::SensorGroups>
+  GetSensors(const bool summarizeData = true) const;
   void setProctime(const bool proctime)
   {
     enableProctime_ = proctime;
@@ -99,7 +100,7 @@ private:
   }
   using PerformanceIndicator = bool;
   static inline std::vector<std::pair<MeasureType, PerformanceIndicator>>
-      predefinedSensors = {std::make_pair(MeasureType::FPS, true)
+      predefinedSensors = {{MeasureType::FPS, true}
                            /* MeasureType::LATENCY */};
   static inline const std::pair<MeasureType, PerformanceIndicator> procTime_ =
       std::make_pair(MeasureType::PROCESSING_TIME, false);

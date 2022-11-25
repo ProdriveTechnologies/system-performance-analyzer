@@ -26,7 +26,7 @@ class CProcMeminfoHandler;
 
 struct SDataHandlers
 {
-  PlatformConfig::Types type;
+  PlatformConfig::ETypes type;
   std::variant<std::unique_ptr<Linux::CPidStatHandler>,
                std::unique_ptr<Linux::CDirectHandler>,
                std::unique_ptr<Linux::CPidStatmHandler>,
@@ -46,7 +46,7 @@ public:
   };
   CDataHandler() = default;
 
-  void Initialize(std::unordered_map<PlatformConfig::Types, Config> parsers,
+  void Initialize(std::unordered_map<PlatformConfig::ETypes, Config> parsers,
                   const std::vector<PlatformConfig::SDatafields> &datafields);
 
   /**
@@ -60,7 +60,7 @@ public:
   bool ParseMeasurements(const std::string &replacement = "",
                          const int masterId = -1);
 
-  std::vector<Exports::MeasuredItem> GetMeasurements() const
+  std::vector<Measurements::SMeasuredItem> GetMeasurements() const
   {
     return lastMeasurements_;
   }
@@ -92,16 +92,16 @@ private:
     }
   };
 
-  std::unordered_map<PlatformConfig::Types, Config> parsers_;
+  std::unordered_map<PlatformConfig::ETypes, Config> parsers_;
   std::vector<Config> configuration_;
   std::vector<PlatformConfig::SDatafields> datafields_;
   std::unordered_map<SIdentifier, int, SIdentifier> uniqueIds_;
 
-  std::vector<Exports::MeasuredItem> lastMeasurements_;
+  std::vector<Measurements::SMeasuredItem> lastMeasurements_;
   int CreateUniqueId(const int masterId, const int datafieldId);
 };
 
-std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
+std::unordered_map<PlatformConfig::ETypes, Linux::CDataHandler::Config>
 GetDatahandlerMap(const std::vector<Linux::SDataHandlers> &dataHandlers,
                   const std::string &replacementTag = "");
 } // namespace Linux

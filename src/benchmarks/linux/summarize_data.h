@@ -17,7 +17,7 @@ public:
   {
   }
   void SetMultiplier(const double multiplier) { multiplier_ = multiplier; }
-  void AddDataPoint(const Exports::MeasuredItem item)
+  void AddDataPoint(const Measurements::SMeasuredItem item)
   {
     average_.Add(item);
     allMeasurements_.push_back(item.measuredValue);
@@ -49,7 +49,7 @@ private:
   {
     double aggregatedData = 0.0;
     int64_t datapoints = 0;
-    void Add(const Exports::MeasuredItem item)
+    void Add(const Measurements::SMeasuredItem item)
     {
       aggregatedData += item.measuredValue;
       datapoints += 1;

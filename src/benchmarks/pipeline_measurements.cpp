@@ -41,8 +41,8 @@ std::vector<Measurements::SMeasurementGroup> CPipelineMeasurements::SortData(
     const std::vector<Measurements::SMeasurementGroup> &data)
 {
   std::vector<Measurements::SMeasurementGroup> sorted;
-  auto sortFunction = [](const Exports::MeasuredItem &lhs,
-                         const Exports::MeasuredItem &rhs) {
+  auto sortFunction = [](const Measurements::SMeasuredItem &lhs,
+                         const Measurements::SMeasuredItem &rhs) {
     return lhs.id < rhs.id;
   };
   for (auto e : data)
@@ -80,13 +80,13 @@ CPipelineMeasurements::ProcessGstreamer()
         summarizeMap.insert(std::make_pair(id, measurement));
     }
 
-    // Convert the measured data to an Exports::MeasuredItem type
+    // Convert the measured data to an Measurements::SMeasuredItem type
     Measurements::SMeasurementGroup gsData;
     gsData.pipelineId = e.second->GetProcessId();
     for (const auto &m : summarizeMap)
     {
-      Exports::MeasuredItem field{GetUniqueId(e.first, m.first),
-                                  static_cast<double>(m.second.valueInt)};
+      Measurements::SMeasuredItem field{GetUniqueId(e.first, m.first),
+                                        static_cast<double>(m.second.valueInt)};
       gsData.measuredItems.push_back(field);
     }
     result.push_back(gsData);
@@ -138,7 +138,7 @@ Exports::MeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
  * live view (For each MeasureType, one component will be marked)
  */
 std::vector<Measurements::AllSensors::SensorGroups>
-CPipelineMeasurements::GetSensors() const
+CPipelineMeasurements::GetSensors(const bool summarizeData) const
 {
   std::vector<Measurements::AllSensors::SensorGroups> result;
 
@@ -170,22 +170,29 @@ CPipelineMeasurements::GetSensors() const
         sensor.userData.showInLive = true;
       }
 
-      sensor.data = PerformanceHelpers::GetSummarizedData(
-          Measurements::Classification::PIPELINE, allData_, e.second,
-          sensor.multiplier, useSteadyState);
+      if (summarizeData)
+      {
+        sensor.data = PerformanceHelpers::GetSummarizedData(
+            Measurements::Classification::PIPELINE, allData_, e.second,
+            sensor.multiplier, useSteadyState);
+      }
       sensorGroup.sensors.push_back(sensor);
     }
-    for (const auto &[type, _] : predefinedSensors)
-    {
-      auto uniqueIdsSet = GetUniqueIdsByType(type);
-      Measurements::Sensors sensorTemplate{
-          GStreamer::GetMeasureType(type), PerformanceHelpers::GetUniqueId(),
-          PlatformConfig::Class::PIPELINE_MEASUREMENTS};
-      sensorTemplate.suffix = GStreamer::GetMeasureType(type);
 
-      sensorGroup.sensors.push_back(PerformanceHelpers::GetSummarizedData(
-          Measurements::Classification::PIPELINE, allData_, uniqueIdsSet,
-          sensorTemplate, useSteadyState));
+    if (summarizeData)
+    {
+      for (const auto &[type, _] : predefinedSensors)
+      {
+        auto uniqueIdsSet = GetUniqueIdsByType(type);
+        Measurements::Sensors sensorTemplate{
+            GStreamer::GetMeasureType(type), PerformanceHelpers::GetUniqueId(),
+            PlatformConfig::EClass::PIPELINE_MEASUREMENTS};
+        sensorTemplate.suffix = GStreamer::GetMeasureType(type);
+
+        sensorGroup.sensors.push_back(PerformanceHelpers::GetSummarizedData(
+            Measurements::Classification::PIPELINE, allData_, uniqueIdsSet,
+            sensorTemplate, useSteadyState));
+      }
     }
     result.push_back(sensorGroup);
   }

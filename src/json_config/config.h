@@ -10,45 +10,59 @@
 
 namespace Core
 {
+enum class ProcessType
+{
+  GSTREAMER,
+  LINUX_PROCESS
+};
+inline ProcessType GetProcessType(const std::string &processType)
+{
+  if (processType == "gstreamer")
+    return ProcessType::GSTREAMER;
+  else if (processType == "linux_command")
+    return ProcessType::LINUX_PROCESS;
+  throw std::runtime_error("Could not recognise process type \"" + processType +
+                           "\", can be: \"gstreamer\" or \"linux_command\"");
+}
 struct SProcess
 {
   int processId = -1;
-  std::string type;
+  ProcessType type = ProcessType::LINUX_PROCESS;
   std::string command;
   int startDelay = 0;
   bool useSteadyState = false;
 };
-enum class ThresholdType
+enum class EThresholdType
 {
   MIN,
   MAX,
   AVERAGE,
   MEDIAN
 };
-enum class Sign
+enum class ESign
 {
   LT, // Less than
   GT, // Greater than
   LE, // Less equal
   GE  // Greater equal
 };
-inline Sign GetSign(const std::string &sign)
+inline ESign GetSign(const std::string &sign)
 {
   if (sign == ">")
-    return Sign::GT;
+    return ESign::GT;
   else if (sign == "<")
-    return Sign::LT;
+    return ESign::LT;
   else if (sign == ">=")
-    return Sign::GE;
+    return ESign::GE;
   else if (sign == "<=")
-    return Sign::LE;
+    return ESign::LE;
   throw std::runtime_error("Could not recognise sign \"" + sign + "\"");
 }
 struct SThreshold
 {
   std::string name;
-  ThresholdType type;
-  Sign sign;
+  EThresholdType type;
+  ESign sign;
   int processId;
   double value;
 };
@@ -96,18 +110,18 @@ struct SConfig
     throw std::runtime_error("Couldn't find processId in the processes!");
   }
 };
-inline ThresholdType GetThresholdType(const std::string &thresholdGroup)
+inline EThresholdType GetThresholdType(const std::string &thresholdGroup)
 {
   switch (Helpers::hash(thresholdGroup))
   {
   case Helpers::hash("minimum"):
-    return ThresholdType::MIN;
+    return EThresholdType::MIN;
   case Helpers::hash("maximum"):
-    return ThresholdType::MAX;
+    return EThresholdType::MAX;
   case Helpers::hash("average"):
-    return ThresholdType::AVERAGE;
+    return EThresholdType::AVERAGE;
   case Helpers::hash("median"):
-    return ThresholdType::MEDIAN;
+    return EThresholdType::MEDIAN;
   default:
     CLogger::Log(CLogger::Types::ERROR, "Threshold group not recognised!");
     throw std::runtime_error("Threshold group not recognised!");

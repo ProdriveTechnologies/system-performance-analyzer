@@ -36,7 +36,8 @@ public:
   Exports::MeasurementItem GetConfig() const;
   std::vector<Measurements::SMeasurementGroup> GetMeasurements();
 
-  std::vector<AllSensors::SensorGroups> GetSensors() const;
+  std::vector<AllSensors::SensorGroups>
+  GetSensors(const bool summarizeData = true) const;
 
   // Should be removed
   std::vector<PlatformConfig::SDatafields> GetDefinition() const
