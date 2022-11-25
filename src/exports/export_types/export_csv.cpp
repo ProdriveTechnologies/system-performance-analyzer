@@ -32,11 +32,13 @@ std::string CCsv::InitExport(const PlatformConfig::SConfig &config)
     {
     case Helpers::hash("ARRAY"):
     {
-      int i = 0;
-      std::for_each(e.datafields.begin(), e.datafields.end(),
-                    [&](const PlatformConfig::SDatafields &dataField) {
-                      row += dataField.name + std::to_string(i++);
-                    });
+      for (size_t i = 0; i < e.size; i++)
+      {
+        std::for_each(e.datafields.begin(), e.datafields.end(),
+                      [&](const PlatformConfig::SDatafields &dataField) {
+                        row += DELIMITER + dataField.name + std::to_string(i);
+                      });
+      }
     }
     break;
     default:
@@ -61,7 +63,7 @@ std::string CCsv::ParseData(const ExportData &data)
   std::string row{data.time};
   for (const auto &e : data.measuredItems)
   {
-    row += DELIMITER, std::to_string(e.measuredValue);
+    row += DELIMITER + std::to_string(e.measuredValue);
   }
   // row += Helpers::ArgToString(DELIMITER,
   //                             GetCpuUtilization(data.cpuUtilization.totalCpu));

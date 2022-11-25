@@ -230,7 +230,7 @@ CPerfMeasurements::GetMeasureFields(const PlatformConfig::SConfig &configFile)
   {
     switch (Helpers::hash(e.type))
     {
-    case Helpers::hash("array"):
+    case Helpers::hash("ARRAY"):
       measureFields = Helpers::CombineVectors(measureFields, ParseArray(e));
       break;
     default:
