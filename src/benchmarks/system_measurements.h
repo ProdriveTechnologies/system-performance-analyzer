@@ -37,7 +37,7 @@ public:
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
   // std::vector<Exports::MeasuredItem> GetMeasurements();
-  SMeasurementGroup GetMeasurements();
+  std::vector<Measurements::SMeasuredItem> GetMeasurements();
 
   std::vector<Sensors> GetSensors() const;
 

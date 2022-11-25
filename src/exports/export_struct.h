@@ -11,6 +11,8 @@
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/linux/filesystem.h"
 
+#include "src/benchmarks/linux/struct_measurements.h"
+
 namespace Exports
 {
 struct Process
@@ -18,11 +20,12 @@ struct Process
   int pid;
   std::string appName;
 };
-struct MeasuredItem
-{
-  int id = -1;
-  double measuredValue = -1.0;
-};
+using MeasuredItem = Measurements::SMeasuredItem;
+// struct MeasuredItem
+// {
+//   int id = -1;
+//   double measuredValue = -1.0;
+// };
 static inline MeasuredItem
 FindMeasuredItem(const std::vector<MeasuredItem> &items, const int id)
 {

@@ -105,8 +105,8 @@ CreateMapWithId(const std::vector<Measurements::Sensors> &data)
 bool HandleThreshold(const Measurements::Sensors *sensor,
                      Core::SThreshold threshold)
 {
-  auto parseSign = [](const double lhs, const double rhs,
-                      const Core::Sign sign) {
+  auto parseSign = [](const double lhs, const double rhs, const Core::Sign sign)
+  {
     switch (sign)
     {
     case Core::Sign::LE:
@@ -231,6 +231,49 @@ GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
         if (uniqueIds.find(e3.id) != uniqueIds.end())
           summarizedData.AddDataPoint(e3);
       }
+    }
+  }
+  Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId()};
+  result.data = summarizedData.GetSensorData();
+  return result;
+}
+
+Measurements::SensorData
+GetSummarizedData(const Measurements::Classification classification,
+                  const std::vector<Measurements::SMeasurementsData> *data,
+                  const int uniqueId)
+{
+  Measurements::CSummarizeData summarizedData;
+  // This is the loop for each measurement
+  for (const auto &e : *data)
+  {
+    auto datapoints = e.GetItems(classification);
+    // This is the loop for the datapoints, only the uniqueId datapoint is used
+    for (const auto &e2 : datapoints)
+    {
+      if (e2.id == uniqueId)
+        summarizedData.AddDataPoint(e2);
+    }
+  }
+  return summarizedData.GetSensorData();
+}
+
+Measurements::Sensors
+GetSummarizedData(const Measurements::Classification classification,
+                  const std::vector<Measurements::SMeasurementsData> *data,
+                  const std::unordered_set<int> uniqueIds,
+                  const std::string &name)
+{
+  Measurements::CSummarizeData summarizedData;
+  // This is the loop for each measurement
+  for (const auto &e : *data)
+  {
+    auto datapoints = e.GetItems(classification);
+    // This is the loop for the datapoints, only the uniqueId datapoint is used
+    for (const auto &e2 : datapoints)
+    {
+      if (uniqueIds.find(e2.id) != uniqueIds.end())
+        summarizedData.AddDataPoint(e2);
     }
   }
   Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId()};

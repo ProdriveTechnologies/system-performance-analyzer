@@ -1,3 +1,5 @@
+#pragma once
+
 #include "struct_sensors.h"
 
 namespace Measurements
@@ -9,7 +11,7 @@ struct SMeasuredItem
 };
 struct SMeasurementGroup
 {
-  int pipelineId;
+  int pipelineId = -1;
   std::vector<SMeasuredItem> measuredItems;
 };
 struct SMeasurementsData
@@ -36,7 +38,7 @@ struct SMeasurementsData
   }
   void AddMeasurements(const Classification c,
                        const std::vector<SMeasuredItem> &measurement,
-                       const int pipelineId)
+                       const int pipelineId = -1)
   {
     auto measurementGroup = SMeasurementGroup{pipelineId, measurement};
     AddMeasurements(c, {measurementGroup});

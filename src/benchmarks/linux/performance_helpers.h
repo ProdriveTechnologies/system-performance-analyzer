@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 
+#include "src/benchmarks/linux/struct_measurements.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/json_config/config.h"
@@ -42,5 +43,16 @@ Measurements::Sensors
 GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
                            const std::unordered_set<int> uniqueId,
                            const std::string &name);
+
+Measurements::SensorData
+GetSummarizedData(const Measurements::Classification classification,
+                  const std::vector<Measurements::SMeasurementsData> *data,
+                  const int uniqueId);
+
+Measurements::Sensors
+GetSummarizedData(const Measurements::Classification classification,
+                  const std::vector<Measurements::SMeasurementsData> *data,
+                  const std::unordered_set<int> uniqueId,
+                  const std::string &name);
 
 } // namespace PerformanceHelpers

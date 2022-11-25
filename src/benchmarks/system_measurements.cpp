@@ -121,21 +121,20 @@ CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
   return result;
 }
 
-SMeasurementGroup CSensors::GetMeasurements()
+std::vector<SMeasuredItem> CSensors::GetMeasurements()
 {
-  SMeasurementGroup group;
+  std::vector<SMeasuredItem> items;
   auto returnSuccess = dataHandler_.ParseMeasurements();
   if (returnSuccess)
   {
-    group.measuredItems = dataHandler_.GetMeasurements();
+    items = dataHandler_.GetMeasurements();
   }
   else
   {
     CLogger::Log(CLogger::Types::WARNING,
                  "Could not measure system measurements!");
   }
-
-  return group;
+  return items;
 }
 
 CSensors::MeasureCombo CSensors::GetFields(
@@ -148,9 +147,8 @@ CSensors::MeasureCombo CSensors::GetFields(
   MeasureCombo result;
 
   std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField) {
-                  result.Add(parserFunction(memberPtr, dataField));
-                });
+                [&](const PlatformConfig::SDatafields &dataField)
+                { result.Add(parserFunction(memberPtr, dataField)); });
 
   return result;
 }

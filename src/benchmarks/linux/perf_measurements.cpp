@@ -86,7 +86,6 @@ void CPerfMeasurements::Initialize()
   gstMeasurements_.setProctime(config_.settings.enableProcTime);
   gstMeasurements_.SetConfig(config_);
 
-  pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
   // pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
 
   // Must happen after the creation of the pMeasurementsData_ memory block
@@ -131,36 +130,36 @@ void CPerfMeasurements::StartMeasurementsLoop()
 
     // Filling the export data
     // procHandler_.ParseMeminfo(); // Parse the /proc/meminfo struct
-    Exports::ExportData exportData;
-    Measurements::SMeasurementsData measurementsData;
+    Measurements::SMeasurementsData measurementData;
 
-    measurementsData.time = std::to_string(
+    measurementData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
     exportData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
 
     // exportData.measuredItems = sensorMeasurements_.GetMeasurements();
-    measurementsData.AddMeasurements(Measurements::Classification::SYSTEM,
-                                     sensorMeasurements_.GetMeasurements());
-    exportData.processInfo = processMeasurements_.GetMeasurements();
-    // measurementsData.AddMeasurements(Measurements::Classification::PROCESSES,
-    //                                  processMeasurements_.GetMeasurements());
+    measurementData.AddMeasurements(Measurements::Classification::SYSTEM,
+                                    sensorMeasurements_.GetMeasurements());
+    // exportData.processInfo = processMeasurements_.GetMeasurements();
+    measurementData.AddMeasurements(Measurements::Classification::PROCESSES,
+                                    processMeasurements_.GetMeasurements());
 
-    // measurementsData.AddMeasurements(Measurements::Classification::PIPELINE,
-    //                                  gstMeasurements_.GetMeasurements());
+    measurementData.AddMeasurements(Measurements::Classification::PIPELINE,
+                                    gstMeasurements_.ProcessGstreamer());
 
     // Measure data on each GStreamer pipeline
-    exportData.pipelineInfo = gstMeasurements_.ProcessGstreamer();
-
-    pMeasurementsData_->push_back(exportData);
+    // exportData.pipelineInfo = gstMeasurements_.ProcessGstreamer();
+    measurementsData_.push_back(measurementData);
 
     std::this_thread::sleep_for(
         std::chrono::milliseconds(config_.settings.measureLoopMs));
   }
   // Sort the pipeline measurements correctly
-  for (auto &e : *pMeasurementsData_)
+  for (auto &e : *measurementsData_)
   {
-    e.pipelineInfo = gstMeasurements_.SortData(e.pipelineInfo);
+    auto newGroups = gstMeasurements_.SortData(processMeasurements_.GetSensors(
+        Measurements::Classification::PIPELINE));
+    e.AddMeasurements(Measurements::Classification::PIPELINE, newGroups);
   }
   exportConfig_.pipelineConfig = gstMeasurements_.GetPipelineConfig();
 }

@@ -37,10 +37,10 @@ void CPipelineMeasurements::AddPipelines(
  * @brief Sorts the measuredItems for each pipeline
  * The sorting is based on the ID field
  */
-std::vector<Exports::PipelineInfo>
-CPipelineMeasurements::SortData(const std::vector<Exports::PipelineInfo> &data)
+std::vector<Measurements::SMeasurementGroup> CPipelineMeasurements::SortData(
+    const std::vector<Measurements::SMeasurementGroup> &data)
 {
-  std::vector<Exports::PipelineInfo> sorted;
+  std::vector<Measuremements::SMeasurementGroup> sorted;
   auto sortFunction =
       [](const Exports::MeasuredItem &lhs, const Exports::MeasuredItem &rhs)
   { return lhs.id < rhs.id; };
@@ -58,9 +58,10 @@ CPipelineMeasurements::SortData(const std::vector<Exports::PipelineInfo> &data)
  *
  * @return std::vector<Exports::PipelineInfo>
  */
-std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
+std::vector<Measurements::SMeasurementGroup>
+CPipelineMeasurements::ProcessGstreamer()
 {
-  std::vector<Exports::PipelineInfo> result;
+  std::vector<Measurements::SMeasurementGroup> result;
   // Check each individual gstreamer pipeline
   for (auto &e : streams_)
   {
@@ -79,7 +80,7 @@ std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
     }
 
     // Convert the measured data to an Exports::MeasuredItem type
-    Exports::PipelineInfo gsData;
+    Measurements::SMeasurementGroup gsData;
     gsData.pipelineId = e.second->GetProcessId();
     for (const auto &m : summarizeMap)
     {

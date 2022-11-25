@@ -38,7 +38,7 @@ public:
   void Initialize(std::vector<Exports::ExportData> *allData);
   void ConcludeMeasurement();
 
-  std::vector<Exports::PipelineInfo> ProcessGstreamer();
+  std::vector<Measurements::SMeasurementGroup> ProcessGstreamer();
   void SetConfig(const Core::SConfig &config) { config_ = config; }
   std::vector<Exports::PipelineConfig> GetPipelineConfig() const;
   Exports::MeasurementItem GetPipelineConfig2() const;
@@ -46,8 +46,9 @@ public:
   GetPipelineConfig(const int pipelineNr) const;
   std::vector<Exports::MeasurementItem>
   GetMeasurementLabels(const int pipelineNr) const;
-  std::vector<Exports::PipelineInfo>
-  SortData(const std::vector<Exports::PipelineInfo> &data);
+  static std::vector<Measurements::SMeasurementGroup>
+  CPipelineMeasurements::SortData(
+      const std::vector<Measurements::SMeasurementGroup> &data);
   std::vector<Measurements::AllSensors::SensorGroups> GetSensors() const;
   void setProctime(const bool proctime)
   {

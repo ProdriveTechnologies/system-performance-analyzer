@@ -168,15 +168,16 @@ void CProcessMeasurements::SetProcesses()
  *
  * @return std::vector<Exports::MeasuredItem>
  */
-std::vector<Exports::ProcessInfo> CProcessMeasurements::GetMeasurements()
+std::vector<Measurements::SMeasurementGroup>
+CProcessMeasurements::GetMeasurements()
 {
-  std::vector<Exports::ProcessInfo> measuredItems;
+  std::vector<Measurements::SMeasurementGroup> measuredItems;
   // 1. Loop through each PID
   for (auto &process : processIds_)
   {
     if (!process.active)
       continue;
-    Exports::ProcessInfo processData;
+    Measurements::SMeasurementGroup processData;
     processData.pipelineId = process.processId;
     auto pidReplacement = std::to_string(process.processId);
     auto returnSuccess =
@@ -222,9 +223,8 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
   MeasureCombo result;
 
   std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField) {
-                  result.Add(parserFunction(memberPtr, dataField));
-                });
+                [&](const PlatformConfig::SDatafields &dataField)
+                { result.Add(parserFunction(memberPtr, dataField)); });
 
   return result;
 }
