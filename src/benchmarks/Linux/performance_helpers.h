@@ -30,7 +30,8 @@ GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
 Measurements::Sensors
 GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
                          const std::unordered_set<int> uniqueId,
-                         const std::string &name);
+                         const std::string &name,
+                         const PlatformConfig::SDatafields &field);
 
 Measurements::SensorData
 GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,

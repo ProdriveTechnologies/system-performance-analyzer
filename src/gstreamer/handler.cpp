@@ -137,7 +137,6 @@ void CGstreamerHandler::ParentWaitProcess()
     }
     else
     {
-      std::cout << "Message received; " << message << std::endl;
       message.pop_back();
       message.erase(0, 1);
       traceHandler_.ParseTraceStructure(message);

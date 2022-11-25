@@ -69,6 +69,7 @@ struct SDatafields
   Types type;
   Class classType = Class::NONE;
   std::string suffix;
+  double multiplier = 1.0;
   std::string calculation;
 
   // Required for type: PROC or DIRECT

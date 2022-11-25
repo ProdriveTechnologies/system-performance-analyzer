@@ -46,10 +46,11 @@ std::vector<Exports::MeasurementItem> CSensors::GetMeasurementFields() const
 std::vector<Sensors> CSensors::GetSensors() const
 {
   std::vector<Sensors> result;
-  for (const auto &e : measureFieldsDefinition_)
+  for (const auto &datafield : measureFieldsDefinition_)
   {
-    Sensors sensor{e.name, e.id, e.classType};
-    sensor.data = PerformanceHelpers::GetSummarizedDataSensors(allData_, e.id);
+    Sensors sensor{datafield};
+    sensor.data =
+        PerformanceHelpers::GetSummarizedDataSensors(allData_, datafield.id);
     result.push_back(sensor);
   }
   // Add the collective groups, such as the combined cpu's instead of the single
@@ -72,10 +73,11 @@ std::vector<Sensors> CSensors::GetSensors() const
       }
     }
   }
-  for (const auto &e : classes)
+  for (const auto &[className, classIds] : classes)
   {
+    auto datafield = GetDatafield(className);
     result.push_back(PerformanceHelpers::GetSummarizedDataSensors(
-        allData_, e.second, e.first));
+        allData_, classIds, className, datafield));
   }
   return result;
 }

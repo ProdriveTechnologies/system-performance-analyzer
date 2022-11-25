@@ -12,8 +12,8 @@ namespace GStreamer
 void TraceHandler::TraceCallbackFunction(
     [[maybe_unused]] GstDebugCategory *category, GstDebugLevel level,
     [[maybe_unused]] const gchar *file, [[maybe_unused]] const gchar *function,
-    [[maybe_unused]] gint line, GObject *object, GstDebugMessage *message,
-    gpointer userData)
+    [[maybe_unused]] gint line, [[maybe_unused]] GObject *object,
+    GstDebugMessage *message, gpointer userData)
 {
   if (level != GST_LEVEL_TRACE)
   {
@@ -23,7 +23,6 @@ void TraceHandler::TraceCallbackFunction(
   TracerUserData *logData = reinterpret_cast<TracerUserData *>(userData);
 
   const char *debugMessage = gst_debug_message_get(message);
-  std::cout << "Gst structure string1: " << debugMessage << std::endl;
   std::string debugMessageStr = debugMessage;
   logData->parent->pipe_->Write("$" + debugMessageStr + "$");
 }

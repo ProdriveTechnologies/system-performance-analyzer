@@ -21,6 +21,9 @@ public:
                          const std::string_view &value);
   template <typename T>
   static void PrintValue(const std::string_view &text, const T &value);
+  template <typename T>
+  static void PrintValue(const std::string_view &text, const T &value,
+                         const std::string &suffix);
 
   static void PrintRow(const std::string_view &text = "");
 
@@ -57,4 +60,11 @@ template <typename T>
 void SummaryWriter::PrintValue(const std::string_view &text, const T &value)
 {
   PrintValue(text, std::to_string(value));
+}
+
+template <typename T>
+void SummaryWriter::PrintValue(const std::string_view &text, const T &value,
+                               const std::string &suffix)
+{
+  PrintValue(text, std::to_string(value) + " " + suffix);
 }

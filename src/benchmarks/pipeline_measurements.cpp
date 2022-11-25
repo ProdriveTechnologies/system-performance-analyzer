@@ -145,6 +145,7 @@ CPipelineMeasurements::GetSensors() const
       std::string sensorName =
           CreateSensorName(e.first.moduleName, e.first.type);
       Measurements::Sensors sensor{sensorName, e.second};
+      sensor.SetDataInfo(GetMeasureType(e.first.type));
       sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second);
       sensorGroup.sensors.push_back(sensor);
     }

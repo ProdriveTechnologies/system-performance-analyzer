@@ -70,6 +70,7 @@ GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
                                PerformanceHelpers::GetUniqueId(),
                                PlatformConfig::Class::PIPELINE_MEASUREMENTS};
   result.data = summarizedData.GetSensorData();
+  result.suffix = GStreamer::GetMeasureType(type);
   return result;
 }
 
@@ -160,7 +161,8 @@ GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
 Measurements::Sensors
 GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
                          const std::unordered_set<int> uniqueIds,
-                         const std::string &name)
+                         const std::string &name,
+                         const PlatformConfig::SDatafields &field)
 {
   Measurements::CSummarizeData summarizedData;
   // This is the loop for each measurement
@@ -175,6 +177,7 @@ GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
   }
   Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId(),
                                PlatformConfig::Class::SYS_RESOURCE_USAGE};
+  result.SetDataInfo(field.suffix, field.multiplier);
   result.data = summarizedData.GetSensorData();
   return result;
 }

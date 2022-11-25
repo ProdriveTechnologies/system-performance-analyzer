@@ -237,7 +237,8 @@ void CSummaryGenerator::PrintValue(const std::string_view translation,
 {
   std::string valName{translation};
   valName += sensor.userId;
-  SummaryWriter::PrintValue(valName, sensor.data.Get(valueType));
+  auto correctedValue = sensor.data.Get(valueType) * sensor.multiplier;
+  SummaryWriter::PrintValue(valName, correctedValue, sensor.suffix);
 }
 
 #if 0

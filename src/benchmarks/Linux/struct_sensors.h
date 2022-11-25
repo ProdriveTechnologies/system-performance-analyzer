@@ -65,6 +65,9 @@ struct Sensors
                       // userId will have a number of the array behind it
   int uniqueId;
   PlatformConfig::Class classType;
+  std::string suffix;
+  double multiplier = 1.0;
+
   // std::string groupId; // Only applicable for arrays, this is the groupname
   // and therefore does not contain the array number. This is the "original"
   // user id of the sensor
@@ -74,6 +77,16 @@ struct Sensors
           PlatformConfig::Class sensorClass_ = PlatformConfig::Class::NONE)
       : userId{userId_}, uniqueId{uniqueId_}, classType{sensorClass_}
   {
+  }
+  Sensors(const PlatformConfig::SDatafields &fields)
+      : userId{fields.name}, uniqueId{fields.id}, classType{fields.classType},
+        suffix{fields.suffix}, multiplier{fields.multiplier}
+  {
+  }
+  void SetDataInfo(const std::string &suffix_, const double multiplier_ = 1.0)
+  {
+    suffix = suffix_;
+    multiplier = multiplier_;
   }
   // Something of a pointer to the necessary data
 };

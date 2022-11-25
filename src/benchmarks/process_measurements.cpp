@@ -123,9 +123,10 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 
     for (const auto &datafield : measureFieldsDefinition_)
     {
-      Sensors sensor{datafield.name, datafield.id, datafield.classType};
+      Sensors sensor{datafield};
       sensor.data = PerformanceHelpers::GetSummarizedDataProcesses(
           allData_, datafield.id);
+
       sensorGroup.sensors.push_back(sensor);
     }
     result.push_back(sensorGroup);

@@ -38,8 +38,8 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
     j.at("data").get_to(p.datafields);
   if (j.contains("suffix"))
     j.at("suffix").get_to(p.suffix);
-  if (j.contains("calculation"))
-    j.at("calculation").get_to(p.calculation);
+  if (j.contains("multiplier"))
+    j.at("multiplier").get_to(p.multiplier);
 }
 
 inline void from_json(const nlohmann::json &j, SConfig &p)

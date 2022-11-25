@@ -96,5 +96,16 @@ private:
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
   std::vector<Exports::MeasuredItem>
   GetMeasurements(const MeasureFieldsType &measureFields);
+  PlatformConfig::SDatafields GetDatafield(const std::string &className) const
+  {
+    for (const auto &datafield : measureFieldsDefinition_)
+    {
+      if (datafield.nameClass == className)
+      {
+        return datafield;
+      }
+    }
+    throw std::runtime_error("Could not find datafield!");
+  }
 };
 } // namespace Measurements
