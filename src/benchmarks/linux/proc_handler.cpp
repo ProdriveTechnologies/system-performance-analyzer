@@ -23,29 +23,24 @@ void ProcHandler::ParseMeminfo()
 {
   meminfo_ = Linux::FileSystem::GetMemInfo("/proc/meminfo");
 }
-Measurements::SMeasuredItem
-ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
-                            const std::string &fieldName)
+Measurements::SMeasuredItem ProcHandler::ParseProcField(const PlatformConfig::SDatafields& procInfo,
+                                                        const std::string& fieldName)
 {
   auto cpuField = procStatCorrected_.cpus.find(fieldName);
   if (cpuField == procStatCorrected_.cpus.end())
   {
-    throw std::runtime_error("Couldn't find field \"" + fieldName +
-                             "\" for /proc/stat");
+    throw std::runtime_error("Couldn't find field \"" + fieldName + "\" for /proc/stat");
   }
 
   Measurements::SMeasuredItem measuredItem;
   measuredItem.id = procInfo.id;
-  long long comparedTo = Linux::FileSystem::GetProcStatGroup(
-      cpuField->second, procInfo.comparedTo);
-  long long value =
-      Linux::FileSystem::GetProcStatGroup(cpuField->second, procInfo.value);
+  long long comparedTo = Linux::FileSystem::GetProcStatGroup(cpuField->second, procInfo.comparedTo);
+  long long value = Linux::FileSystem::GetProcStatGroup(cpuField->second, procInfo.value);
   measuredItem.measuredValue = static_cast<double>(value) / comparedTo;
   return measuredItem;
 }
 
-Measurements::SMeasuredItem
-ProcHandler::ParseMemField(const PlatformConfig::SDatafields &procInfo)
+Measurements::SMeasuredItem ProcHandler::ParseMemField(const PlatformConfig::SDatafields& procInfo)
 {
   auto memValue = meminfo_.GetField(procInfo.value);
   auto comparedTo = meminfo_.GetField(procInfo.comparedTo, true);

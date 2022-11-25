@@ -4,7 +4,7 @@
 
 namespace Helpers
 {
-bool FileExists(const std::string &fileName)
+bool FileExists(const std::string& fileName)
 {
   std::ifstream fileObj(fileName);
   return fileObj.good();
@@ -14,7 +14,7 @@ bool FileExists(const std::string &fileName)
  * @note function originally from:
  * https://www.techiedelight.com/split-a-string-into-a-vector-in-cpp/
  */
-std::vector<std::string> Split(const std::string &text, char delimiter)
+std::vector<std::string> Split(const std::string& text, char delimiter)
 {
   std::vector<std::string> result;
   std::stringstream textSs(text);
@@ -34,18 +34,17 @@ std::vector<std::string> Split(const std::string &text, char delimiter)
  * @note function originally from:
  * https://www.techiedelight.com/split-a-string-into-a-vector-in-cpp/
  */
-std::vector<const char *> ToCString(const std::vector<std::string> &text)
+std::vector<const char*> ToCString(const std::vector<std::string>& text)
 {
-  std::vector<const char *> cStr;
-  for (const auto &e : text)
+  std::vector<const char*> cStr;
+  for (const auto& e : text)
   {
     cStr.push_back(e.c_str());
   }
   return cStr;
 }
 
-void replaceStr(std::string &data, const std::string toReplace,
-                const std::string replacementStr)
+void replaceStr(std::string& data, const std::string toReplace, const std::string replacementStr)
 {
   size_t pos = data.find(toReplace);
 
@@ -66,7 +65,7 @@ void replaceStr(std::string &data, const std::string toReplace,
  * @param decimals
  * @return int
  */
-int DecimalsToInt(const std::string &data, const unsigned int decimals)
+int DecimalsToInt(const std::string& data, const unsigned int decimals)
 {
   if (data.size() == 0 || decimals == 0)
     return 0;

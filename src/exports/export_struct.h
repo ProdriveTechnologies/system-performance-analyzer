@@ -1,26 +1,24 @@
 #pragma once
 
+#include "src/benchmarks/gstreamer_identifier.h"
+#include "src/json_config/sensor_config/config.h"
+
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
-
-#include "src/benchmarks/gstreamer_identifier.h"
-#include "src/json_config/sensor_config/config.h"
 //#include "src/benchmarks/linux/xavier_sensors.h"
+#include "src/benchmarks/linux/struct_measurements.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/linux/filesystem.h"
-
-#include "src/benchmarks/linux/struct_measurements.h"
 
 namespace Exports
 {
 using SMeasuredItem = Measurements::SMeasuredItem;
 
-static inline SMeasuredItem
-FindMeasuredItem(const std::vector<SMeasuredItem> &items, const int id)
+static inline SMeasuredItem FindMeasuredItem(const std::vector<SMeasuredItem>& items, const int id)
 {
-  for (const auto &e : items)
+  for (const auto& e : items)
   {
     if (e.id == id)
       return e;

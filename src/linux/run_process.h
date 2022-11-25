@@ -1,11 +1,11 @@
 #pragma once
 
+#include "src/linux/pipe_comm.h"
+#include "src/process_runner/run_process_base.h"
+
 #include <atomic>
 #include <string>
 #include <thread>
-
-#include "src/linux/pipe_comm.h"
-#include "src/process_runner/run_process_base.h"
 
 class Synchronizer;
 namespace Linux
@@ -13,11 +13,11 @@ namespace Linux
 class RunProcess : public ProcessRunner::Base
 {
 public:
-  RunProcess(Synchronizer *synchronizer, const Core::SProcess &userProcessInfo);
-  RunProcess(const RunProcess &process);
+  RunProcess(Synchronizer* synchronizer, const Core::SProcess& userProcessInfo);
+  RunProcess(const RunProcess& process);
   ~RunProcess();
 
-  void StartThread(const std::string &command);
+  void StartThread(const std::string& command);
 
   int GetThreadPid() const { return applicationPid_; }
   bool IsRunning() const { return running_; }
@@ -29,6 +29,6 @@ private:
   std::string processName_;
 
   void ParentWaitProcess();
-  void ChildExecProcess(const std::string &command);
+  void ChildExecProcess(const std::string& command);
 };
 } // namespace Linux

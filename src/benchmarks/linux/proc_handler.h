@@ -17,11 +17,8 @@ public:
   Linux::FileSystem::ProcStatData GetStats() const { return procStat_; };
   Linux::FileSystem::MemInfoData GetMemInfo() const { return meminfo_; };
 
-  Measurements::SMeasuredItem
-  ParseProcField(const PlatformConfig::SDatafields &procInfo,
-                 const std::string &fieldName);
-  Measurements::SMeasuredItem
-  ParseMemField(const PlatformConfig::SDatafields &procInfo);
+  Measurements::SMeasuredItem ParseProcField(const PlatformConfig::SDatafields& procInfo, const std::string& fieldName);
+  Measurements::SMeasuredItem ParseMemField(const PlatformConfig::SDatafields& procInfo);
 
 private:
   Linux::FileSystem::ProcStatData procStat_;

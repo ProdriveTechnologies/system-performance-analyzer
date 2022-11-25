@@ -9,10 +9,10 @@
 class FileWriter
 {
 public:
-  FileWriter(const std::string &fileName);
+  FileWriter(const std::string& fileName);
 
-  bool AddRow(const std::string &text);
-  bool AddRow(const std::string &text, const bool addEmptyString);
+  bool AddRow(const std::string& text);
+  bool AddRow(const std::string& text, const bool addEmptyString);
   void Close() { file_.close(); }
 
 private:

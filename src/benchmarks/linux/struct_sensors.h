@@ -1,13 +1,12 @@
 #pragma once
 
-#include <unordered_map>
+#include "src/helpers/helper_functions.h"
+#include "src/json_config/sensor_config/config.h"
 
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
-
-#include "src/helpers/helper_functions.h"
-#include "src/json_config/sensor_config/config.h"
 
 namespace Measurements
 {
@@ -30,7 +29,7 @@ struct SSensorData
 
   double Get(const EValueTypes valueType) const
   {
-    for (const auto &e : summarizedValues)
+    for (const auto& e : summarizedValues)
     {
       if (e.type == valueType)
         return e.value;
@@ -40,7 +39,7 @@ struct SSensorData
   std::string Printable() const
   {
     std::string result;
-    for (const auto &e : summarizedValues)
+    for (const auto& e : summarizedValues)
       result += ToString(e.type) + ": " + std::to_string(e.value) + " ; ";
 
     return result;
@@ -66,20 +65,27 @@ struct SSensors
   SSensorData data;
 
   // Constructor with the name and unique id
-  SSensors(const std::string &userId_, const int uniqueId_,
+  SSensors(const std::string& userId_,
+           const int uniqueId_,
            PlatformConfig::EClass sensorClass_ = PlatformConfig::EClass::NONE)
-      : userId{userId_}, uniqueId{uniqueId_}, classType{sensorClass_}
+  : userId{ userId_ }
+  , uniqueId{ uniqueId_ }
+  , classType{ sensorClass_ }
   {
   }
   // Constructor with an SDataFields object
-  SSensors(const PlatformConfig::SDatafields &fields)
-      : userId{fields.name}, uniqueId{fields.id}, classType{fields.classType},
-        suffix{fields.suffix}, multiplier{fields.multiplier},
-        measuredRaw{true}, userData{fields}
+  SSensors(const PlatformConfig::SDatafields& fields)
+  : userId{ fields.name }
+  , uniqueId{ fields.id }
+  , classType{ fields.classType }
+  , suffix{ fields.suffix }
+  , multiplier{ fields.multiplier }
+  , measuredRaw{ true }
+  , userData{ fields }
   {
   }
   SSensors() = default;
-  void SetDataInfo(const std::string &suffix_, const double multiplier_ = 1.0)
+  void SetDataInfo(const std::string& suffix_, const double multiplier_ = 1.0)
   {
     suffix = suffix_;
     multiplier = multiplier_;
@@ -93,10 +99,11 @@ enum class EClassification
   PROCESSES,
   SYSTEM
 };
-inline std::unordered_map<EClassification, std::string> classificationToString =
-    {{EClassification::PIPELINE, "PipelineMeasurements"},
-     {EClassification::PROCESSES, "ProcessMeasurements"},
-     {EClassification::SYSTEM, "SystemResources"}};
+inline std::unordered_map<EClassification, std::string> classificationToString = {
+  { EClassification::PIPELINE, "PipelineMeasurements" },
+  { EClassification::PROCESSES, "ProcessMeasurements" },
+  { EClassification::SYSTEM, "SystemResources" }
+};
 
 inline std::string GetClassificationStr(const EClassification c)
 {
@@ -106,8 +113,7 @@ inline std::string GetClassificationStr(const EClassification c)
   throw std::runtime_error("Could not find translation for Classification!");
 }
 
-inline void SetClassificationStr(const EClassification c,
-                                 const std::string &newText)
+inline void SetClassificationStr(const EClassification c, const std::string& newText)
 {
   auto res = classificationToString.find(c);
   if (res != classificationToString.end())
@@ -122,7 +128,7 @@ using SensorIdentifier = std::pair<SensorName, SensorProcessId>;
 // Hash function for the Measurements::SensorIdentifier field
 struct SensorIdHash
 {
-  size_t operator()(const Measurements::SensorIdentifier &k) const;
+  size_t operator()(const Measurements::SensorIdentifier& k) const;
 };
 
 /**
@@ -138,8 +144,9 @@ struct SAllSensors
     // EClassification::PROCESSES
     std::vector<SSensors> sensors;
     int processDelay = -1;
-    SSensorGroups(const int processId_, const std::vector<SSensors> &sensors_)
-        : processId{processId_}, sensors{sensors_}
+    SSensorGroups(const int processId_, const std::vector<SSensors>& sensors_)
+    : processId{ processId_ }
+    , sensors{ sensors_ }
     {
     }
     SSensorGroups() = default;
@@ -149,15 +156,14 @@ struct SAllSensors
   // data, system data)
   std::unordered_map<EClassification, std::vector<SSensorGroups>> data;
 
-  using SensorMap = std::unordered_map<std::string, Measurements::SSensors *>;
+  using SensorMap = std::unordered_map<std::string, Measurements::SSensors*>;
   using ProcessId = int;
   using SensorMapByProcess = std::unordered_map<ProcessId, SensorMap>;
   SensorMapByProcess mapByProcessId;
 
   SensorMap GetMap(const int processId) const;
 
-  std::vector<SSensors> GetSensors(const EClassification c,
-                                   const int processId = -1) const;
+  std::vector<SSensors> GetSensors(const EClassification c, const int processId = -1) const;
 
   EClassification GetClassification(const int uniqueId) const;
 
@@ -166,16 +172,12 @@ struct SAllSensors
    */
   std::unordered_set<int> GetProcesses() const;
 
-  void AddSensors(const EClassification c, const std::vector<SSensors> &sensors,
-                  const int processId = -1);
-  void AddSensors(const EClassification c,
-                  const std::vector<SSensorGroups> &sensors);
-  std::vector<SSensorGroups>
-  GetSensorGroups(const EClassification classification) const;
+  void AddSensors(const EClassification c, const std::vector<SSensors>& sensors, const int processId = -1);
+  void AddSensors(const EClassification c, const std::vector<SSensorGroups>& sensors);
+  std::vector<SSensorGroups> GetSensorGroups(const EClassification classification) const;
 
 private:
-  void AddMapValues(SensorMapByProcess *mapObj, std::vector<SSensors> *sensors,
-                    const int processId) const;
+  void AddMapValues(SensorMapByProcess* mapObj, std::vector<SSensors>* sensors, const int processId) const;
 };
 
 } // namespace Measurements

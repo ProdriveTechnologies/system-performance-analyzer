@@ -11,11 +11,11 @@ public:
   void SetChild();
   void SetParent();
 
-  void Write(const std::string &message);
-  void Write(void *message, const size_t bytes);
+  void Write(const std::string& message);
+  void Write(void* message, const size_t bytes);
   std::string Read();
-  size_t ReadRaw(void *message, const size_t bytes);
-  size_t Read(char *message, const size_t bytes)
+  size_t ReadRaw(void* message, const size_t bytes);
+  size_t Read(char* message, const size_t bytes)
   {
     auto readSize = ReadRaw(message, bytes);
     message[readSize] = '\0';

@@ -29,7 +29,7 @@ bool Statm::ParseStatm(const std::string &path)
       const auto &element = statmElements.at(i);
       const auto &name = orderedNames_.at(i);
       values_.insert(std::make_pair(name, std::stoull(element)));
-    }
+    } 
     return true;
   }
 }

@@ -3,7 +3,6 @@
 #include "linux/xavier_sensors.h"
 #include "src/benchmarks/linux/performance_helpers.h"
 #include "src/json_config/sensor_config/config_parser.h"
-
 #include "src/linux/datahandlers/direct_handler.h"
 #include "src/linux/datahandlers/procmeminfo_handler.h"
 #include "src/linux/datahandlers/procstat_handler.h"
@@ -15,8 +14,8 @@ namespace Measurements
  *
  * @param configFile
  */
-CSystemSensors::CSystemSensors(const std::string &configFile)
-    : configFile_{configFile}
+CSystemSensors::CSystemSensors(const std::string& configFile)
+: configFile_{ configFile }
 {
 }
 
@@ -25,14 +24,12 @@ CSystemSensors::CSystemSensors(const std::string &configFile)
  *
  * @param allData
  */
-void CSystemSensors::Initialize(
-    std::vector<Measurements::SMeasurementsData> *allData)
+void CSystemSensors::Initialize(std::vector<Measurements::SMeasurementsData>* allData)
 {
   SetDataHandlers();
   allData_ = allData;
   auto parsed = PlatformConfig::Parse(configFile_);
-  auto measureFields =
-      GetFields(parsed.sensors, &CSystemSensors::GetMeasureFields, this);
+  auto measureFields = GetFields(parsed.sensors, &CSystemSensors::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
   measureFieldsDefinition_ = measureFields.definition;
 
@@ -47,16 +44,13 @@ void CSystemSensors::Initialize(
  */
 void CSystemSensors::SetDataHandlers()
 {
-  dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::ETypes::DIRECT,
-      std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
+  dataHandlers_.push_back(Linux::SDataHandlers{ PlatformConfig::ETypes::DIRECT,
+                                                std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler()) });
   dataHandlers_.push_back(
-      Linux::SDataHandlers{PlatformConfig::ETypes::PROC_MEM,
-                           std::make_unique<Linux::CProcMeminfoHandler>(
-                               Linux::CProcMeminfoHandler())});
-  dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::ETypes::PROC_STAT,
-      std::make_unique<Linux::CProcStatHandler>(Linux::CProcStatHandler())});
+    Linux::SDataHandlers{ PlatformConfig::ETypes::PROC_MEM,
+                          std::make_unique<Linux::CProcMeminfoHandler>(Linux::CProcMeminfoHandler()) });
+  dataHandlers_.push_back(Linux::SDataHandlers{ PlatformConfig::ETypes::PROC_STAT,
+                                                std::make_unique<Linux::CProcStatHandler>(Linux::CProcStatHandler()) });
 }
 
 /**
@@ -72,14 +66,15 @@ void CSystemSensors::SetDataHandlers()
 std::vector<SSensors> CSystemSensors::GetSensors(const bool summarizeData) const
 {
   std::vector<SSensors> result;
-  for (const auto &datafield : measureFieldsDefinition_)
+  for (const auto& datafield : measureFieldsDefinition_)
   {
-    SSensors sensor{datafield};
+    SSensors sensor{ datafield };
     if (summarizeData)
     {
-      sensor.data = PerformanceHelpers::GetSummarizedData(
-          Measurements::EClassification::SYSTEM, allData_, datafield.id,
-          sensor.multiplier);
+      sensor.data = PerformanceHelpers::GetSummarizedData(Measurements::EClassification::SYSTEM,
+                                                          allData_,
+                                                          datafield.id,
+                                                          sensor.multiplier);
     }
     result.push_back(sensor);
   }
@@ -89,7 +84,7 @@ std::vector<SSensors> CSystemSensors::GetSensors(const bool summarizeData) const
   // Add the collective groups, such as the combined cpu's instead of the single
   // cores
   std::unordered_map<std::string, std::unordered_set<int>> classes;
-  for (const auto &e : measureFieldsDefinition_)
+  for (const auto& e : measureFieldsDefinition_)
   {
     // Check if it is within an array, then these values are non-equal
     if (e.name != e.nameClass)
@@ -101,18 +96,18 @@ std::vector<SSensors> CSystemSensors::GetSensors(const bool summarizeData) const
       }
       else
       {
-        classes.insert(
-            std::make_pair(e.nameClass, std::unordered_set<int>{e.id}));
+        classes.insert(std::make_pair(e.nameClass, std::unordered_set<int>{ e.id }));
       }
     }
   }
-  for (const auto &[className, classIds] : classes)
+  for (const auto& [className, classIds] : classes)
   {
     auto datafield = GetDatafield(className);
     datafield.name = className;
-    result.push_back(PerformanceHelpers::GetSummarizedData(
-        Measurements::EClassification::SYSTEM, allData_, classIds,
-        Measurements::SSensors{datafield}));
+    result.push_back(PerformanceHelpers::GetSummarizedData(Measurements::EClassification::SYSTEM,
+                                                           allData_,
+                                                           classIds,
+                                                           Measurements::SSensors{ datafield }));
   }
   return result;
 }
@@ -133,8 +128,7 @@ std::vector<SMeasuredItem> CSystemSensors::GetMeasurements()
   }
   else
   {
-    CLogger::Log(CLogger::Types::WARNING,
-                 "Could not measure system measurements!");
+    CLogger::Log(CLogger::Types::WARNING, "Could not measure system measurements!");
   }
   return items;
 }
@@ -153,11 +147,10 @@ Exports::SMeasurementItem CSystemSensors::GetConfig() const
   return config;
 }
 
-std::vector<Exports::SMeasurementItem>
-CSystemSensors::GetMeasurementFields() const
+std::vector<Exports::SMeasurementItem> CSystemSensors::GetMeasurementFields() const
 {
   std::vector<Exports::SMeasurementItem> result;
-  for (const auto &e : measureFieldsDefinition_)
+  for (const auto& e : measureFieldsDefinition_)
   {
     Exports::SMeasurementItem config;
     config.name = e.name;
@@ -169,42 +162,35 @@ CSystemSensors::GetMeasurementFields() const
 }
 
 std::vector<Exports::SMeasurementItem> CSystemSensors::GetDefinitionItems(
-    const PlatformConfig::SDatafields &field) const
+  const PlatformConfig::SDatafields& field) const
 {
   std::vector<Exports::SMeasurementItem> result;
-  auto item1 =
-      Exports::SMeasurementItem{"Label", Exports::EType::LABEL, field.name};
+  auto item1 = Exports::SMeasurementItem{ "Label", Exports::EType::LABEL, field.name };
   result.push_back(item1);
-  auto item2 =
-      Exports::SMeasurementItem{"Unique ID", Exports::EType::INFO, field.id};
+  auto item2 = Exports::SMeasurementItem{ "Unique ID", Exports::EType::INFO, field.id };
   result.push_back(item2);
   if (!field.path.empty())
   {
-    auto item3 =
-        Exports::SMeasurementItem{"Path", Exports::EType::INFO, field.path};
+    auto item3 = Exports::SMeasurementItem{ "Path", Exports::EType::INFO, field.path };
     result.push_back(item3);
   }
   return result;
 }
 
 CSystemSensors::MeasureCombo CSystemSensors::GetFields(
-    std::vector<PlatformConfig::SDatafields> &sensorConfig,
-    const std::function<MeasureCombo(CSystemSensors *,
-                                     const PlatformConfig::SDatafields &)>
-        parserFunction,
-    CSystemSensors *memberPtr)
+  std::vector<PlatformConfig::SDatafields>& sensorConfig,
+  const std::function<MeasureCombo(CSystemSensors*, const PlatformConfig::SDatafields&)> parserFunction,
+  CSystemSensors* memberPtr)
 {
   MeasureCombo result;
 
-  std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField) {
-                  result.Add(parserFunction(memberPtr, dataField));
-                });
+  std::for_each(sensorConfig.begin(), sensorConfig.end(), [&](const PlatformConfig::SDatafields& dataField) {
+    result.Add(parserFunction(memberPtr, dataField));
+  });
 
   return result;
 }
-CSystemSensors::MeasureCombo
-CSystemSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
+CSystemSensors::MeasureCombo CSystemSensors::GetMeasureFields(const PlatformConfig::SDatafields& dataField)
 {
   MeasureCombo result;
 
@@ -229,17 +215,16 @@ CSystemSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
   return result;
 }
 
-CSystemSensors::MeasureCombo
-CSystemSensors::ParseArray(const PlatformConfig::SDatafields &data)
+CSystemSensors::MeasureCombo CSystemSensors::ParseArray(const PlatformConfig::SDatafields& data)
 {
   MeasureCombo result;
   // Loop through the defined array
   for (size_t i = 0; i < data.size; ++i)
   {
     // Adjust all variables that are defined within the array
-    for (const auto &e : data.datafields)
+    for (const auto& e : data.datafields)
     {
-      auto datafieldCopy{e};
+      auto datafieldCopy{ e };
       Helpers::replaceStr(datafieldCopy.path, "$INDEX$", std::to_string(i));
       datafieldCopy.nameClass = datafieldCopy.name;
       datafieldCopy.name = datafieldCopy.name + std::to_string(i);
@@ -249,8 +234,7 @@ CSystemSensors::ParseArray(const PlatformConfig::SDatafields &data)
   return result;
 }
 
-CSystemSensors::MeasureComboSingular
-CSystemSensors::ParseField(const PlatformConfig::SDatafields &data)
+CSystemSensors::MeasureComboSingular CSystemSensors::ParseField(const PlatformConfig::SDatafields& data)
 {
   MeasureComboSingular result;
   result.field.path = data.path;

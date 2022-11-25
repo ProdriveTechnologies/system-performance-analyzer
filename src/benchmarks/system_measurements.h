@@ -1,19 +1,17 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
+#include "src/benchmarks/linux/struct_measurements.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/helpers/helper_functions.h"
 #include "src/json_config/sensor_config/config.h"
 #include "src/linux/data_handler.h"
-
 #include "src/linux/datahandlers/direct_handler.h"
 #include "src/linux/datahandlers/pidstat_handler.h"
 #include "src/linux/datahandlers/pidstatm_handler.h"
 
-#include "src/benchmarks/linux/struct_measurements.h"
+#include <string>
+#include <vector>
 
 namespace Measurements
 {
@@ -29,9 +27,9 @@ namespace Measurements
 class CSystemSensors
 {
 public:
-  CSystemSensors(const std::string &configFile);
+  CSystemSensors(const std::string& configFile);
 
-  void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
+  void Initialize(std::vector<Measurements::SMeasurementsData>* allData);
 
   Exports::SMeasurementItem GetConfig() const;
 
@@ -41,7 +39,7 @@ public:
 
 private:
   const std::string configFile_;
-  std::vector<Measurements::SMeasurementsData> *allData_;
+  std::vector<Measurements::SMeasurementsData>* allData_;
   Linux::CDataHandler dataHandler_;
   std::vector<Linux::SDataHandlers> dataHandlers_;
 
@@ -51,8 +49,7 @@ private:
   MeasureFieldsType measureFields_;
 
   std::vector<Exports::SMeasurementItem> GetMeasurementFields() const;
-  std::vector<Exports::SMeasurementItem>
-  GetDefinitionItems(const PlatformConfig::SDatafields &field) const;
+  std::vector<Exports::SMeasurementItem> GetDefinitionItems(const PlatformConfig::SDatafields& field) const;
   /**
    * @brief Necessary for parsing the configuration file for the sensors
    */
@@ -66,12 +63,12 @@ private:
     MeasureFieldsDefType definition;
     MeasureFieldsType fields;
 
-    void Add(const MeasureComboSingular &data)
+    void Add(const MeasureComboSingular& data)
     {
       definition.push_back(data.definition);
       fields.push_back(data.field);
     }
-    void Add(const MeasureCombo &data)
+    void Add(const MeasureCombo& data)
     {
       definition = Helpers::CombineVectors(definition, data.definition);
       fields = Helpers::CombineVectors(fields, data.fields);
@@ -79,7 +76,7 @@ private:
   };
   PlatformConfig::SDatafields GetFieldDef(const int id)
   {
-    for (const auto &e : measureFieldsDefinition_)
+    for (const auto& e : measureFieldsDefinition_)
     {
       if (id == e.id)
         return e;
@@ -87,18 +84,16 @@ private:
     throw std::runtime_error("ID not found!");
   }
   MeasureCombo GetFields(
-      std::vector<PlatformConfig::SDatafields> &sensorConfig,
-      const std::function<MeasureCombo(CSystemSensors *,
-                                       const PlatformConfig::SDatafields &)>
-          parserFunction,
-      CSystemSensors *memberPtr);
-  MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields &dataField);
-  MeasureCombo ParseArray(const PlatformConfig::SDatafields &data);
-  MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
+    std::vector<PlatformConfig::SDatafields>& sensorConfig,
+    const std::function<MeasureCombo(CSystemSensors*, const PlatformConfig::SDatafields&)> parserFunction,
+    CSystemSensors* memberPtr);
+  MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields& dataField);
+  MeasureCombo ParseArray(const PlatformConfig::SDatafields& data);
+  MeasureComboSingular ParseField(const PlatformConfig::SDatafields& data);
   void SetDataHandlers();
-  PlatformConfig::SDatafields GetDatafield(const std::string &className) const
+  PlatformConfig::SDatafields GetDatafield(const std::string& className) const
   {
-    for (const auto &datafield : measureFieldsDefinition_)
+    for (const auto& datafield : measureFieldsDefinition_)
     {
       if (datafield.nameClass == className)
       {

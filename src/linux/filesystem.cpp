@@ -6,17 +6,17 @@ namespace Linux
 {
 namespace FileSystem
 {
-std::vector<std::string> GetFiles(const std::string &path)
+std::vector<std::string> GetFiles(const std::string& path)
 {
   std::vector<std::string> dirFiles;
-  for (const auto &entry : std::filesystem::directory_iterator(path))
+  for (const auto& entry : std::filesystem::directory_iterator(path))
     dirFiles.push_back(entry.path());
   return dirFiles;
 }
 
-Stat GetStats(const std::string &statLocation)
+Stat GetStats(const std::string& statLocation)
 {
-  std::ifstream statFile{statLocation, std::ios_base::in};
+  std::ifstream statFile{ statLocation, std::ios_base::in };
   if (!statFile.good())
   {
     return Stat{};
@@ -28,7 +28,7 @@ Stat GetStats(const std::string &statLocation)
   if (statElements.back().back() == '\n')
     statElements.back().pop_back();
 
-  return Stat{statElements};
+  return Stat{ statElements };
 }
 
 /**
@@ -38,9 +38,9 @@ Stat GetStats(const std::string &statLocation)
  * /proc/stat
  * @return ProcStatData the measured data
  */
-ProcStatData GetProcStat(const std::string &procStatLocation)
+ProcStatData GetProcStat(const std::string& procStatLocation)
 {
-  std::ifstream statFile{procStatLocation, std::ios_base::in};
+  std::ifstream statFile{ procStatLocation, std::ios_base::in };
   if (!statFile.good())
   {
     throw std::runtime_error("Linux::FileSystem: stat file not existent!");
@@ -48,7 +48,7 @@ ProcStatData GetProcStat(const std::string &procStatLocation)
   std::vector<ProcRow> statElements;
   for (std::string val; std::getline(statFile, val);)
   {
-    ProcRow row{Helpers::Split(val, ' ')};
+    ProcRow row{ Helpers::Split(val, ' ') };
     if (row.rowElements.back().back() == '\n')
       row.rowElements.back().pop_back();
     statElements.push_back(row);
@@ -58,15 +58,14 @@ ProcStatData GetProcStat(const std::string &procStatLocation)
   ProcStatData procStatData;
   // procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
 
-  for (const auto &procStatRow : statElements)
+  for (const auto& procStatRow : statElements)
   {
     try
     {
-      auto row = std::make_pair(procStatRow.rowElements.at(0),
-                                ProcStatData::Cpu{procStatRow});
+      auto row = std::make_pair(procStatRow.rowElements.at(0), ProcStatData::Cpu{ procStatRow });
       procStatData.cpus.insert(row);
     }
-    catch (const std::exception &e)
+    catch (const std::exception& e)
     {
       return procStatData;
     }
@@ -82,19 +81,16 @@ ProcStatData GetProcStat(const std::string &procStatLocation)
  * @param groupName
  * @return long long
  */
-long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
-                           const std::string &groupName)
+long long GetProcStatGroup(const ProcStatData::Cpu& cpuField, const std::string& groupName)
 {
   switch (Helpers::hash(groupName))
   {
   case Helpers::hash("all"):
-    return cpuField.jiffiesIdle + cpuField.jiffiesIoWait + cpuField.jiffiesIrq +
-           cpuField.jiffiesNice + cpuField.jiffiesSoftIrq +
-           cpuField.jiffiesSystem + cpuField.jiffiesUser;
+    return cpuField.jiffiesIdle + cpuField.jiffiesIoWait + cpuField.jiffiesIrq + cpuField.jiffiesNice +
+           cpuField.jiffiesSoftIrq + cpuField.jiffiesSystem + cpuField.jiffiesUser;
   case Helpers::hash("all_excl_idle"):
-    return cpuField.jiffiesIoWait + cpuField.jiffiesIrq + cpuField.jiffiesNice +
-           cpuField.jiffiesSoftIrq + cpuField.jiffiesSystem +
-           cpuField.jiffiesUser;
+    return cpuField.jiffiesIoWait + cpuField.jiffiesIrq + cpuField.jiffiesNice + cpuField.jiffiesSoftIrq +
+           cpuField.jiffiesSystem + cpuField.jiffiesUser;
   case Helpers::hash("user"):
     return cpuField.jiffiesUser;
   case Helpers::hash("nice"):
@@ -119,9 +115,9 @@ long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
  * @param memInfoLocation
  * @return MemInfoData
  */
-MemInfoData GetMemInfo(const std::string &memInfoLocation)
+MemInfoData GetMemInfo(const std::string& memInfoLocation)
 {
-  std::ifstream memoryFile{memInfoLocation, std::ios_base::in};
+  std::ifstream memoryFile{ memInfoLocation, std::ios_base::in };
   if (!memoryFile.good())
   {
     throw std::runtime_error("Linux::FileSystem: Memory file not existent!");
@@ -129,7 +125,7 @@ MemInfoData GetMemInfo(const std::string &memInfoLocation)
   std::vector<ProcRow> memoryRows;
   for (std::string val; std::getline(memoryFile, val);)
   {
-    ProcRow row{Helpers::Split(val, ' ')};
+    ProcRow row{ Helpers::Split(val, ' ') };
     if (row.rowElements.empty())
       continue; // Zero size check before assuming a minimum size of 1
     if (row.rowElements.back().back() == '\n')
@@ -141,13 +137,13 @@ MemInfoData GetMemInfo(const std::string &memInfoLocation)
 
   MemInfoData memoryData;
 
-  for (const auto &memoryRow : memoryRows)
+  for (const auto& memoryRow : memoryRows)
   {
     try
     {
       memoryData.ParseRow(memoryRow);
     }
-    catch (const std::exception &e)
+    catch (const std::exception& e)
     {
       return memoryData;
     }

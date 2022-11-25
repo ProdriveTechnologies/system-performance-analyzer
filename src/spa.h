@@ -3,6 +3,7 @@
 #include "src/benchmarks/linux/perf_measurements.h"
 #include "src/helpers/synchronizer.h"
 #include "src/json_config/config_parser.h"
+
 #include <string>
 
 /**
@@ -13,8 +14,7 @@
 class CSystemPerformanceAnalyzer
 {
 public:
-  CSystemPerformanceAnalyzer(const std::string &configFile,
-                            const std::string sensorFile);
+  CSystemPerformanceAnalyzer(const std::string& configFile, const std::string sensorFile);
 
   void StartExecution();
 

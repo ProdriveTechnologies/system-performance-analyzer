@@ -8,6 +8,10 @@
 
 namespace Exports
 {
+/**
+ * @brief FullExport not implemented for the terminal UI, as this export only
+ * implements a live view
+ */
 bool CTerminalUI::FullExport(
     [[maybe_unused]] const std::vector<SMeasurementItem> &config,
     [[maybe_unused]] const FullMeasurement data,
@@ -17,40 +21,14 @@ bool CTerminalUI::FullExport(
 {
   return true;
 }
-void CTerminalUI::StartLiveMeasurements()
-{
-  //   using namespace ftxui;
 
-  //   auto summary = [&] {
-  //     auto content = ftxui::vbox({
-  //         hbox({text(L"- done:   "), text(L"3") | bold}) |
-  //         color(Color::Green), hbox({text(L"- active: "), text(L"2") | bold})
-  //         | color(Color::RedLight), hbox({text(L"- queue:  "), text(L"9") |
-  //         bold}) | color(Color::Red),
-  //     });
-  //     return window(text(L" Summary "), content);
-  //   };
-
-  //   document_ = //
-  //       ftxui::vbox({
-  //           ftxui::hbox({
-  //               text("fps") | border,
-  //               gauge(0.5) | border | flex,
-  //           }),
-  //       });
-
-  //   // Limit the size of the document to 80 char.
-  //   document_ = document_ | size(WIDTH, LESS_THAN, 80);
-
-  //   auto screen = Screen::Create(Dimension::Full(),
-  //   Dimension::Fit(document_)); Render(screen, document_); screen.Print();
-}
-
+/**
+ * @brief Shows the most recent measurements to the user in a live view
+ */
 void CTerminalUI::AddMeasurements(const Measurements::SMeasurementsData data)
 {
   auto elements = GetElements(data);
-  document_ = //
-      ftxui::vbox(elements);
+  document_ = ftxui::vbox(elements);
 
   // Limit the size of the document to 80 char.
   document_ = document_ | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 120);
@@ -63,6 +41,10 @@ void CTerminalUI::AddMeasurements(const Measurements::SMeasurementsData data)
   position_ = screen.ResetPosition();
 }
 
+/**
+ * @brief Gets all ftxui::Elements containing the most recent measurements for a
+ * live view
+ */
 ftxui::Elements
 CTerminalUI::GetElements(const Measurements::SMeasurementsData data)
 {
@@ -76,6 +58,9 @@ CTerminalUI::GetElements(const Measurements::SMeasurementsData data)
   return elements;
 }
 
+/**
+ * @brief Gets the elements of each group
+ */
 ftxui::Elements CTerminalUI::GetElementsSensorGroups(
     const std::vector<Measurements::SAllSensors::SSensorGroups> &sensorGroups,
     const Measurements::SMeasurementsData data)
@@ -109,18 +94,21 @@ ftxui::Elements CTerminalUI::GetElementsSensorGroups(
   return elements;
 }
 
+/**
+ * @brief Returns a ftxui::Element based on a sensor, measured value, and
+ * process id. Thus, creates the ftxui::Element
+ */
 ftxui::Element CTerminalUI::GetElement(const Measurements::SSensors &sensor,
-                                       const double &item, const int processId)
+                                       const double &measuredValue,
+                                       const int processId)
 {
-  double value = GetPercentage(sensor.userData, item);
-  std::string name;
-  if (processId == -1)
-    name = sensor.userId;
-  else
-    name = std::to_string(processId) + "." + sensor.userId;
+  double value = GetPercentage(sensor.userData, measuredValue);
+  std::string name = processId == -1
+                         ? sensor.userId
+                         : std::to_string(processId) + "." + sensor.userId;
 
   std::string fullValue =
-      std::to_string(item * sensor.multiplier) + " " + sensor.suffix;
+      std::to_string(measuredValue * sensor.multiplier) + " " + sensor.suffix;
 
   return ftxui::hbox(
       {ftxui::text(name) | ftxui::border,
@@ -128,7 +116,6 @@ ftxui::Element CTerminalUI::GetElement(const Measurements::SSensors &sensor,
            ftxui::border | ftxui::flex,
        ftxui::text(fullValue) | ftxui::border});
 }
-void CTerminalUI::FinishLiveMeasurements() {}
 
 /**
  * @brief Get percentage between 0 and 1 (where 1 = 100% and 0 = 0%)
@@ -140,6 +127,13 @@ double CTerminalUI::GetPercentage(const PlatformConfig::SDatafields &datafield,
   auto range = datafield.maximumValue - datafield.minimumValue;
   return (corrected - datafield.minimumValue) / (range);
 }
+
+/**
+ * @brief Get the color of a bar based on the ID
+ *
+ * @param id the unique ID of a measurement
+ * @return ftxui::Color the color of the bar
+ */
 ftxui::Color CTerminalUI::GetColor(const int id)
 {
   auto res = colorMap_.find(id);

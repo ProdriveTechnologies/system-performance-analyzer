@@ -8,14 +8,13 @@
 
 namespace Exports
 {
-bool CGraphs::FullExport(
-    [[maybe_unused]] const std::vector<SMeasurementItem> &config,
-    [[maybe_unused]] const FullMeasurement data, const AllSensors &allSensors,
-    [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>
-        &correlations)
+bool CGraphs::FullExport([[maybe_unused]] const std::vector<SMeasurementItem>& config,
+                         [[maybe_unused]] const FullMeasurement data,
+                         const AllSensors& allSensors,
+                         [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>& correlations)
 {
   allSensors_ = allSensors;
-  for (const auto &e : correlations)
+  for (const auto& e : correlations)
   {
     if (std::abs(e.correlation) >= Globals::strongCorrelation)
       CreateGraph(e.sensor1, e.sensor2);
@@ -24,13 +23,11 @@ bool CGraphs::FullExport(
   return true;
 }
 
-void CGraphs::CreateGraph(const Measurements::SSensors &sensor1,
-                          const Measurements::SSensors &sensor2)
+void CGraphs::CreateGraph(const Measurements::SSensors& sensor1, const Measurements::SSensors& sensor2)
 {
-  FILE *pipe_gp = popen("gnuplot", "w");
+  FILE* pipe_gp = popen("gnuplot", "w");
   fputs("set terminal png \n", pipe_gp);
-  std::string outputStr = "set output 'graphs/" + sensor1.userId + " + " +
-                          sensor2.userId + ".png' \n";
+  std::string outputStr = "set output 'graphs/" + sensor1.userId + " + " + sensor2.userId + ".png' \n";
   fputs(outputStr.c_str(), pipe_gp);
   //   fputs("set xlabel 'f' \n", pipe_gp);
   fputs("set datafile separator ','\n", pipe_gp);
@@ -46,9 +43,8 @@ void CGraphs::CreateGraph(const Measurements::SSensors &sensor1,
   classification = allSensors_.GetClassification(sensor2.uniqueId);
   std::string sensor2file = GetFileName(classification);
 
-  std::string plotStr = "plot '" + sensor1file + "' using 'time':'" + plot1 +
-                        "' with lines axis x1y1, '" + sensor2file +
-                        "' using 'time':'" + plot2 +
+  std::string plotStr = "plot '" + sensor1file + "' using 'time':'" + plot1 + "' with lines axis x1y1, '" +
+                        sensor2file + "' using 'time':'" + plot2 +
                         "' "
                         "with lines axis x1y2 \n";
 

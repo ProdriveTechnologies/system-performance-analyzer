@@ -6,55 +6,55 @@
 namespace Measurements
 {
 /**
- * @brief Get the Correlation object
+ * @brief Calculate the Correlation
  *
- * @param allSensors
- * @param measuredData
- * Steps to execute:
+ * What this function does:
  * 1. Create evenly length vectors with a pair <double measurement, bool
  * isMeasured> for all measurements
  * 1.1 Separate these vectors between performance vectors and non-performance
  * vectors
  *
- *  2. Loop through all the vectors and create all combinations of performance &
- * resource usage
+ * 2. Loop through all the vectors and create all combinations of performance &
+ * resource usage (to calculate the correlation between them)
  *
- *  3. When having 2 vectors (one performance and one resource usage), remove
+ * 3. When having 2 vectors (one performance and one resource usage), remove
  * all measurements where isMeasured=false (also remove the same index in the
- * other vector). The result are equal sized vectors with all isMeasurement=true
+ * other vector). The result are equal sized vectors with all isMeasured=true
+ * The isMeasured should be true in both vectors because measurements on the
+ * same timeframe can be compared (one measurement at T=0s and one at T=1s
+ * cannot be reliably compared, as the situation could differ between these
+ * timeframes)
  *
- *  4. Execute the correlation function, but only if the vectors have size>1
- * (size=1 is useless)
  *
- *  5. Store the correlation result of -1 <= correlation <= 1
+ * 4. Execute the correlation function, but only if the vectors have
+ * size > minimumCorrelationSize_ (the bigger the size, the more accurate the
+ * correlation measurement is, a minimum correlation size of 10 is recommended)
+ *
+ * 5. Store (and return) the correlation result of -1 <= correlation <= 1
  */
 std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
-    const Measurements::SAllSensors &allSensors,
-    const std::vector<Measurements::SMeasurementsData> *measuredData,
-    const bool enablePretestZeroes)
+  const Measurements::SAllSensors& allSensors,
+  const std::vector<Measurements::SMeasurementsData>* measuredData,
+  const bool enablePretestZeroes)
 {
-  auto equalVectorsPerf = CreateEqualSizedVectors(allSensors, measuredData,
-                                                  true, enablePretestZeroes);
-  auto equalVectorsRsc = CreateEqualSizedVectors(allSensors, measuredData,
-                                                 false, enablePretestZeroes);
+  auto equalVectorsPerf = CreateEqualSizedVectors(allSensors, measuredData, true, enablePretestZeroes);
+  auto equalVectorsRsc = CreateEqualSizedVectors(allSensors, measuredData, false, enablePretestZeroes);
   std::vector<SResult> correlationResults;
 
-  for (const auto &rscVector : equalVectorsRsc)
+  for (const auto& rscVector : equalVectorsRsc)
   {
-    for (const auto &perfVector : equalVectorsPerf)
+    for (const auto& perfVector : equalVectorsPerf)
     {
-      const auto &[rscVectorCorrected, perfVectorCorrected] =
-          RemoveNotMeasured(rscVector, perfVector);
+      const auto& [rscVectorCorrected, perfVectorCorrected] = RemoveNotMeasured(rscVector, perfVector);
 
-      const auto &rawRscVec = ConvertToRaw(rscVectorCorrected);
-      const auto &rawPerfVec = ConvertToRaw(perfVectorCorrected);
-      if (rawRscVec.size() >= 10)
+      const auto& rawRscVec = ConvertToRaw(rscVectorCorrected);
+      const auto& rawPerfVec = ConvertToRaw(perfVectorCorrected);
+      if (rawRscVec.size() >= minimumCorrelationSize_)
       {
         SResult correlationResult;
         correlationResult.sensor1 = perfVectorCorrected.sensor;
         correlationResult.sensor2 = rscVectorCorrected.sensor;
-        correlationResult.correlation =
-            GetCorrelationCoefficient(rawRscVec, rawPerfVec);
+        correlationResult.correlation = GetCorrelationCoefficient(rawRscVec, rawPerfVec);
         correlationResults.push_back(correlationResult);
       }
     }
@@ -69,33 +69,32 @@ std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
  * 1. Loop through all measurements
  * 2. Make a vector for each measurement
  */
-std::vector<CCorrelation::SSensorMeasurements>
-CCorrelation::CreateEqualSizedVectors(
-    const Measurements::SAllSensors &allSensors,
-    const std::vector<Measurements::SMeasurementsData> *measuredData,
-    const bool isPerformanceMetric, const bool enablePretestZeroes)
+std::vector<CCorrelation::SSensorMeasurements> CCorrelation::CreateEqualSizedVectors(
+  const Measurements::SAllSensors& allSensors,
+  const std::vector<Measurements::SMeasurementsData>* measuredData,
+  const bool isPerformanceMetric,
+  const bool enablePretestZeroes)
 {
   std::vector<CCorrelation::SSensorMeasurements> allCorrelations;
 
-  for (const auto &classification : allSensors.allClasses)
+  for (const auto& classification : allSensors.allClasses)
   {
-    for (const auto &sensorGroup : allSensors.GetSensorGroups(classification))
+    for (const auto& sensorGroup : allSensors.GetSensorGroups(classification))
     {
-      auto equalSizedVector =
-          GetSensors(sensorGroup.sensors, isPerformanceMetric);
+      auto equalSizedVector = GetSensors(sensorGroup.sensors, isPerformanceMetric);
 
       // Loop through all the sensors and add all the values
-      for (auto &sensor : equalSizedVector)
+      for (auto& sensor : equalSizedVector)
       {
         // Loop through all the raw measurements and add them to the correct
         // sensor
-        for (auto &measurement : *measuredData)
+        for (auto& measurement : *measuredData)
         {
           SSensorMeasurements::SMeasurement resMeasurement;
           auto measurementGroup = measurement.GetItems(classification);
           // Loop through all the measured fields and find the one equal to
           // sensor
-          for (const auto &field : measurementGroup)
+          for (const auto& field : measurementGroup)
           {
             if (field.id == sensor.sensor.uniqueId)
             {
@@ -115,60 +114,26 @@ CCorrelation::CreateEqualSizedVectors(
         }
       }
 
-      allCorrelations =
-          Helpers::CombineVectors(allCorrelations, equalSizedVector);
+      allCorrelations = Helpers::CombineVectors(allCorrelations, equalSizedVector);
     }
   }
-
-  // resultPipeline = CreateEqualSizedVector(
-  //     allSensors.GetSensorGroups(Classification::PIPELINE), measuredData,
-  //     isPerformanceMetric);
-  // Loop through all the sensors and add all the values
-  // for (auto &sensor : resultPipeline)
-  // {
-  //   // Loop through all the raw measurements and add them to the correct
-  //   sensor for (auto &measurement : *measuredData)
-  //   {
-  //     SSensorMeasurements::SMeasurement resMeasurement;
-  //     // Loop through all the measured fields and find the one equal to
-  //     // sensor
-  //     for (const auto &pipeline : measurement.pipelineInfo)
-  //     {
-  //       for (const auto &field : pipeline.measuredItems)
-  //       {
-  //         if (field.id == sensor.sensor.uniqueId)
-  //           resMeasurement.AddItem(field);
-  //       }
-  //       // Stop checking the other pipelines if found
-  //       if (resMeasurement.isMeasured)
-  //         break;
-  //     }
-  //     if (!resMeasurement.isMeasured)
-  //     {
-  //       // TODO add the not started functionality here
-  //       // if (measurement.time < resultPipeline)
-  //     }
-  //     sensor.rawMeasurements.push_back(resMeasurement);
-  //   }
-  // }
   return allCorrelations;
 }
 
-std::vector<CCorrelation::SSensorMeasurements>
-CCorrelation::GetSensors(const Measurements::SAllSensors &allSensors,
-                         const Measurements::EClassification classification,
-                         const bool isPerformanceMetric)
+std::vector<CCorrelation::SSensorMeasurements> CCorrelation::GetSensors(
+  const Measurements::SAllSensors& allSensors,
+  const Measurements::EClassification classification,
+  const bool isPerformanceMetric)
 {
   auto sensors = allSensors.GetSensors(classification);
   return GetSensors(sensors, isPerformanceMetric);
 }
 
-std::vector<CCorrelation::SSensorMeasurements>
-CCorrelation::GetSensors(const std::vector<SSensors> &sensors,
-                         const bool isPerformanceMetric)
+std::vector<CCorrelation::SSensorMeasurements> CCorrelation::GetSensors(const std::vector<SSensors>& sensors,
+                                                                        const bool isPerformanceMetric)
 {
   std::vector<SSensorMeasurements> result;
-  for (const auto &sensor : sensors)
+  for (const auto& sensor : sensors)
   {
     if (sensor.performanceIndicator == isPerformanceMetric)
     {
@@ -179,55 +144,6 @@ CCorrelation::GetSensors(const std::vector<SSensors> &sensors,
   }
   return result;
 }
-
-// std::vector<CCorrelation::SSensorMeasurements>
-// CCorrelation::CreateEqualSizedVector(
-//     const std::vector<Measurements::AllSensors::SensorGroups> &sensorGroups,
-//     const std::vector<Measurements::SMeasurementsData> *measuredData,
-//     const bool isPerformanceMetric)
-// {
-//   std::vector<CCorrelation::SSensorMeasurements> result;
-//   // Loop through all the sensors and add all the values
-//   for (auto &sensorGroup : sensorGroups)
-//   {
-//     std::vector<CCorrelation::SSensorMeasurements> sensors =
-//         GetSensors(sensorGroup.sensors, isPerformanceMetric);
-//     // Loop through all the raw measurements and add them to the correct
-//     // sensor
-//     for (auto &sensor : sensors)
-//     {
-//       for (auto &measurement : *measuredData)
-//       {
-//         SSensorMeasurements::SMeasurement resMeasurement;
-//         // Loop through all the measured fields and find the one equal to
-//         // sensor
-//         for (const auto &pipeline : measurement.pipelineInfo)
-//         {
-//           for (const auto &field : pipeline.measuredItems)
-//           {
-//             if (field.id == sensor.sensor.uniqueId)
-//               resMeasurement.AddItem(field);
-//           }
-//           // Stop checking the other pipelines if found
-//           if (resMeasurement.isMeasured)
-//             break;
-//         }
-//         // if (!resMeasurement.isMeasured)
-//         // {
-//         //   // TODO add the not started functionality here
-//         //   if (std::stoll(measurement.time) < sensorGroup.processDelay)
-//         //   {
-//         //     resMeasurement.isMeasured = true;
-//         //     resMeasurement.item.measuredValue = 0;
-//         //   }
-//         // }
-//         sensor.rawMeasurements.push_back(resMeasurement);
-//       }
-//     }
-//     result = Helpers::CombineVectors(result, sensors);
-//   }
-//   return result;
-// }
 
 /**
  * @brief Calculates the Pearson correlation coefficient
@@ -243,13 +159,11 @@ CCorrelation::GetSensors(const std::vector<SSensors> &sensors,
  * as a fraction. The higher the value, the more correlated the data is or the
  * lower the value, the higher the inversed correlation is
  */
-double CCorrelation::GetCorrelationCoefficient(const std::vector<double> &arrU,
-                                               const std::vector<double> &arrV)
+double CCorrelation::GetCorrelationCoefficient(const std::vector<double>& arrU, const std::vector<double>& arrV)
 {
   if (arrU.size() != arrV.size())
   {
-    throw std::runtime_error(
-        "Correlation failed! Vectors are not equal length!");
+    throw std::runtime_error("Correlation failed! Vectors are not equal length!");
   }
 
   double sum_U = 0, sum_V = 0, sum_UV = 0;
@@ -275,17 +189,16 @@ double CCorrelation::GetCorrelationCoefficient(const std::vector<double> &arrU,
   }
   // use formula for calculating correlation coefficient.
   double corr = ((arrLength * sum_UV) - (sum_U * sum_V)) /
-                sqrt(((arrLength * squareSum_U) - (sum_U * sum_U)) *
-                     ((arrLength * squareSum_V) - (sum_V * sum_V)));
+                sqrt(((arrLength * squareSum_U) - (sum_U * sum_U)) * ((arrLength * squareSum_V) - (sum_V * sum_V)));
 
   return corr;
 }
 
-std::pair<CCorrelation::SSensorMeasurements, CCorrelation::SSensorMeasurements>
-CCorrelation::RemoveNotMeasured(const SSensorMeasurements &vec1,
-                                const SSensorMeasurements &vec2)
+std::pair<CCorrelation::SSensorMeasurements, CCorrelation::SSensorMeasurements> CCorrelation::RemoveNotMeasured(
+  const SSensorMeasurements& vec1,
+  const SSensorMeasurements& vec2)
 {
-  auto GetRemoveIndexes = [](const SSensorMeasurements &vec) {
+  auto GetRemoveIndexes = [](const SSensorMeasurements& vec) {
     std::set<int, std::greater<int>> indexesToBeRemoved;
     for (size_t i = 0; i < vec.rawMeasurements.size(); ++i)
     {
@@ -298,12 +211,11 @@ CCorrelation::RemoveNotMeasured(const SSensorMeasurements &vec1,
   auto indexesToRemove = GetRemoveIndexes(vec1);
   indexesToRemove.merge(GetRemoveIndexes(vec2));
 
-  auto RemoveIndexes = [](const SSensorMeasurements &vec,
-                          const std::set<int, std::greater<int>> &indexes) {
+  auto RemoveIndexes = [](const SSensorMeasurements& vec, const std::set<int, std::greater<int>>& indexes) {
     auto vecCpy = vec.rawMeasurements;
     // Start with removal of the largest index, therefore the set is ordered
     // with std::greater
-    for (const auto &index : indexes)
+    for (const auto& index : indexes)
     {
       auto deleteIndex = vecCpy.begin() + index;
       vecCpy.erase(deleteIndex);
@@ -317,10 +229,10 @@ CCorrelation::RemoveNotMeasured(const SSensorMeasurements &vec1,
   return std::make_pair(vec1rm, vec2rm);
 }
 
-std::vector<double> CCorrelation::ConvertToRaw(const SSensorMeasurements &vec1)
+std::vector<double> CCorrelation::ConvertToRaw(const SSensorMeasurements& vec1)
 {
   std::vector<double> result;
-  for (const auto &e : vec1.rawMeasurements)
+  for (const auto& e : vec1.rawMeasurements)
   {
     result.push_back(e.item.measuredValue);
   }

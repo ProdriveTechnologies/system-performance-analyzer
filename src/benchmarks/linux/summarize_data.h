@@ -11,9 +11,14 @@ namespace Measurements
 class CSummarizeData
 {
 public:
-  CSummarizeData() : useSteadyState_{false}, multiplier_{1.0} {}
+  CSummarizeData()
+  : useSteadyState_{ false }
+  , multiplier_{ 1.0 }
+  {
+  }
   CSummarizeData(const bool useSteadyState)
-      : useSteadyState_{useSteadyState}, multiplier_{1.0}
+  : useSteadyState_{ useSteadyState }
+  , multiplier_{ 1.0 }
   {
   }
   void SetMultiplier(const double multiplier) { multiplier_ = multiplier; }
@@ -28,14 +33,12 @@ public:
     // There must be a datapoint to add sensible data
     if (average_.datapoints != 0)
     {
+      sensorData.summarizedValues.push_back(SSensorData::SMeasureValue{ EValueTypes::MIN, GetMin() * multiplier_ });
+      sensorData.summarizedValues.push_back(SSensorData::SMeasureValue{ EValueTypes::MAX, GetMax() * multiplier_ });
       sensorData.summarizedValues.push_back(
-          SSensorData::SMeasureValue{EValueTypes::MIN, GetMin() * multiplier_});
+        SSensorData::SMeasureValue{ EValueTypes::AVERAGE, average_.Get() * multiplier_ });
       sensorData.summarizedValues.push_back(
-          SSensorData::SMeasureValue{EValueTypes::MAX, GetMax() * multiplier_});
-      sensorData.summarizedValues.push_back(SSensorData::SMeasureValue{
-          EValueTypes::AVERAGE, average_.Get() * multiplier_});
-      sensorData.summarizedValues.push_back(SSensorData::SMeasureValue{
-          EValueTypes::MEDIAN, GetMedian() * multiplier_});
+        SSensorData::SMeasureValue{ EValueTypes::MEDIAN, GetMedian() * multiplier_ });
     }
     return sensorData;
   }
@@ -54,10 +57,7 @@ private:
       aggregatedData += item.measuredValue;
       datapoints += 1;
     }
-    double Get() const
-    {
-      return datapoints != 0 ? aggregatedData / datapoints : 0;
-    }
+    double Get() const { return datapoints != 0 ? aggregatedData / datapoints : 0; }
   };
   Average average_;
   std::vector<double> allMeasurements_;
@@ -85,9 +85,7 @@ private:
   inline bool IsEven(int value) const { return (value % 2) == 0; }
   double GetMedian() const
   {
-    auto sortFunction = [](const double &lhs, const double &rhs) {
-      return lhs < rhs;
-    };
+    auto sortFunction = [](const double& lhs, const double& rhs) { return lhs < rhs; };
     if (!allMeasurements_.empty())
     {
       std::vector<double> sorted = allMeasurements_;

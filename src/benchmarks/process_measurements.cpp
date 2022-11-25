@@ -2,18 +2,16 @@
 
 #include "linux/xavier_sensors.h"
 #include "src/benchmarks/linux/performance_helpers.h"
-#include "src/json_config/sensor_config/config_parser.h"
-
 #include "src/benchmarks/linux/struct_sensors.h"
-
+#include "src/json_config/sensor_config/config_parser.h"
 #include "src/linux/datahandlers/direct_handler.h"
 #include "src/linux/datahandlers/pidstat_handler.h"
 #include "src/linux/datahandlers/pidstatm_handler.h"
 
 namespace Measurements
 {
-CProcessMeasurements::CProcessMeasurements(const std::string &configFile)
-    : configFile_{configFile}
+CProcessMeasurements::CProcessMeasurements(const std::string& configFile)
+: configFile_{ configFile }
 {
 }
 
@@ -22,17 +20,15 @@ CProcessMeasurements::CProcessMeasurements(const std::string &configFile)
  *
  * @param allData
  */
-void CProcessMeasurements::Initialize(
-    std::vector<Measurements::SMeasurementsData> *allData,
-    std::vector<Linux::RunProcess *> processes)
+void CProcessMeasurements::Initialize(std::vector<Measurements::SMeasurementsData>* allData,
+                                      std::vector<Linux::RunProcess*> processes)
 {
   SetDataHandlers();
   processes_ = processes;
   allData_ = allData;
   auto parsed = PlatformConfig::Parse(configFile_);
 
-  auto measureFields =
-      GetFields(parsed.sensors, &CProcessMeasurements::GetMeasureFields, this);
+  auto measureFields = GetFields(parsed.sensors, &CProcessMeasurements::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
   measureFieldsDefinition_ = measureFields.definition;
   SetProcesses(); // Get the PIDs of the applications so they can be checked
@@ -44,15 +40,12 @@ void CProcessMeasurements::Initialize(
 
 void CProcessMeasurements::SetDataHandlers()
 {
-  dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::ETypes::DIRECT_PID,
-      std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
-  dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::ETypes::PID_STAT,
-      std::make_unique<Linux::CPidStatHandler>(Linux::CPidStatHandler())});
-  dataHandlers_.push_back(Linux::SDataHandlers{
-      PlatformConfig::ETypes::PID_STATM,
-      std::make_unique<Linux::CPidStatmHandler>(Linux::CPidStatmHandler())});
+  dataHandlers_.push_back(Linux::SDataHandlers{ PlatformConfig::ETypes::DIRECT_PID,
+                                                std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler()) });
+  dataHandlers_.push_back(Linux::SDataHandlers{ PlatformConfig::ETypes::PID_STAT,
+                                                std::make_unique<Linux::CPidStatHandler>(Linux::CPidStatHandler()) });
+  dataHandlers_.push_back(Linux::SDataHandlers{ PlatformConfig::ETypes::PID_STATM,
+                                                std::make_unique<Linux::CPidStatmHandler>(Linux::CPidStatmHandler()) });
 }
 
 Exports::SMeasurementItem CProcessMeasurements::GetConfig() const
@@ -64,17 +57,16 @@ Exports::SMeasurementItem CProcessMeasurements::GetConfig() const
   return config;
 }
 
-std::vector<Exports::SMeasurementItem>
-CProcessMeasurements::GetMeasurementFields() const
+std::vector<Exports::SMeasurementItem> CProcessMeasurements::GetMeasurementFields() const
 {
   std::vector<Exports::SMeasurementItem> result;
-  for (const auto &process : processIds_)
+  for (const auto& process : processIds_)
   {
     Exports::SMeasurementItem processInfo;
     processInfo.name = std::to_string(process.processId);
     processInfo.type = Exports::EType::ARRAY;
     std::vector<Exports::SMeasurementItem> datapoints;
-    for (const auto &e : measureFieldsDefinition_)
+    for (const auto& e : measureFieldsDefinition_)
     {
       Exports::SMeasurementItem config;
       config.name = e.name;
@@ -89,33 +81,33 @@ CProcessMeasurements::GetMeasurementFields() const
   return result;
 }
 
-std::vector<SAllSensors::SSensorGroups>
-CProcessMeasurements::GetSensors(const bool summarizeData) const
+std::vector<SAllSensors::SSensorGroups> CProcessMeasurements::GetSensors(const bool summarizeData) const
 {
   std::vector<SAllSensors::SSensorGroups> result;
 
-  for (const auto &e : processIds_)
+  for (const auto& e : processIds_)
   {
     SAllSensors::SSensorGroups sensorGroup;
     sensorGroup.processId = e.userProcessId;
     sensorGroup.processDelay = GetProcessDelay(e.userProcessId);
 
-    for (const auto &datafield : measureFieldsDefinition_)
+    for (const auto& datafield : measureFieldsDefinition_)
     {
       try
       {
-        SSensors sensor{datafield};
+        SSensors sensor{ datafield };
         sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
         if (summarizeData)
         {
-          sensor.data = PerformanceHelpers::GetSummarizedData(
-              Measurements::EClassification::PROCESSES, allData_,
-              sensor.uniqueId, sensor.multiplier);
+          sensor.data = PerformanceHelpers::GetSummarizedData(Measurements::EClassification::PROCESSES,
+                                                              allData_,
+                                                              sensor.uniqueId,
+                                                              sensor.multiplier);
         }
 
         sensorGroup.sensors.push_back(sensor);
       }
-      catch (const std::exception &error)
+      catch (const std::exception& error)
       {
         ; // Ignore the error and don't add the sensor
       }
@@ -133,7 +125,7 @@ CProcessMeasurements::GetSensors(const bool summarizeData) const
  */
 int CProcessMeasurements::GetProcessDelay(const int processId) const
 {
-  for (const auto &e : processes_)
+  for (const auto& e : processes_)
   {
     if (e->GetUserProcessId() == processId)
     {
@@ -144,20 +136,18 @@ int CProcessMeasurements::GetProcessDelay(const int processId) const
 }
 
 std::vector<Exports::SMeasurementItem> CProcessMeasurements::GetDefinitionItems(
-    const PlatformConfig::SDatafields &field, const int processId) const
+  const PlatformConfig::SDatafields& field,
+  const int processId) const
 {
   std::vector<Exports::SMeasurementItem> result;
   auto item1 =
-      Exports::SMeasurementItem{"Label", Exports::EType::LABEL,
-                                std::to_string(processId) + "." + field.name};
+    Exports::SMeasurementItem{ "Label", Exports::EType::LABEL, std::to_string(processId) + "." + field.name };
   result.push_back(item1);
-  auto item2 =
-      Exports::SMeasurementItem{"Unique ID", Exports::EType::INFO, field.id};
+  auto item2 = Exports::SMeasurementItem{ "Unique ID", Exports::EType::INFO, field.id };
   result.push_back(item2);
   if (!field.path.empty())
   {
-    auto item3 =
-        Exports::SMeasurementItem{"Path", Exports::EType::INFO, field.path};
+    auto item3 = Exports::SMeasurementItem{ "Path", Exports::EType::INFO, field.path };
     result.push_back(item3);
   }
   return result;
@@ -165,11 +155,10 @@ std::vector<Exports::SMeasurementItem> CProcessMeasurements::GetDefinitionItems(
 
 void CProcessMeasurements::SetProcesses()
 {
-  for (const auto &process : processes_)
+  for (const auto& process : processes_)
   {
-    processIds_.push_back(ProcessDef{process->GetThreadPid(),
-                                     process->GetProcessName(), true,
-                                     process->GetUserProcessId()});
+    processIds_.push_back(
+      ProcessDef{ process->GetThreadPid(), process->GetProcessName(), true, process->GetUserProcessId() });
   }
 }
 
@@ -181,20 +170,18 @@ void CProcessMeasurements::SetProcesses()
  *
  * @return std::vector<Measurements::SMeasuredItem>
  */
-std::vector<Measurements::SMeasurementGroup>
-CProcessMeasurements::GetMeasurements()
+std::vector<Measurements::SMeasurementGroup> CProcessMeasurements::GetMeasurements()
 {
   std::vector<Measurements::SMeasurementGroup> measuredItems;
   // 1. Loop through each PID
-  for (auto &process : processIds_)
+  for (auto& process : processIds_)
   {
     if (!process.active)
       continue;
     Measurements::SMeasurementGroup processData;
     processData.pipelineId = process.processId;
     auto pidReplacement = std::to_string(process.processId);
-    auto returnSuccess =
-        dataHandler_.ParseMeasurements(pidReplacement, process.processId);
+    auto returnSuccess = dataHandler_.ParseMeasurements(pidReplacement, process.processId);
     if (returnSuccess)
     {
       processData.measuredItems = dataHandler_.GetMeasurements();
@@ -219,7 +206,7 @@ Linux::FileSystem::Stat CProcessMeasurements::GetProcStat(const int procId)
 }
 void CProcessMeasurements::SetInactive(const int processId)
 {
-  for (auto &e : processIds_)
+  for (auto& e : processIds_)
   {
     if (e.processId == processId)
       e.active = false;
@@ -227,23 +214,19 @@ void CProcessMeasurements::SetInactive(const int processId)
 }
 
 CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
-    std::vector<PlatformConfig::SDatafields> &sensorConfig,
-    const std::function<MeasureCombo(CProcessMeasurements *,
-                                     const PlatformConfig::SDatafields &)>
-        parserFunction,
-    CProcessMeasurements *memberPtr)
+  std::vector<PlatformConfig::SDatafields>& sensorConfig,
+  const std::function<MeasureCombo(CProcessMeasurements*, const PlatformConfig::SDatafields&)> parserFunction,
+  CProcessMeasurements* memberPtr)
 {
   MeasureCombo result;
 
-  std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField) {
-                  result.Add(parserFunction(memberPtr, dataField));
-                });
+  std::for_each(sensorConfig.begin(), sensorConfig.end(), [&](const PlatformConfig::SDatafields& dataField) {
+    result.Add(parserFunction(memberPtr, dataField));
+  });
 
   return result;
 }
-CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(
-    const PlatformConfig::SDatafields &dataField)
+CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(const PlatformConfig::SDatafields& dataField)
 {
   MeasureCombo result;
 
@@ -272,17 +255,16 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(
   return result;
 }
 
-CProcessMeasurements::MeasureCombo
-CProcessMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
+CProcessMeasurements::MeasureCombo CProcessMeasurements::ParseArray(const PlatformConfig::SDatafields& data)
 {
   MeasureCombo result;
   // Loop through the defined array
   for (size_t i = 0; i < data.size; ++i)
   {
     // Adjust all variables that are defined within the array
-    for (const auto &e : data.datafields)
+    for (const auto& e : data.datafields)
     {
-      auto datafieldCopy{e};
+      auto datafieldCopy{ e };
       Helpers::replaceStr(datafieldCopy.path, "$INDEX$", std::to_string(i));
       datafieldCopy.nameClass = datafieldCopy.name;
       datafieldCopy.name = datafieldCopy.name + std::to_string(i);
@@ -292,8 +274,7 @@ CProcessMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
   return result;
 }
 
-CProcessMeasurements::MeasureComboSingular
-CProcessMeasurements::ParseField(const PlatformConfig::SDatafields &data)
+CProcessMeasurements::MeasureComboSingular CProcessMeasurements::ParseField(const PlatformConfig::SDatafields& data)
 {
   MeasureComboSingular result;
   result.field.path = data.path;

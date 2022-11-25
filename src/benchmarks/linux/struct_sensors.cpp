@@ -15,12 +15,11 @@ std::string ToString(const EValueTypes t)
   case EValueTypes::MEDIAN:
     return "median";
   default:
-    throw std::runtime_error(
-        "ValueTypes not recognised in Measurements::EValueTypes!");
+    throw std::runtime_error("ValueTypes not recognised in Measurements::EValueTypes!");
   }
 }
 
-size_t SensorIdHash::operator()(const Measurements::SensorIdentifier &k) const
+size_t SensorIdHash::operator()(const Measurements::SensorIdentifier& k) const
 {
   // computes the hash of a Measurements::SensorIdentifier using a variant
   // of the Fowler-Noll-Vo hash function
@@ -45,8 +44,7 @@ size_t SensorIdHash::operator()(const Measurements::SensorIdentifier &k) const
  * @return std::vector<Sensors> the sensors of the wanted pipeline/group
  * or all pipelines combined
  */
-std::vector<SSensors> SAllSensors::GetSensors(const EClassification c,
-                                              const int processId) const
+std::vector<SSensors> SAllSensors::GetSensors(const EClassification c, const int processId) const
 {
   auto group = data.find(c);
   if (group != data.end())
@@ -54,7 +52,7 @@ std::vector<SSensors> SAllSensors::GetSensors(const EClassification c,
     if (processId == -1 && group->second.size() == 1)
       return group->second.front().sensors;
     std::vector<SSensors> allPipelines;
-    for (const auto &e : group->second)
+    for (const auto& e : group->second)
     {
       if (processId == -1)
         allPipelines = Helpers::CombineVectors(allPipelines, e.sensors);
@@ -69,10 +67,10 @@ std::vector<SSensors> SAllSensors::GetSensors(const EClassification c,
 
 EClassification SAllSensors::GetClassification(const int uniqueId) const
 {
-  for (const auto &classification : allClasses)
+  for (const auto& classification : allClasses)
   {
     auto sensors = GetSensors(classification);
-    for (const auto &sensor : sensors)
+    for (const auto& sensor : sensors)
     {
       if (uniqueId == sensor.uniqueId)
         return classification;
@@ -87,9 +85,9 @@ EClassification SAllSensors::GetClassification(const int uniqueId) const
 std::unordered_set<int> SAllSensors::GetProcesses() const
 {
   std::unordered_set<int> result;
-  for (const auto &[classifier, sensors] : data)
+  for (const auto& [classifier, sensors] : data)
   {
-    for (const auto &processSensors : sensors)
+    for (const auto& processSensors : sensors)
     {
       result.insert(processSensors.processId);
     }
@@ -97,16 +95,13 @@ std::unordered_set<int> SAllSensors::GetProcesses() const
   return result;
 }
 
-void SAllSensors::AddSensors(const EClassification c,
-                             const std::vector<SSensors> &sensors,
-                             const int processId)
+void SAllSensors::AddSensors(const EClassification c, const std::vector<SSensors>& sensors, const int processId)
 {
-  SSensorGroups sensorGroup{processId, sensors};
-  AddSensors(c, {sensorGroup});
+  SSensorGroups sensorGroup{ processId, sensors };
+  AddSensors(c, { sensorGroup });
 }
 
-void SAllSensors::AddSensors(const EClassification c,
-                             const std::vector<SSensorGroups> &sensors)
+void SAllSensors::AddSensors(const EClassification c, const std::vector<SSensorGroups>& sensors)
 {
   auto existingGroup = data.find(c);
 
@@ -115,7 +110,7 @@ void SAllSensors::AddSensors(const EClassification c,
     // Group already exists, overwriting old data with new sensorgroups
     existingGroup->second = sensors;
     // And adding the values to the internal map as well
-    for (auto &e : existingGroup->second)
+    for (auto& e : existingGroup->second)
       AddMapValues(&mapByProcessId, &e.sensors, e.processId);
   }
   else
@@ -123,12 +118,11 @@ void SAllSensors::AddSensors(const EClassification c,
     // Group does not exist, thus create the group
     data.insert(std::make_pair(c, sensors));
     allClasses.push_back(c);
-    for (auto &e : data.find(c)->second)
+    for (auto& e : data.find(c)->second)
       AddMapValues(&mapByProcessId, &e.sensors, e.processId);
   }
 }
-std::vector<SAllSensors::SSensorGroups>
-SAllSensors::GetSensorGroups(const EClassification classification) const
+std::vector<SAllSensors::SSensorGroups> SAllSensors::GetSensorGroups(const EClassification classification) const
 {
   auto sensorGroup = data.find(classification);
   if (sensorGroup == data.end())
@@ -144,9 +138,7 @@ SAllSensors::SensorMap SAllSensors::GetMap(const int processId) const
   }
   return mapResult->second;
 }
-void SAllSensors::AddMapValues(SensorMapByProcess *mapObj,
-                               std::vector<SSensors> *sensors,
-                               const int processId) const
+void SAllSensors::AddMapValues(SensorMapByProcess* mapObj, std::vector<SSensors>* sensors, const int processId) const
 {
   auto mapResult = mapObj->find(processId);
   if (mapResult == mapObj->end())
@@ -154,7 +146,7 @@ void SAllSensors::AddMapValues(SensorMapByProcess *mapObj,
     mapObj->insert(std::make_pair(processId, SensorMap{}));
     mapResult = mapObj->find(processId);
   }
-  for (auto &e : *sensors)
+  for (auto& e : *sensors)
   {
     mapResult->second.insert(std::make_pair(e.userId, &e));
   }

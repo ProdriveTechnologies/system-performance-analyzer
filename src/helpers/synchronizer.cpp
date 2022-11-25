@@ -3,14 +3,16 @@
 #include <thread>
 
 Synchronizer::Synchronizer(const size_t threadNr)
-    : processRunning_{false}, threadNr_{threadNr}, waitForProcessId_{0},
-      threadReadyCount_{0}
+: processRunning_{ false }
+, threadNr_{ threadNr }
+, waitForProcessId_{ 0 }
+, threadReadyCount_{ 0 }
 {
 }
 
 void Synchronizer::WaitForProcess()
 {
-  std::unique_lock<std::mutex> lk{processReadyMtx_};
+  std::unique_lock<std::mutex> lk{ processReadyMtx_ };
   threadReadyCount_++;                   // Not synchronized yet
   int waitProcessId = waitForProcessId_; // Make a copy of the ID to wait for
   if (threadReadyCount_ == threadNr_)
@@ -22,9 +24,7 @@ void Synchronizer::WaitForProcess()
     conditionVar_.notify_all();
     return;
   }
-  conditionVar_.wait(lk, [this, waitProcessId] {
-    return waitProcessId == (waitForProcessId_ - 1);
-  });
+  conditionVar_.wait(lk, [this, waitProcessId] { return waitProcessId == (waitForProcessId_ - 1); });
 }
 
 bool Synchronizer::AllCompleted()

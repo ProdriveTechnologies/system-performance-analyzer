@@ -9,29 +9,24 @@
  * adjusted. And it can be checked if the timer has already been elapsed.
  *
  */
-template <typename Rep = int64_t, typename TimeType = std::milli> class Timer
+template <typename Rep = int64_t, typename TimeType = std::milli>
+class Timer
 {
 public:
   Timer(const std::chrono::duration<Rep, TimeType> timerLength);
   ~Timer() = default;
 
   void start(const bool alreadyElapsed);
-  void changeTime(const std::chrono::duration<Rep, TimeType> timerLength)
-  {
-    _timerLength = timerLength;
-  }
+  void changeTime(const std::chrono::duration<Rep, TimeType> timerLength) { _timerLength = timerLength; }
   void restart();
   bool elapsed() const;
   template <typename LocalTimeType = std::milli>
   uint64_t timeTillElapsed() const
   {
     const auto timeNow = std::chrono::system_clock::now();
-    auto timePassed =
-        std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(
-            _startingTime - timeNow);
+    auto timePassed = std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(_startingTime - timeNow);
     auto timeTillElapsed =
-        std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(
-            _timerLength - timePassed);
+      std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(_timerLength - timePassed);
     return timeTillElapsed.count();
   }
 
@@ -51,9 +46,8 @@ private:
  * in the constructor else, it could give errors (most vexing parse)
  */
 template <typename Rep, typename TimeType>
-Timer<Rep, TimeType>::Timer(
-    const std::chrono::duration<Rep, TimeType> timerLength)
-    : _timerLength{timerLength}
+Timer<Rep, TimeType>::Timer(const std::chrono::duration<Rep, TimeType> timerLength)
+: _timerLength{ timerLength }
 {
 }
 
@@ -66,16 +60,15 @@ Timer<Rep, TimeType>::Timer(
 template <typename Rep, typename TimeType>
 void Timer<Rep, TimeType>::start(const bool alreadyElapsed)
 {
-  _startingTime = alreadyElapsed
-                      ? std::chrono::system_clock::now() - _timerLength
-                      : std::chrono::system_clock::now();
+  _startingTime = alreadyElapsed ? std::chrono::system_clock::now() - _timerLength : std::chrono::system_clock::now();
 }
 
 /**
  * @brief Restarts the timer
  *
  */
-template <typename Rep, typename TimeType> void Timer<Rep, TimeType>::restart()
+template <typename Rep, typename TimeType>
+void Timer<Rep, TimeType>::restart()
 {
   _startingTime = std::chrono::system_clock::now();
 }
@@ -90,9 +83,7 @@ template <typename Rep, typename TimeType>
 bool Timer<Rep, TimeType>::elapsed() const
 {
   auto currentTime = std::chrono::system_clock::now();
-  auto timeDifference =
-      std::chrono::duration_cast<std::chrono::duration<Rep, TimeType>>(
-          currentTime - _startingTime);
+  auto timeDifference = std::chrono::duration_cast<std::chrono::duration<Rep, TimeType>>(currentTime - _startingTime);
 
   return (timeDifference > _timerLength);
 }

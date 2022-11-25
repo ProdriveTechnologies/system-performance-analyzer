@@ -4,7 +4,7 @@
 
 namespace PlatformConfig
 {
-SConfig Parse(const std::string &jsonFile)
+SConfig Parse(const std::string& jsonFile)
 {
   using json = nlohmann::json;
   json jsonObj = JsonHelpers::GetJsonObj(jsonFile);

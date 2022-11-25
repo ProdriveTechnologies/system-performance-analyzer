@@ -5,10 +5,11 @@
 
 namespace Helpers
 {
-template <typename T> class AtomicQueue
+template <typename T>
+class AtomicQueue
 {
 public:
-  void push(const T &value)
+  void push(const T& value)
   {
     std::lock_guard<std::mutex> lock(mutexObj);
     queueObj.push(value);

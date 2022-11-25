@@ -33,7 +33,7 @@ void PipeCommunicator::SetParent()
   close(parentWritePipe_[READ]);
 }
 
-void PipeCommunicator::Write(const std::string &message)
+void PipeCommunicator::Write(const std::string& message)
 {
   // Write(static_cast<void *>(&message), message.size());
 
@@ -46,7 +46,7 @@ void PipeCommunicator::Write(const std::string &message)
   }
 }
 
-void PipeCommunicator::Write(void *message, const size_t bytes)
+void PipeCommunicator::Write(void* message, const size_t bytes)
 {
   int fd = isParent_ ? parentWritePipe_[WRITE] : parentReadPipe_[WRITE];
   int writtenBytes = write(fd, message, bytes);
@@ -89,7 +89,7 @@ std::string PipeCommunicator::Read()
  * @brief Reads until X bytes are read or when the read function returns (can be
  * less than X bytes)
  */
-size_t PipeCommunicator::ReadRaw(void *message, const size_t bytes)
+size_t PipeCommunicator::ReadRaw(void* message, const size_t bytes)
 {
   int fd = isParent_ ? parentReadPipe_[READ] : parentWritePipe_[READ];
   size_t readBytes = read(fd, message, bytes);
@@ -104,7 +104,7 @@ size_t PipeCommunicator::ReadRaw(void *message, const size_t bytes)
  */
 std::string PipeCommunicator::ReadUntil(const size_t bytes)
 {
-  size_t readBytes{0};
+  size_t readBytes{ 0 };
 
   char messageData[bytes + 1];
   while (readBytes != bytes)

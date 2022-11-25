@@ -1,54 +1,50 @@
 #include "perf_measurements.h"
 
+#include "proc_handler.h"
+#include "src/benchmarks/linux/xavier_sensors.h"
+#include "src/exports/export.h"
+#include "src/exports/export_types/export_csv.h"
+#include "src/exports/export_types/export_graphs.h"
+#include "src/exports/export_types/export_json.h"
+#include "src/globals.h"
+#include "src/helpers/logger.h"
+#include "src/helpers/stopwatch.h"
+#include "src/helpers/synchronizer.h"
+#include "src/json_config/sensor_config/config_parser.h"
+#include "src/linux/filesystem.h"
+
 #include <algorithm>
 #include <iostream>
 #include <regex>       // std::regex_replace
 #include <sys/types.h> // getpid()
 #include <thread>
 #include <unistd.h> // getpid()
-
-#include "src/benchmarks/linux/xavier_sensors.h"
-#include "src/helpers/synchronizer.h"
-#include "src/linux/filesystem.h"
-
-#include "src/exports/export.h"
-#include "src/exports/export_types/export_csv.h"
-#include "src/exports/export_types/export_graphs.h"
-#include "src/exports/export_types/export_json.h"
-
-#include "proc_handler.h"
-#include "src/globals.h"
-#include "src/helpers/logger.h"
-#include "src/helpers/stopwatch.h"
-#include "src/json_config/sensor_config/config_parser.h"
 // #include "xavier_sensors_live.h"
 
 #include "performance_helpers.h"
-#include "src/exports/export_types/summary_generator.h"
-
 #include "src/benchmarks/analysis/correlation.h"
+#include "src/exports/export_types/summary_generator.h"
 
 namespace Linux
 {
 // TODO: Make cpuUtilizationTimer_ configurable through the JSON
-CPerfMeasurements::CPerfMeasurements(
-    Synchronizer *synchronizer, const std::string &sensorConfig,
-    const std::vector<Core::SThreshold> &thresholds)
-    : threadSync_{synchronizer}, sensorConfigFile_{sensorConfig},
-      cpuUtilizationTimer_{std::chrono::milliseconds{1000}},
-      sensorMeasurements_{sensorConfig}, processMeasurements_{sensorConfig},
-      thresholds_{thresholds} //,
+CPerfMeasurements::CPerfMeasurements(Synchronizer* synchronizer,
+                                     const std::string& sensorConfig,
+                                     const std::vector<Core::SThreshold>& thresholds)
+: threadSync_{ synchronizer }
+, sensorConfigFile_{ sensorConfig }
+, cpuUtilizationTimer_{ std::chrono::milliseconds{ 1000 } }
+, sensorMeasurements_{ sensorConfig }
+, processMeasurements_{ sensorConfig }
+, thresholds_{ thresholds } //,
 // liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
 {
 }
 
 /**
  * @brief Will initiate and start the measurements loop
- *
- * @param config
  */
-void CPerfMeasurements::Start(const Core::SConfig &config,
-                              std::vector<ProcessInfo> *processes)
+void CPerfMeasurements::Start(const Core::SConfig& config, std::vector<ProcessInfo>* processes)
 {
   processes_ = processes;
   config_ = config;
@@ -93,20 +89,16 @@ void CPerfMeasurements::Initialize()
 
   sensorMeasurements_.Initialize(&measurementsData_);
   gstMeasurements_.Initialize(&measurementsData_);
-  std::vector<RunProcess *> linuxProcesses =
-      GetProcessFromProcesses<RunProcess>();
+  std::vector<RunProcess*> linuxProcesses = GetProcessFromProcesses<RunProcess>();
   processMeasurements_.Initialize(&measurementsData_, linuxProcesses);
 
-  allSensors_.AddSensors(Measurements::EClassification::SYSTEM,
-                         sensorMeasurements_.GetSensors(false));
-  allSensors_.AddSensors(Measurements::EClassification::PROCESSES,
-                         processMeasurements_.GetSensors(false));
+  allSensors_.AddSensors(Measurements::EClassification::SYSTEM, sensorMeasurements_.GetSensors(false));
+  allSensors_.AddSensors(Measurements::EClassification::PROCESSES, processMeasurements_.GetSensors(false));
 
   cpuUtilizationTimer_.restart();
   while (!cpuUtilizationTimer_.elapsed())
   {
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
+    std::this_thread::sleep_for(std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
   }
 }
 
@@ -138,16 +130,12 @@ void CPerfMeasurements::StartMeasurementsLoop()
     // Filling the export data
     Measurements::SMeasurementsData measurementData;
 
-    measurementData.time = std::to_string(
-        testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
+    measurementData.time = std::to_string(testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
 
-    measurementData.AddMeasurements(Measurements::EClassification::SYSTEM,
-                                    sensorMeasurements_.GetMeasurements());
-    measurementData.AddMeasurements(Measurements::EClassification::PROCESSES,
-                                    processMeasurements_.GetMeasurements());
+    measurementData.AddMeasurements(Measurements::EClassification::SYSTEM, sensorMeasurements_.GetMeasurements());
+    measurementData.AddMeasurements(Measurements::EClassification::PROCESSES, processMeasurements_.GetMeasurements());
 
-    measurementData.AddMeasurements(Measurements::EClassification::PIPELINE,
-                                    gstMeasurements_.ProcessGstreamer());
+    measurementData.AddMeasurements(Measurements::EClassification::PIPELINE, gstMeasurements_.ProcessGstreamer());
 
     // Measure data on each GStreamer pipeline
     measurementsData_.push_back(measurementData);
@@ -156,26 +144,22 @@ void CPerfMeasurements::StartMeasurementsLoop()
     {
       // Have to add the sensors of the pipeline each time as they are
       // dynamically added (the old sensors are cleared when adding new ones)
-      allSensors_.AddSensors(Measurements::EClassification::PIPELINE,
-                             gstMeasurements_.GetSensors(false));
+      allSensors_.AddSensors(Measurements::EClassification::PIPELINE, gstMeasurements_.GetSensors(false));
       exportObj_.AddMeasurements(measurementData);
     }
 
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(config_.settings.measureLoopMs));
+    std::this_thread::sleep_for(std::chrono::milliseconds(config_.settings.measureLoopMs));
   }
   // Sort the pipeline measurements correctly
-  for (auto &e : measurementsData_)
+  for (auto& e : measurementsData_)
   {
-    auto newGroups = gstMeasurements_.SortData(
-        e.GetItemGroups(Measurements::EClassification::PIPELINE));
+    auto newGroups = gstMeasurements_.SortData(e.GetItemGroups(Measurements::EClassification::PIPELINE));
     e.AddMeasurements(Measurements::EClassification::PIPELINE, newGroups);
   }
 }
 
-void CPerfMeasurements::ExportData(
-    const Exports::AllSensors &sensors,
-    const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
+void CPerfMeasurements::ExportData(const Exports::AllSensors& sensors,
+                                   const std::vector<Measurements::CCorrelation::SResult>& correlationResults)
 {
   std::vector<Exports::SMeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
@@ -183,18 +167,9 @@ void CPerfMeasurements::ExportData(
   items.push_back(processMeasurements_.GetConfig());
 
   Exports::CExport exportGenericClass;
-  Exports::SExportData expData{items, &measurementsData_, sensors,
-                               correlationResults};
-  for (const auto &e : config_.settings.exports)
+  Exports::SExportData expData{ items, &measurementsData_, sensors, correlationResults };
+  for (const auto& e : config_.settings.exports)
     exportGenericClass.ExecuteExport(e, expData, config_);
-
-  //       ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors,
-  //                                                 correlationResults);
-  // ExecuteExport<Exports::CJson>("filename", items, sensors,
-  // correlationResults); ExecuteExport<Exports::CCsv>("filename", items,
-  // sensors, correlationResults); ExecuteExport<Exports::CGraphs>("filename",
-  // items, sensors,
-  //                                 correlationResults);
 }
 
 /**
@@ -204,7 +179,7 @@ void CPerfMeasurements::RemoveProcessId(const int pid)
 {
   for (size_t i = 0; i < processPids_.size(); i++)
   {
-    const auto &e = processPids_[i];
+    const auto& e = processPids_[i];
     if (e == pid)
       processPids_.erase(processPids_.begin() + i);
   }
@@ -232,12 +207,11 @@ void CPerfMeasurements::AnalyzeData()
   Exports::AllSensors allSensors;
   allSensors.AddSensors(Measurements::EClassification::PIPELINE, gstSensors);
   allSensors.AddSensors(Measurements::EClassification::SYSTEM, sysSensors);
-  allSensors.AddSensors(Measurements::EClassification::PROCESSES,
-                        processSensors);
+  allSensors.AddSensors(Measurements::EClassification::PROCESSES, processSensors);
 
   // Execute the correlation check here
-  auto corrResults = Measurements::CCorrelation::GetCorrelation(
-      allSensors, &measurementsData_, config_.settings.enablePretestZeroes);
+  auto corrResults =
+    Measurements::CCorrelation::GetCorrelation(allSensors, &measurementsData_, config_.settings.enablePretestZeroes);
 
   // Check thresholds
   SetThresholdResults(allSensors);
@@ -245,28 +219,25 @@ void CPerfMeasurements::AnalyzeData()
   ExportData(allSensors, corrResults);
 }
 
-void CPerfMeasurements::SetThresholdResults(
-    Measurements::SAllSensors allSensors)
+void CPerfMeasurements::SetThresholdResults(Measurements::SAllSensors allSensors)
 {
   auto allProcessIds = allSensors.GetProcesses();
-  for (const auto &processId : allProcessIds)
+  for (const auto& processId : allProcessIds)
   {
     auto sensorMap = allSensors.GetMap(processId);
 
-    for (const auto &e : thresholds_)
+    for (const auto& e : thresholds_)
     {
       if (e.processId != processId)
         continue; // This process doesn't need checking for this threshold
       auto sensor = sensorMap.find(e.name);
       if (sensor == sensorMap.end())
       {
-        CLogger::Log(CLogger::Types::WARNING, "Threshold name: \"", e.name,
-                     "\" not found!");
+        CLogger::Log(CLogger::Types::WARNING, "Threshold name: \"", e.name, "\" not found!");
         continue; // Couldn't check any thresholds, doesn't exist
       }
       if (!sensor->second->thresholdExceeded)
-        sensor->second->thresholdExceeded =
-            PerformanceHelpers::HandleThreshold(sensor->second, e);
+        sensor->second->thresholdExceeded = PerformanceHelpers::HandleThreshold(sensor->second, e);
       // }
     }
   }

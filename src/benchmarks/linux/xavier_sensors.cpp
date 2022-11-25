@@ -1,4 +1,5 @@
 #include "xavier_sensors.h"
+
 #include "perf_measurements.h"
 
 /**
@@ -9,8 +10,7 @@
  *    [error]: SMeasuredItem{} with ID being -1 (or -2 when datafield.id is -1),
  * thus ID != datafield.id
  */
-Measurements::SMeasuredItem
-CXavierSensors::ParseDirect(const PlatformConfig::SMeasureField &datafield)
+Measurements::SMeasuredItem CXavierSensors::ParseDirect(const PlatformConfig::SMeasureField& datafield)
 {
   Measurements::SMeasuredItem item;
   item.id = datafield.id;
@@ -31,7 +31,7 @@ CXavierSensors::ParseDirect(const PlatformConfig::SMeasureField &datafield)
  * @param path the path of the file
  * @return std::string the content of the file
  */
-std::string CXavierSensors::ReadLocation(const std::string &path)
+std::string CXavierSensors::ReadLocation(const std::string& path)
 {
   std::string dataBuffer;
   std::ifstream fileObj(path);

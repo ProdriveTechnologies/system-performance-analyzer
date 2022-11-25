@@ -1,22 +1,22 @@
 #pragma once
 
-#include <array>
-#include <string>
-#include <unordered_map>
-
 #include "../exports_base.h"
 #include "src/helpers/helper_functions.h"
+
+#include <array>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <unordered_map>
 
 namespace Exports
 {
 class CJson : public CBase
 {
 public:
-  bool FullExport(
-      const std::vector<SMeasurementItem> &config, const FullMeasurement data,
-      const AllSensors &allSensors,
-      const std::vector<Measurements::CCorrelation::SResult> &correlations);
+  bool FullExport(const std::vector<SMeasurementItem>& config,
+                  const FullMeasurement data,
+                  const AllSensors& allSensors,
+                  const std::vector<Measurements::CCorrelation::SResult>& correlations);
 
 private:
   static constexpr char EXTENSION[] = ".json";
@@ -36,11 +36,8 @@ private:
   {
     std::array<std::string, Helpers::ToUnderlying(CsvIndex::MAX_SIZE)> csvRows;
   };
-  std::string InitPipelineConfig(
-      const size_t pipelineId,
-      const std::unordered_map<int, GStreamer::SIdentifier> &items);
-  nlohmann::json ParseLabel(const SMeasurementItem &item,
-                            const nlohmann::json parent = nlohmann::json{});
+  std::string InitPipelineConfig(const size_t pipelineId, const std::unordered_map<int, GStreamer::SIdentifier>& items);
+  nlohmann::json ParseLabel(const SMeasurementItem& item, const nlohmann::json parent = nlohmann::json{});
 };
 
 } // namespace Exports

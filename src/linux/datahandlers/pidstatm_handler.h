@@ -1,11 +1,11 @@
 #pragma once
 
-#include <unordered_map>
-#include <utility>
-
 #include "src/helpers/helper_functions.h"
 #include "src/linux/filesystem.h"
 #include "src/linux/path_parser_base.h"
+
+#include <unordered_map>
+#include <utility>
 
 namespace Linux
 {
@@ -18,7 +18,7 @@ public:
    * @brief CPidStatHandler has nothing to initialize
    */
   void Initialize() {}
-  bool InitializeRuntime(const std::string &replacement)
+  bool InitializeRuntime(const std::string& replacement)
   {
     std::string path = pidStatmPath;
     Helpers::replaceStr(path, "$PID$", replacement);
@@ -30,23 +30,20 @@ public:
     return true;
   }
 
-  bool ParseMeasurement(const PlatformConfig::SDatafields &datafield,
-                        [[maybe_unused]] const std::string &path,
-                        const std::string &replacement = "")
+  bool ParseMeasurement(const PlatformConfig::SDatafields& datafield,
+                        [[maybe_unused]] const std::string& path,
+                        const std::string& replacement = "")
   {
     item_.id = datafield.id;
 
     auto pidStat = pidStatmData_.find(replacement);
     if (pidStat == pidStatmData_.end())
-      throw std::runtime_error("CPidStatmHandler: /proc/" + replacement +
-                               "/stat not found!");
+      throw std::runtime_error("CPidStatmHandler: /proc/" + replacement + "/stat not found!");
 
-    item_.measuredValue =
-        static_cast<double>(pidStat->second.GetValue(datafield.value));
+    item_.measuredValue = static_cast<double>(pidStat->second.GetValue(datafield.value));
     if (!datafield.comparedTo.empty())
     {
-      unsigned long long comparedTo =
-          pidStat->second.GetValue(datafield.comparedTo);
+      unsigned long long comparedTo = pidStat->second.GetValue(datafield.comparedTo);
       if (comparedTo != 0)
         item_.measuredValue = item_.measuredValue / comparedTo;
     }

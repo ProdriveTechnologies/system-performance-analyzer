@@ -2,6 +2,7 @@
 
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/logger.h"
+
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -25,7 +26,7 @@ enum class EClass : int
   PIPELINE_MEASUREMENTS = 3,
 };
 
-inline ETypes GetType(const std::string &typeStr)
+inline ETypes GetType(const std::string& typeStr)
 {
   switch (Helpers::hash(typeStr))
   {
@@ -54,8 +55,7 @@ inline EClass GetClass(const int classNr)
   case Helpers::ToUnderlying(EClass::SYS_RESOURCE_USAGE):
     return EClass::SYS_RESOURCE_USAGE;
   default:
-    CLogger::Log(CLogger::Types::WARNING,
-                 "Class type not found! Number: " + std::to_string(classNr));
+    CLogger::Log(CLogger::Types::WARNING, "Class type not found! Number: " + std::to_string(classNr));
   }
   return EClass::NONE;
 }

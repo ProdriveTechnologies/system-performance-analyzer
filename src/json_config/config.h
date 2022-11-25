@@ -1,12 +1,12 @@
 #pragma once
 
+#include "src/exports/export_types.h"
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/logger.h"
+
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include "src/exports/export_types.h"
 
 namespace Core
 {
@@ -15,7 +15,7 @@ enum class ProcessType
   GSTREAMER,
   LINUX_PROCESS
 };
-inline ProcessType GetProcessType(const std::string &processType)
+inline ProcessType GetProcessType(const std::string& processType)
 {
   if (processType == "gstreamer")
     return ProcessType::GSTREAMER;
@@ -46,7 +46,7 @@ enum class ESign
   LE, // Less equal
   GE  // Greater equal
 };
-inline ESign GetSign(const std::string &sign)
+inline ESign GetSign(const std::string& sign)
 {
   if (sign == ">")
     return ESign::GT;
@@ -88,8 +88,7 @@ struct SConfig
 {
   std::string getStr()
   {
-    return "name: " + name + ", description: " + description +
-           ", id: " + std::to_string(id) + ", version: " + version;
+    return "name: " + name + ", description: " + description + ", id: " + std::to_string(id) + ", version: " + version;
   }
   std::string name;
   std::string description;
@@ -102,7 +101,7 @@ struct SConfig
 
   SProcess GetProcess(const int processId) const
   {
-    for (const auto &e : processes)
+    for (const auto& e : processes)
     {
       if (e.processId == processId)
         return e;
@@ -110,7 +109,7 @@ struct SConfig
     throw std::runtime_error("Couldn't find processId in the processes!");
   }
 };
-inline EThresholdType GetThresholdType(const std::string &thresholdGroup)
+inline EThresholdType GetThresholdType(const std::string& thresholdGroup)
 {
   switch (Helpers::hash(thresholdGroup))
   {

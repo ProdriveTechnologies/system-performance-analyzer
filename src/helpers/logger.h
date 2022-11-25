@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/helpers/helper_functions.h"
+
 #include <iostream>
 
 class CLogger
@@ -14,7 +15,7 @@ public:
     ERROR
   };
   template <typename... Args>
-  static void Log(const Types logType, const Args &... args);
+  static void Log(const Types logType, const Args&... args);
 
   static void Enable(const bool info, const bool debug)
   {
@@ -28,7 +29,7 @@ private:
 };
 
 template <typename... Args>
-void CLogger::Log(const Types logType, const Args &... args)
+void CLogger::Log(const Types logType, const Args&... args)
 {
   if (!enableDebugLogging_ && logType == Types::DEBUG)
     return;

@@ -1,6 +1,7 @@
 #include "file_writer.h"
 
-FileWriter::FileWriter(const std::string &fileName) : file_{}
+FileWriter::FileWriter(const std::string& fileName)
+: file_{}
 {
   file_.open(fileName.c_str(), std::ios::trunc | std::ios::out);
 }
@@ -11,7 +12,7 @@ FileWriter::FileWriter(const std::string &fileName) : file_{}
  * @return true no errors occured
  * @return false could not add the text in the file, file corrupt
  */
-bool FileWriter::AddRow(const std::string &text)
+bool FileWriter::AddRow(const std::string& text)
 {
   if (file_.is_open())
   {
@@ -28,10 +29,8 @@ bool FileWriter::AddRow(const std::string &text)
  * @return true no errors occured
  * @return false could not add the text in the file, file corrupt
  */
-bool FileWriter::AddRow(const std::string &text, const bool addEmptyString)
+bool FileWriter::AddRow(const std::string& text, const bool addEmptyString)
 {
-  auto checkEmpty = [this](const std::string &text) {
-    return text.empty() ? true : AddRow(text);
-  };
+  auto checkEmpty = [this](const std::string& text) { return text.empty() ? true : AddRow(text); };
   return addEmptyString ? AddRow(text) : checkEmpty(text);
 }

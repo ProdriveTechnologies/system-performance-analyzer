@@ -1,18 +1,18 @@
 #include "export_csv.h"
 
-#include "src/helpers/helper_functions.h"
-#include <unordered_map>
-
 #include "src/exports/file_writer.h"
+#include "src/helpers/helper_functions.h"
+
+#include <unordered_map>
 
 namespace Exports
 {
-std::string CCsv::ParseData(const std::string &timeStr,
-                            const std::vector<Measurements::SSensors> &sensors,
-                            const std::vector<SMeasuredItem> &items)
+std::string CCsv::ParseData(const std::string& timeStr,
+                            const std::vector<Measurements::SSensors>& sensors,
+                            const std::vector<SMeasuredItem>& items)
 {
-  std::string row{timeStr};
-  for (const auto &e : sensors)
+  std::string row{ timeStr };
+  for (const auto& e : sensors)
   {
     if (e.measuredRaw)
     {
@@ -25,27 +25,24 @@ std::string CCsv::ParseData(const std::string &timeStr,
   return row;
 }
 
-bool CCsv::FullExport(
-    [[maybe_unused]] const std::vector<SMeasurementItem> &config,
-    const FullMeasurement data, const AllSensors &allSensors,
-    [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>
-        &correlations)
+bool CCsv::FullExport([[maybe_unused]] const std::vector<SMeasurementItem>& config,
+                      const FullMeasurement data,
+                      const AllSensors& allSensors,
+                      [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>& correlations)
 {
   std::string labels;
 
-  for (const auto &classification : allSensors.allClasses)
+  for (const auto& classification : allSensors.allClasses)
   {
     const auto name = Measurements::GetClassificationStr(classification);
-    FileWriter systemFile{name + ".csv"};
+    FileWriter systemFile{ name + ".csv" };
 
     labels = "time" + ParseLabel(allSensors.GetSensors(classification));
     systemFile.AddRow(labels);
 
-    for (const auto &e : *data)
+    for (const auto& e : *data)
     {
-      systemFile.AddRow(ParseData(e.time, allSensors.GetSensors(classification),
-                                  e.GetItems(classification)),
-                        false);
+      systemFile.AddRow(ParseData(e.time, allSensors.GetSensors(classification), e.GetItems(classification)), false);
     }
   }
 
@@ -58,11 +55,11 @@ bool CCsv::FullExport(
  * @param item
  * @return std::string
  */
-std::string CCsv::ParseLabel(const std::vector<Measurements::SSensors> &sensors)
+std::string CCsv::ParseLabel(const std::vector<Measurements::SSensors>& sensors)
 {
   std::string result;
 
-  for (const auto &e : sensors)
+  for (const auto& e : sensors)
   {
     if (e.measuredRaw)
       result += DELIMITER + e.userId;

@@ -1,6 +1,7 @@
 #include "performance_helpers.h"
 
 #include "summarize_data.h"
+
 #include <algorithm>
 
 namespace PerformanceHelpers
@@ -26,11 +27,10 @@ int GetUniqueId()
  * @param data
  * @return std::unordered_map<int, Measurements::SSensors>
  */
-std::unordered_map<std::string, Measurements::SSensors>
-CreateMapWithId(const std::vector<Measurements::SSensors> &data)
+std::unordered_map<std::string, Measurements::SSensors> CreateMapWithId(const std::vector<Measurements::SSensors>& data)
 {
   std::unordered_map<std::string, Measurements::SSensors> mapData;
-  for (const auto &e : data)
+  for (const auto& e : data)
   {
     mapData.insert(std::make_pair(e.userId, e));
   }
@@ -45,11 +45,9 @@ CreateMapWithId(const std::vector<Measurements::SSensors> &data)
  * @return true threshold was exceeded
  * @return false threshold didnt get exceeded
  */
-bool HandleThreshold(const Measurements::SSensors *sensor,
-                     Core::SThreshold threshold)
+bool HandleThreshold(const Measurements::SSensors* sensor, Core::SThreshold threshold)
 {
-  auto parseSign = [](const double lhs, const double rhs,
-                      const Core::ESign sign) {
+  auto parseSign = [](const double lhs, const double rhs, const Core::ESign sign) {
     switch (sign)
     {
     case Core::ESign::LE:
@@ -67,39 +65,31 @@ bool HandleThreshold(const Measurements::SSensors *sensor,
   switch (threshold.type)
   {
   case Core::EThresholdType::MAX:
-    return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::EValueTypes::MAX),
-                     threshold.sign);
+    return parseSign(threshold.value, sensor->data.Get(Measurements::EValueTypes::MAX), threshold.sign);
   case Core::EThresholdType::MIN:
-    return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::EValueTypes::MIN),
-                     threshold.sign);
+    return parseSign(threshold.value, sensor->data.Get(Measurements::EValueTypes::MIN), threshold.sign);
   case Core::EThresholdType::AVERAGE:
-    return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::EValueTypes::AVERAGE),
-                     threshold.sign);
+    return parseSign(threshold.value, sensor->data.Get(Measurements::EValueTypes::AVERAGE), threshold.sign);
   case Core::EThresholdType::MEDIAN:
-    return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::EValueTypes::MEDIAN),
-                     threshold.sign);
+    return parseSign(threshold.value, sensor->data.Get(Measurements::EValueTypes::MEDIAN), threshold.sign);
   default:
     throw std::runtime_error("Cannot parse threshold type! Illegal type!");
   }
 }
 
-Measurements::SSensorData
-GetSummarizedData(const Measurements::EClassification classification,
-                  const std::vector<Measurements::SMeasurementsData> *data,
-                  const int uniqueId, const double multiplication,
-                  const bool useSteadyState)
+Measurements::SSensorData GetSummarizedData(const Measurements::EClassification classification,
+                                            const std::vector<Measurements::SMeasurementsData>* data,
+                                            const int uniqueId,
+                                            const double multiplication,
+                                            const bool useSteadyState)
 {
-  Measurements::CSummarizeData summarizedData{useSteadyState};
+  Measurements::CSummarizeData summarizedData{ useSteadyState };
   // This is the loop for each measurement
-  for (const auto &e : *data)
+  for (const auto& e : *data)
   {
     auto datapoints = e.GetItems(classification);
     // This is the loop for the datapoints, only the uniqueId datapoint is used
-    for (const auto &e2 : datapoints)
+    for (const auto& e2 : datapoints)
     {
       if (e2.id == uniqueId)
       {
@@ -113,20 +103,19 @@ GetSummarizedData(const Measurements::EClassification classification,
   return summarizedData.GetSensorData();
 }
 
-Measurements::SSensors
-GetSummarizedData(const Measurements::EClassification classification,
-                  const std::vector<Measurements::SMeasurementsData> *data,
-                  const std::unordered_set<int> uniqueIds,
-                  const Measurements::SSensors &sensorTemplate,
-                  const bool useSteadyState)
+Measurements::SSensors GetSummarizedData(const Measurements::EClassification classification,
+                                         const std::vector<Measurements::SMeasurementsData>* data,
+                                         const std::unordered_set<int> uniqueIds,
+                                         const Measurements::SSensors& sensorTemplate,
+                                         const bool useSteadyState)
 {
-  Measurements::CSummarizeData summarizedData{useSteadyState};
+  Measurements::CSummarizeData summarizedData{ useSteadyState };
   // This is the loop for each measurement
-  for (const auto &e : *data)
+  for (const auto& e : *data)
   {
     auto datapoints = e.GetItems(classification);
     // This is the loop for the datapoints, only the uniqueId datapoint is used
-    for (const auto &e2 : datapoints)
+    for (const auto& e2 : datapoints)
     {
       if (uniqueIds.find(e2.id) != uniqueIds.end())
         summarizedData.AddDataPoint(e2);

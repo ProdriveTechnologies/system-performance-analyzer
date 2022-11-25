@@ -1,11 +1,10 @@
-#include <gtest/gtest.h>
-
 #include "src/benchmarks/analysis/correlation.h"
 
-void AddPoints(
-    std::vector<Measurements::SMeasurementsData> *alldata,
-    Measurements::SMeasuredItem item1,
-    Measurements::SMeasuredItem item2 = Measurements::SMeasuredItem{});
+#include <gtest/gtest.h>
+
+void AddPoints(std::vector<Measurements::SMeasurementsData>* alldata,
+               Measurements::SMeasuredItem item1,
+               Measurements::SMeasuredItem item2 = Measurements::SMeasuredItem{});
 /**
  * @brief Test the correlation function for perfectly correlated vectors
  *
@@ -13,7 +12,7 @@ void AddPoints(
 TEST(Correlation, Correlated)
 {
   Measurements::CCorrelation correlation;
-  std::vector<double> data{1, 2, 3, 4, 5, 4, 4, 2};
+  std::vector<double> data{ 1, 2, 3, 4, 5, 4, 4, 2 };
   auto res = correlation.GetCorrelationCoefficient(data, data);
 
   // Expect equality.
@@ -27,10 +26,9 @@ TEST(Correlation, Correlated)
 TEST(Correlation, InverseCorrelated)
 {
   Measurements::CCorrelation correlation;
-  std::vector<double> data{1, 2, 3, 4, 5, 4, 4, 2};
+  std::vector<double> data{ 1, 2, 3, 4, 5, 4, 4, 2 };
   auto negatedData = data;
-  std::for_each(negatedData.begin(), negatedData.end(),
-                [](auto &e) { e = -e; });
+  std::for_each(negatedData.begin(), negatedData.end(), [](auto& e) { e = -e; });
 
   auto res = correlation.GetCorrelationCoefficient(data, negatedData);
   EXPECT_EQ(res, -1.0);
@@ -43,8 +41,8 @@ TEST(Correlation, InverseCorrelated)
 TEST(Correlation, LowCorrelation)
 {
   Measurements::CCorrelation correlation;
-  std::vector<double> data{1, 2, 3, 4, 5, 4, 4, 2};
-  std::vector<double> data2{1, 1, -1, 3, 1, 3, 0, 6};
+  std::vector<double> data{ 1, 2, 3, 4, 5, 4, 4, 2 };
+  std::vector<double> data2{ 1, 1, -1, 3, 1, 3, 0, 6 };
 
   auto res = correlation.GetCorrelationCoefficient(data, data2);
   EXPECT_GT(res, -0.5);
@@ -58,10 +56,9 @@ TEST(Correlation, LowCorrelation)
 TEST(Correlation, CorrelationFull)
 {
   Measurements::SAllSensors allsensors;
-  Measurements::SSensors sensor{"name", 1,
-                                PlatformConfig::EClass::PIPELINE_MEASUREMENTS};
+  Measurements::SSensors sensor{ "name", 1, PlatformConfig::EClass::PIPELINE_MEASUREMENTS };
   sensor.performanceIndicator = true;
-  Measurements::SSensors sensor2{"name", 2};
+  Measurements::SSensors sensor2{ "name", 2 };
   sensor2.performanceIndicator = false;
 
   std::vector<Measurements::SMeasurementsData> alldata;
@@ -73,13 +70,12 @@ TEST(Correlation, CorrelationFull)
     // Remove half of the values for the 2nd item, to see whether the
     // correlation function can handle unequal vector lengths
     if (i % 2 == 0)
-      AddPoints(&alldata, _Item{1, i_d}, _Item{2, i_d * 3});
+      AddPoints(&alldata, _Item{ 1, i_d }, _Item{ 2, i_d * 3 });
     else
-      AddPoints(&alldata, _Item{1, i_d});
+      AddPoints(&alldata, _Item{ 1, i_d });
   }
 
-  allsensors.AddSensors(Measurements::EClassification::PIPELINE,
-                        {sensor, sensor2});
+  allsensors.AddSensors(Measurements::EClassification::PIPELINE, { sensor, sensor2 });
 
   auto res = Measurements::CCorrelation::GetCorrelation(allsensors, &alldata);
 
@@ -87,7 +83,7 @@ TEST(Correlation, CorrelationFull)
   EXPECT_EQ(res.at(0).correlation, 1);
 }
 
-void AddPoints(std::vector<Measurements::SMeasurementsData> *alldata,
+void AddPoints(std::vector<Measurements::SMeasurementsData>* alldata,
                Measurements::SMeasuredItem item1,
                Measurements::SMeasuredItem item2)
 {
@@ -95,9 +91,8 @@ void AddPoints(std::vector<Measurements::SMeasurementsData> *alldata,
   Measurements::SMeasurementsData data;
   data.time = "3000";
   if (item2.id != -1)
-    data.AddMeasurements(Measurements::EClassification::PIPELINE,
-                         {item1, item2});
+    data.AddMeasurements(Measurements::EClassification::PIPELINE, { item1, item2 });
   else
-    data.AddMeasurements(Measurements::EClassification::PIPELINE, {item1});
+    data.AddMeasurements(Measurements::EClassification::PIPELINE, { item1 });
   alldata->push_back(data);
 }

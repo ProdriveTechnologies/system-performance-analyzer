@@ -2,11 +2,11 @@
 
 #include <string>
 // #include <string_view>
-#include <thread>
-#include <vector>
-
 #include "src/json_config/config.h"
 #include "src/linux/pipe_comm.h"
+
+#include <thread>
+#include <vector>
 // #include "src/helpers/synchronizer.h"
 class Synchronizer;
 
@@ -15,17 +15,17 @@ namespace ProcessRunner
 class Base
 {
 public:
-  Base(Synchronizer *processSync, const Core::SProcess &userProcessInfo);
+  Base(Synchronizer* processSync, const Core::SProcess& userProcessInfo);
   ~Base();
-  Base(const Base &base);
-  virtual void StartThread(const std::string &command) = 0;
+  Base(const Base& base);
+  virtual void StartThread(const std::string& command) = 0;
 
   void ChildWaitProcess();
   int GetUserProcessId() const { return userProcessInfo_.processId; }
   int GetProcessDelay() const { return userProcessInfo_.startDelay; }
 
 protected:
-  Synchronizer *processSync_;
+  Synchronizer* processSync_;
   std::thread pipelineThread_;
   Linux::PipeCommunicator pipe_;
   const Core::SProcess userProcessInfo_;

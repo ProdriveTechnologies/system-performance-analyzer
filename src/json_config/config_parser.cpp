@@ -4,7 +4,7 @@
 
 namespace Core
 {
-SConfig ConfigParser::Parse(const std::string &jsonFile)
+SConfig ConfigParser::Parse(const std::string& jsonFile)
 {
   using json = nlohmann::json;
   json jsonObj = JsonHelpers::GetJsonObj(jsonFile);

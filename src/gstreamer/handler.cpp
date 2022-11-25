@@ -1,5 +1,10 @@
 #include "handler.h"
 
+#include "src/gstreamer/measurement_types.h"
+#include "src/helpers/logger.h"
+#include "src/helpers/synchronizer.h"
+#include "trace_parser.h"
+
 #include <gst/gst.h>
 #include <iostream>
 #include <memory>
@@ -9,35 +14,39 @@
 #include <unistd.h>
 #include <vector>
 
-#include "src/gstreamer/measurement_types.h"
-#include "src/helpers/logger.h"
-#include "src/helpers/synchronizer.h"
-#include "trace_parser.h"
-
-CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer,
-                                     const Core::SProcess &userProcessInfo,
-                                     const Core::SSettings &settings,
+CGstreamerHandler::CGstreamerHandler(Synchronizer* synchronizer,
+                                     const Core::SProcess& userProcessInfo,
+                                     const Core::SSettings& settings,
                                      const int processId)
-    : ProcessRunner::Base{synchronizer, userProcessInfo},
-      threadSync_{synchronizer}, processId_{processId}, running_{false},
-      gstPipeline_{nullptr}, gstBus_{nullptr}, gstMsg_{nullptr},
-      gstErrorMsg_{nullptr}, settings_{settings}, traceHandler_{&pipe_}
+: ProcessRunner::Base{ synchronizer, userProcessInfo }
+, threadSync_{ synchronizer }
+, processId_{ processId }
+, running_{ false }
+, gstPipeline_{ nullptr }
+, gstBus_{ nullptr }
+, gstMsg_{ nullptr }
+, gstErrorMsg_{ nullptr }
+, settings_{ settings }
+, traceHandler_{ &pipe_ }
 {
 }
-CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler &gstreamer)
-    : ProcessRunner::Base{gstreamer.threadSync_, gstreamer.userProcessInfo_},
-      threadSync_{gstreamer.threadSync_},
-      processId_{gstreamer.processId_}, running_{false},
-      gstPipeline_{nullptr}, gstBus_{nullptr}, gstMsg_{nullptr},
-      gstErrorMsg_{nullptr}, settings_{gstreamer.settings_}, traceHandler_{
-                                                                 &pipe_}
+CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler& gstreamer)
+: ProcessRunner::Base{ gstreamer.threadSync_, gstreamer.userProcessInfo_ }
+, threadSync_{ gstreamer.threadSync_ }
+, processId_{ gstreamer.processId_ }
+, running_{ false }
+, gstPipeline_{ nullptr }
+, gstBus_{ nullptr }
+, gstMsg_{ nullptr }
+, gstErrorMsg_{ nullptr }
+, settings_{ gstreamer.settings_ }
+, traceHandler_{ &pipe_ }
 {
 }
 
-static gboolean bus_call([[maybe_unused]] GstBus *bus, GstMessage *msg,
-                         gpointer data)
+static gboolean bus_call([[maybe_unused]] GstBus* bus, GstMessage* msg, gpointer data)
 {
-  auto *userData = reinterpret_cast<CGstreamerHandler::LogStructure *>(data);
+  auto* userData = reinterpret_cast<CGstreamerHandler::LogStructure*>(data);
   switch (GST_MESSAGE_TYPE(msg))
   {
   case GST_MESSAGE_EOS:
@@ -47,8 +56,8 @@ static gboolean bus_call([[maybe_unused]] GstBus *bus, GstMessage *msg,
 
   case GST_MESSAGE_ERROR:
   {
-    gchar *debug;
-    GError *error;
+    gchar* debug;
+    GError* error;
 
     gst_message_parse_error(msg, &error, &debug);
     g_free(debug);
@@ -60,8 +69,7 @@ static gboolean bus_call([[maybe_unused]] GstBus *bus, GstMessage *msg,
     break;
   }
   case GST_MESSAGE_STREAM_STATUS:
-    CLogger::Log(CLogger::Types::INFO,
-                 "GStreamer: Received GST message stream status");
+    CLogger::Log(CLogger::Types::INFO, "GStreamer: Received GST message stream status");
 
     break;
   default:
@@ -91,7 +99,7 @@ void CGstreamerHandler::FreeMemory()
     g_clear_error(&gstErrorMsg_);
 }
 
-void CGstreamerHandler::StartThread(const std::string &command)
+void CGstreamerHandler::StartThread(const std::string& command)
 {
   // First, clean up an old thread, if existent
   if (pipelineThread_.joinable())
@@ -100,7 +108,7 @@ void CGstreamerHandler::StartThread(const std::string &command)
   applicationPid_ = fork(); // Fork the process where GStreamer will run in
   if (applicationPid_ < 0)
   {
-    std::string response{strerror(errno)};
+    std::string response{ strerror(errno) };
     response = "Fork failed! Reason: " + response;
     throw std::runtime_error(response);
   }
@@ -132,8 +140,7 @@ void CGstreamerHandler::ParentWaitProcess()
     std::string message = pipe_.ReadBetweenChars('$');
     if (message == waitMessage_)
     {
-      CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1,
-                   " for child");
+      CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1, " for child");
       processSync_->WaitForProcess();
       waitCount++;
       pipe_.Write(waitDoneMsg_);
@@ -156,17 +163,16 @@ void CGstreamerHandler::ParentWaitProcess()
   // processSync_->WaitForProcess();
 }
 
-void CGstreamerHandler::RunPipelineThread(const std::string &pipelineStr)
+void CGstreamerHandler::RunPipelineThread(const std::string& pipelineStr)
 {
   if (pipelineThread_.joinable())
     pipelineThread_.join();
-  pipelineThread_ =
-      std::thread{&CGstreamerHandler::RunPipeline, this, pipelineStr};
+  pipelineThread_ = std::thread{ &CGstreamerHandler::RunPipeline, this, pipelineStr };
 }
 
-void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
+void CGstreamerHandler::RunPipeline(const std::string& pipelineStr)
 {
-  GMainLoop *loop = PipelineInitialization(pipelineStr);
+  GMainLoop* loop = PipelineInitialization(pipelineStr);
 
   // start playing
   CLogger::Log(CLogger::Types::INFO, "Starting the pipeline for gstreamer");
@@ -183,8 +189,7 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   running_ = false;
 }
 
-GMainLoop *
-CGstreamerHandler::PipelineInitialization(const std::string &pipelineStr)
+GMainLoop* CGstreamerHandler::PipelineInitialization(const std::string& pipelineStr)
 {
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize for gstreamer");
   ChildWaitProcess();
@@ -199,14 +204,13 @@ CGstreamerHandler::PipelineInitialization(const std::string &pipelineStr)
   if (!gst_is_initialized())
     gst_init(nullptr, nullptr);
 
-  GMainLoop *loop = g_main_loop_new(NULL, FALSE);
+  GMainLoop* loop = g_main_loop_new(NULL, FALSE);
 
   logUserData_.loop = loop;
   logUserData_.parentClass = this;
   tracerUserData_.parent = &traceHandler_;
 
-  gst_debug_add_log_function(&GStreamer::TraceHandler::TraceCallbackFunction,
-                             &tracerUserData_, nullptr);
+  gst_debug_add_log_function(&GStreamer::TraceHandler::TraceCallbackFunction, &tracerUserData_, nullptr);
 
   gstPipeline_ = gst_parse_launch(pipelineStr.c_str(), &gstErrorMsg_);
   gstBus_ = gst_pipeline_get_bus(GST_PIPELINE(gstPipeline_));
@@ -215,8 +219,7 @@ CGstreamerHandler::PipelineInitialization(const std::string &pipelineStr)
 
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for gstreamer");
   ChildWaitProcess();
-  std::this_thread::sleep_for(
-      std::chrono::milliseconds(userProcessInfo_.startDelay));
+  std::this_thread::sleep_for(std::chrono::milliseconds(userProcessInfo_.startDelay));
   return loop;
 }
 

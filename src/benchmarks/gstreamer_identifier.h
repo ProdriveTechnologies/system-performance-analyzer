@@ -1,10 +1,10 @@
 #pragma once
 
 //#include <functional>
-#include <string>
-
 #include "src/gstreamer/measurement_types.h"
 #include "src/helpers/helper_functions.h"
+
+#include <string>
 
 /**
  * @brief Placed in its own file because the hash function is necessary for an
@@ -17,18 +17,16 @@ struct SIdentifier
 {
   GStreamer::EMeasureType type;
   std::string moduleName;
-  bool operator==(const SIdentifier &r) const
-  {
-    return ((type == r.type) && (moduleName == r.moduleName));
-  }
+  bool operator==(const SIdentifier& r) const { return ((type == r.type) && (moduleName == r.moduleName)); }
 };
 } // namespace GStreamer
 
 namespace std
 {
-template <> struct hash<GStreamer::SIdentifier>
+template <>
+struct hash<GStreamer::SIdentifier>
 {
-  inline size_t operator()(const GStreamer::SIdentifier &k) const
+  inline size_t operator()(const GStreamer::SIdentifier& k) const
   {
     // computes the hash of a GStreamer::SIdentifier using a variant
     // of the Fowler-Noll-Vo hash function

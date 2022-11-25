@@ -1,13 +1,15 @@
 #include "run_process_base.h"
 
 #include "src/helpers/synchronizer.h"
+
 #include <string.h> // strcpy
 
 namespace ProcessRunner
 {
-Base::Base(Synchronizer *processSync, const Core::SProcess &userProcessInfo)
-    : processSync_{processSync}, pipelineThread_{}, userProcessInfo_{
-                                                        userProcessInfo}
+Base::Base(Synchronizer* processSync, const Core::SProcess& userProcessInfo)
+: processSync_{ processSync }
+, pipelineThread_{}
+, userProcessInfo_{ userProcessInfo }
 {
 }
 Base::~Base()
@@ -15,7 +17,10 @@ Base::~Base()
   if (pipelineThread_.joinable())
     pipelineThread_.join();
 }
-Base::Base(const Base &base) : processSync_{base.processSync_} {}
+Base::Base(const Base& base)
+: processSync_{ base.processSync_ }
+{
+}
 
 void Base::ChildWaitProcess()
 {

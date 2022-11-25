@@ -1,23 +1,23 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
-#include <string>
-
 #include "config.h"
 #include "src/helpers/json_helpers.h"
+
+#include <nlohmann/json.hpp>
+#include <string>
 
 namespace Core
 {
 class ConfigParser
 {
 public:
-  static SConfig Parse(const std::string &jsonFile);
+  static SConfig Parse(const std::string& jsonFile);
 
 private:
 };
 
 //*********** Conversions for the Core structs to JSON objects ***************//
-inline void from_json(const nlohmann::json &j, SThreshold &p)
+inline void from_json(const nlohmann::json& j, SThreshold& p)
 {
   j.at("name").get_to(p.name);
   std::string typeBuffer;
@@ -31,7 +31,7 @@ inline void from_json(const nlohmann::json &j, SThreshold &p)
   j.at("threshold").get_to(p.value);
 }
 
-inline void from_json(const nlohmann::json &j, SProcess &p)
+inline void from_json(const nlohmann::json& j, SProcess& p)
 {
   std::string typeStr;
   j.at("type").get_to(typeStr);
@@ -47,19 +47,15 @@ inline void from_json(const nlohmann::json &j, SProcess &p)
   // Parameter checks
   if (p.startDelay < 0)
   {
-    throw std::runtime_error(
-        "Start delay may not be negative! Please change the start_delay for " +
-        p.command);
+    throw std::runtime_error("Start delay may not be negative! Please change the start_delay for " + p.command);
   }
   if (p.processId < 0)
   {
-    throw std::runtime_error(
-        "Process IDs may not be negative! Please change the process ID for " +
-        p.command);
+    throw std::runtime_error("Process IDs may not be negative! Please change the process ID for " + p.command);
   }
 }
 
-inline void from_json(const nlohmann::json &j, SExports &p)
+inline void from_json(const nlohmann::json& j, SExports& p)
 {
   std::string exportType;
   j.at("export_type").get_to(exportType);
@@ -71,7 +67,7 @@ inline void from_json(const nlohmann::json &j, SExports &p)
     j.at("filename").get_to(p.filename);
 }
 
-inline void from_json(const nlohmann::json &j, SSettings &p)
+inline void from_json(const nlohmann::json& j, SSettings& p)
 {
   j.at("measure_loop_ms").get_to(p.measureLoopMs);
   if (j.contains("enable_proctime"))
@@ -92,7 +88,7 @@ inline void from_json(const nlohmann::json &j, SSettings &p)
   j.at("enable_logs").get_to(p.enableLogs);
 }
 
-inline void from_json(const nlohmann::json &j, SConfig &p)
+inline void from_json(const nlohmann::json& j, SConfig& p)
 {
   j.at("name").get_to(p.name);
   j.at("description").get_to(p.description);

@@ -1,15 +1,14 @@
 #pragma once
 
+#include "filesystem/statm.h"
+#include "src/helpers/helper_functions.h"
+
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <string>
 #include <variant>
 #include <vector>
-
-#include "src/helpers/helper_functions.h"
-#include <iostream>
-
-#include "filesystem/statm.h"
 
 namespace Linux
 {
@@ -21,18 +20,19 @@ struct Path
   std::string GetPath() const
   {
     std::string path;
-    for (const auto &e : pathItems)
+    for (const auto& e : pathItems)
       path += "/" + e;
     return path;
   }
-  template <typename... Args> void AddItems(const Args &... args)
+  template <typename... Args>
+  void AddItems(const Args&... args)
   {
     (pathItems.push_back(Helpers::GetString(args)), ...);
   }
   void Reset() { pathItems.clear(); }
   bool PathExists() const
   {
-    std::ifstream fileObj{GetPath()};
+    std::ifstream fileObj{ GetPath() };
     return fileObj.good();
   }
   //   void insertPath(const std::string& path) {
@@ -40,7 +40,7 @@ struct Path
   //   }
 };
 
-std::vector<std::string> GetFiles(const std::string &path);
+std::vector<std::string> GetFiles(const std::string& path);
 
 struct Stat
 {
@@ -98,141 +98,193 @@ struct Stat
   long unsigned envEnd;
   int exitCode;
 
-  Stat(const std::vector<std::string> &stats_)
-      : pid{std::stoi(stats_[0])}, exeName{stats_[1]}, state{stats_[2][0]},
-        ppid{std::stoi(stats_[3])}, pgrp{std::stoi(stats_[4])},
-        session{std::stoi(stats_[5])}, ttyNr{std::stoi(stats_[6])},
-        tpgid{std::stoi(stats_[7])}, flags{std::stoul(stats_[8])},
-        minFaults{std::stoul(stats_[9])}, cminFaults{std::stoul(stats_[10])},
-        majorFaults{std::stoul(stats_[11])}, cmajorFaults{std::stoul(
-                                                 stats_[12])},
-        utime{std::stoul(stats_[13])}, stime{std::stoul(stats_[14])},
-        cutime{std::stol(stats_[15])}, cstime{std::stol(stats_[16])},
-        priority{std::stol(stats_[17])}, nice{std::stol(stats_[18])},
-        numThreads{std::stol(stats_[19])}, itrealvalue{std::stol(stats_[20])},
-        starttime{std::stoull(stats_[21])}, vsize{std::stoul(stats_[22])},
-        rss{std::stoi(stats_[23])}, rsslim{std::stoul(stats_[24])},
-        startcode{std::stoul(stats_[25])}, endcode{std::stoul(stats_[26])},
-        startstack{std::stoul(stats_[27])}, kstkesp{std::stoul(stats_[28])},
-        kstkeip{std::stoul(stats_[29])}, signal{std::stoul(stats_[30])},
-        blocked{std::stoul(stats_[31])}, sigignore{std::stoul(stats_[32])},
-        sigcatch{std::stoul(stats_[33])}, wchan{std::stoul(stats_[34])},
-        nswap{std::stoul(stats_[35])}, cnswap{std::stoul(stats_[36])},
-        exitSignal{std::stoi(stats_[37])}, processor{std::stoi(stats_[38])},
-        rtPriority{std::stoul(stats_[39])}, policy{std::stoul(stats_[40])},
-        delayAcctBlkioTicks{std::stoull(stats_[41])},
-        guestTime{std::stoul(stats_[42])}, cguestTime{std::stoi(stats_[43])},
-        startData{std::stoul(stats_[44])}, endData{std::stoul(stats_[45])},
-        startBrk{std::stoul(stats_[46])}, argStart{std::stoul(stats_[47])},
-        argEnd{std::stoul(stats_[48])}, envStart{std::stoul(stats_[49])},
-        envEnd{std::stoul(stats_[50])}, exitCode{std::stoi(stats_[51])}
+  Stat(const std::vector<std::string>& stats_)
+  : pid{ std::stoi(stats_[0]) }
+  , exeName{ stats_[1] }
+  , state{ stats_[2][0] }
+  , ppid{ std::stoi(stats_[3]) }
+  , pgrp{ std::stoi(stats_[4]) }
+  , session{ std::stoi(stats_[5]) }
+  , ttyNr{ std::stoi(stats_[6]) }
+  , tpgid{ std::stoi(stats_[7]) }
+  , flags{ std::stoul(stats_[8]) }
+  , minFaults{ std::stoul(stats_[9]) }
+  , cminFaults{ std::stoul(stats_[10]) }
+  , majorFaults{ std::stoul(stats_[11]) }
+  , cmajorFaults{ std::stoul(stats_[12]) }
+  , utime{ std::stoul(stats_[13]) }
+  , stime{ std::stoul(stats_[14]) }
+  , cutime{ std::stol(stats_[15]) }
+  , cstime{ std::stol(stats_[16]) }
+  , priority{ std::stol(stats_[17]) }
+  , nice{ std::stol(stats_[18]) }
+  , numThreads{ std::stol(stats_[19]) }
+  , itrealvalue{ std::stol(stats_[20]) }
+  , starttime{ std::stoull(stats_[21]) }
+  , vsize{ std::stoul(stats_[22]) }
+  , rss{ std::stoi(stats_[23]) }
+  , rsslim{ std::stoul(stats_[24]) }
+  , startcode{ std::stoul(stats_[25]) }
+  , endcode{ std::stoul(stats_[26]) }
+  , startstack{ std::stoul(stats_[27]) }
+  , kstkesp{ std::stoul(stats_[28]) }
+  , kstkeip{ std::stoul(stats_[29]) }
+  , signal{ std::stoul(stats_[30]) }
+  , blocked{ std::stoul(stats_[31]) }
+  , sigignore{ std::stoul(stats_[32]) }
+  , sigcatch{ std::stoul(stats_[33]) }
+  , wchan{ std::stoul(stats_[34]) }
+  , nswap{ std::stoul(stats_[35]) }
+  , cnswap{ std::stoul(stats_[36]) }
+  , exitSignal{ std::stoi(stats_[37]) }
+  , processor{ std::stoi(stats_[38]) }
+  , rtPriority{ std::stoul(stats_[39]) }
+  , policy{ std::stoul(stats_[40]) }
+  , delayAcctBlkioTicks{ std::stoull(stats_[41]) }
+  , guestTime{ std::stoul(stats_[42]) }
+  , cguestTime{ std::stoi(stats_[43]) }
+  , startData{ std::stoul(stats_[44]) }
+  , endData{ std::stoul(stats_[45]) }
+  , startBrk{ std::stoul(stats_[46]) }
+  , argStart{ std::stoul(stats_[47]) }
+  , argEnd{ std::stoul(stats_[48]) }
+  , envStart{ std::stoul(stats_[49]) }
+  , envEnd{ std::stoul(stats_[50]) }
+  , exitCode{ std::stoi(stats_[51]) }
   {
     succesful = true;
   }
-  Stat(const Stat &stats)
-      : succesful{stats.succesful}, pid{stats.pid}, exeName{stats.exeName},
-        state{stats.state}, ppid{stats.ppid}, pgrp{stats.pgrp},
-        session{stats.session}, ttyNr{stats.ttyNr}, tpgid{stats.tpgid},
-        flags{stats.flags}, minFaults{stats.minFaults},
-        cminFaults{stats.cminFaults}, majorFaults{stats.majorFaults},
-        cmajorFaults{stats.cmajorFaults}, utime{stats.utime},
-        stime{stats.stime}, cutime{stats.cutime}, cstime{stats.cstime},
-        priority{stats.priority}, nice{stats.nice},
-        numThreads{stats.numThreads},
-        itrealvalue{stats.itrealvalue}, starttime{stats.starttime},
-        vsize{stats.vsize}, rss{stats.rss}, rsslim{stats.rsslim},
-        startcode{stats.startcode}, endcode{stats.endcode},
-        startstack{stats.startstack}, kstkesp{stats.kstkesp},
-        kstkeip{stats.kstkeip}, signal{stats.signal}, blocked{stats.blocked},
-        sigignore{stats.sigignore}, sigcatch{stats.sigcatch},
-        wchan{stats.wchan}, nswap{stats.nswap}, cnswap{stats.cnswap},
-        exitSignal{stats.exitSignal}, processor{stats.processor},
-        rtPriority{stats.rtPriority}, policy{stats.policy},
-        delayAcctBlkioTicks{stats.delayAcctBlkioTicks},
-        guestTime{stats.guestTime},
-        cguestTime{stats.cguestTime}, startData{stats.startData},
-        endData{stats.endData}, startBrk{stats.startBrk},
-        argStart{stats.argStart}, argEnd{stats.argEnd},
-        envStart{stats.envStart}, envEnd{stats.envEnd}, exitCode{stats.exitCode}
+  Stat(const Stat& stats)
+  : succesful{ stats.succesful }
+  , pid{ stats.pid }
+  , exeName{ stats.exeName }
+  , state{ stats.state }
+  , ppid{ stats.ppid }
+  , pgrp{ stats.pgrp }
+  , session{ stats.session }
+  , ttyNr{ stats.ttyNr }
+  , tpgid{ stats.tpgid }
+  , flags{ stats.flags }
+  , minFaults{ stats.minFaults }
+  , cminFaults{ stats.cminFaults }
+  , majorFaults{ stats.majorFaults }
+  , cmajorFaults{ stats.cmajorFaults }
+  , utime{ stats.utime }
+  , stime{ stats.stime }
+  , cutime{ stats.cutime }
+  , cstime{ stats.cstime }
+  , priority{ stats.priority }
+  , nice{ stats.nice }
+  , numThreads{ stats.numThreads }
+  , itrealvalue{ stats.itrealvalue }
+  , starttime{ stats.starttime }
+  , vsize{ stats.vsize }
+  , rss{ stats.rss }
+  , rsslim{ stats.rsslim }
+  , startcode{ stats.startcode }
+  , endcode{ stats.endcode }
+  , startstack{ stats.startstack }
+  , kstkesp{ stats.kstkesp }
+  , kstkeip{ stats.kstkeip }
+  , signal{ stats.signal }
+  , blocked{ stats.blocked }
+  , sigignore{ stats.sigignore }
+  , sigcatch{ stats.sigcatch }
+  , wchan{ stats.wchan }
+  , nswap{ stats.nswap }
+  , cnswap{ stats.cnswap }
+  , exitSignal{ stats.exitSignal }
+  , processor{ stats.processor }
+  , rtPriority{ stats.rtPriority }
+  , policy{ stats.policy }
+  , delayAcctBlkioTicks{ stats.delayAcctBlkioTicks }
+  , guestTime{ stats.guestTime }
+  , cguestTime{ stats.cguestTime }
+  , startData{ stats.startData }
+  , endData{ stats.endData }
+  , startBrk{ stats.startBrk }
+  , argStart{ stats.argStart }
+  , argEnd{ stats.argEnd }
+  , envStart{ stats.envStart }
+  , envEnd{ stats.envEnd }
+  , exitCode{ stats.exitCode }
   {
   }
   Stat() = default;
-  template <typename RetType> RetType GetValue(const std::string &value)
+  template <typename RetType>
+  RetType GetValue(const std::string& value)
   {
     auto procStat = nameToValue.find(value);
     if (procStat == nameToValue.end())
-      throw std::runtime_error("Linux Filesystem: /proc/<PID>/stat field " +
-                               value + " not found");
+      throw std::runtime_error("Linux Filesystem: /proc/<PID>/stat field " + value + " not found");
     auto resultVariant = procStat->second;
 
     // Get the pointer to the correct object in the variant
     RetType result;
     std::visit(
-        Overload{
-            [&result](auto &value) { result = static_cast<RetType>(*value); },
-        },
-        resultVariant);
+      Overload{
+        [&result](auto& value) { result = static_cast<RetType>(*value); },
+      },
+      resultVariant);
 
     return result;
   }
 
-  std::unordered_map<std::string,
-                     std::variant<int *, long unsigned *, long int *,
-                                  long long unsigned *, char *>>
-      nameToValue = {{"pid", &pid},
-                     {"state", &state},
-                     {"ppid", &ppid},
-                     {"pgrp", &pgrp},
-                     {"session", &session},
-                     {"tty_nr", &ttyNr},
-                     {"tpgid", &tpgid},
-                     {"flags", &flags},
-                     {"minflt", &minFaults},
-                     {"cminflt", &cminFaults},
-                     {"majflt", &majorFaults},
-                     {"cmajflt", &cmajorFaults},
-                     {"utime", &utime},
-                     {"stime", &stime},
-                     {"cutime", &cutime},
-                     {"cstime", &cstime},
-                     {"priority", &priority},
-                     {"nice", &nice},
-                     {"num_threads", &numThreads},
-                     {"itrealvalue", &itrealvalue},
-                     {"starttime", &starttime},
-                     {"vsize", &vsize},
-                     {"rss", &rss},
-                     {"rsslim", &rsslim},
-                     {"startcode", &startcode},
-                     {"endcode", &endcode},
-                     {"startstack", &startstack},
-                     {"kstkesp", &kstkesp},
-                     {"kstkeip", &kstkeip},
-                     {"signal", &signal},
-                     {"blocked", &blocked},
-                     {"sigignore", &sigignore},
-                     {"sigcatch", &sigcatch},
-                     {"wchan", &wchan},
-                     {"nswap", &nswap},
-                     {"cnswap", &cnswap},
-                     {"exit_signal", &exitSignal},
-                     {"processor", &processor},
-                     {"rt_priority", &rtPriority},
-                     {"policy", &policy},
-                     {"delayacct_blkio_ticks", &delayAcctBlkioTicks},
-                     {"guest_time", &guestTime},
-                     {"cguest_time", &cguestTime},
-                     {"start_data", &startData},
-                     {"end_data", &endData},
-                     {"start_brk", &startBrk},
-                     {"arg_start", &argStart},
-                     {"arg_end", &argEnd},
-                     {"env_start", &envStart},
-                     {"env_end", &envEnd},
-                     {"exit_code", &exitCode}};
+  std::unordered_map<std::string, std::variant<int*, long unsigned*, long int*, long long unsigned*, char*>>
+    nameToValue = { { "pid", &pid },
+                    { "state", &state },
+                    { "ppid", &ppid },
+                    { "pgrp", &pgrp },
+                    { "session", &session },
+                    { "tty_nr", &ttyNr },
+                    { "tpgid", &tpgid },
+                    { "flags", &flags },
+                    { "minflt", &minFaults },
+                    { "cminflt", &cminFaults },
+                    { "majflt", &majorFaults },
+                    { "cmajflt", &cmajorFaults },
+                    { "utime", &utime },
+                    { "stime", &stime },
+                    { "cutime", &cutime },
+                    { "cstime", &cstime },
+                    { "priority", &priority },
+                    { "nice", &nice },
+                    { "num_threads", &numThreads },
+                    { "itrealvalue", &itrealvalue },
+                    { "starttime", &starttime },
+                    { "vsize", &vsize },
+                    { "rss", &rss },
+                    { "rsslim", &rsslim },
+                    { "startcode", &startcode },
+                    { "endcode", &endcode },
+                    { "startstack", &startstack },
+                    { "kstkesp", &kstkesp },
+                    { "kstkeip", &kstkeip },
+                    { "signal", &signal },
+                    { "blocked", &blocked },
+                    { "sigignore", &sigignore },
+                    { "sigcatch", &sigcatch },
+                    { "wchan", &wchan },
+                    { "nswap", &nswap },
+                    { "cnswap", &cnswap },
+                    { "exit_signal", &exitSignal },
+                    { "processor", &processor },
+                    { "rt_priority", &rtPriority },
+                    { "policy", &policy },
+                    { "delayacct_blkio_ticks", &delayAcctBlkioTicks },
+                    { "guest_time", &guestTime },
+                    { "cguest_time", &cguestTime },
+                    { "start_data", &startData },
+                    { "end_data", &endData },
+                    { "start_brk", &startBrk },
+                    { "arg_start", &argStart },
+                    { "arg_end", &argEnd },
+                    { "env_start", &envStart },
+                    { "env_end", &envEnd },
+                    { "exit_code", &exitCode } };
 };
 
-Stat GetStats(const std::string &statLocation);
+Stat GetStats(const std::string& statLocation);
 
 /**
  * @brief Begin of the /proc/stat parsing
@@ -253,7 +305,7 @@ struct ProcStatData
     long jiffiesIoWait;
     long jiffiesIrq;
     long jiffiesSoftIrq;
-    Cpu operator-(const Cpu &r) const
+    Cpu operator-(const Cpu& r) const
     {
       Cpu newResult;
       newResult.jiffiesUser = jiffiesUser - r.jiffiesUser;
@@ -265,13 +317,13 @@ struct ProcStatData
       newResult.jiffiesSoftIrq = jiffiesSoftIrq - r.jiffiesSoftIrq;
       return newResult;
     }
-    Cpu(const ProcRow &cpuRow)
+    Cpu(const ProcRow& cpuRow)
     {
       if (!Add(cpuRow))
         throw std::runtime_error("/proc/stat CPU data incorrect!");
     }
     Cpu() = default;
-    bool Add(const std::vector<std::string> &cpuRow)
+    bool Add(const std::vector<std::string>& cpuRow)
     {
       if (cpuRow.size() < 9 || !StartsWithCpu(cpuRow.at(0)))
         return false;
@@ -284,20 +336,20 @@ struct ProcStatData
       jiffiesSoftIrq = std::stol(cpuRow.at(7));
       return true;
     }
-    static bool StartsWithCpu(const std::string &cpuString)
+    static bool StartsWithCpu(const std::string& cpuString)
     {
       return cpuString.size() >= 3 && cpuString.substr(0, 3) == "cpu";
     }
-    bool Add(const ProcRow &cpuRow) { return Add(cpuRow.rowElements); };
+    bool Add(const ProcRow& cpuRow) { return Add(cpuRow.rowElements); };
   };
-  ProcStatData operator-(const ProcStatData &r)
+  ProcStatData operator-(const ProcStatData& r)
   {
     ProcStatData newResult;
     newResult.totalCpu = this->totalCpu - r.totalCpu;
 
-    for (const auto &cpuLeft : cpus)
+    for (const auto& cpuLeft : cpus)
     {
-      const auto &cpuRight = r.cpus.find(cpuLeft.first);
+      const auto& cpuRight = r.cpus.find(cpuLeft.first);
       if (cpuRight == r.cpus.end())
         throw std::runtime_error("Field mismatch with CPUs!");
       auto newCpuValues = cpuLeft.second - cpuRight->second;
@@ -309,9 +361,8 @@ struct ProcStatData
   std::map<std::string, Cpu> cpus;
 };
 
-ProcStatData GetProcStat(const std::string &procStatLocation);
-long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
-                           const std::string &groupName);
+ProcStatData GetProcStat(const std::string& procStatLocation);
+long long GetProcStatGroup(const ProcStatData::Cpu& cpuField, const std::string& groupName);
 
 /**
  * @brief Begin of the /proc/meminfo parsing
@@ -320,24 +371,36 @@ long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
 struct MemInfoData
 {
   MemInfoData()
-      : memtotal{0}, memfree{0}, memavailable{0}, buffers{0}, cached{0},
-        swapcached{0}, active{0}, inactive{0}, swaptotal{0}, swapfree{0},
-        dirty{0}, fieldMap{{"MemTotal", &memtotal},
-                           {"MemFree", &memfree},
-                           {"MemAvailable", &memavailable}}
+  : memtotal{ 0 }
+  , memfree{ 0 }
+  , memavailable{ 0 }
+  , buffers{ 0 }
+  , cached{ 0 }
+  , swapcached{ 0 }
+  , active{ 0 }
+  , inactive{ 0 }
+  , swaptotal{ 0 }
+  , swapfree{ 0 }
+  , dirty{ 0 }
+  , fieldMap{ { "MemTotal", &memtotal }, { "MemFree", &memfree }, { "MemAvailable", &memavailable } }
   {
   }
-  MemInfoData(const MemInfoData &c)
-      : memtotal{c.memtotal}, memfree{c.memfree}, memavailable{c.memavailable},
-        buffers{c.buffers}, cached{c.cached}, swapcached{c.swapcached},
-        active{c.active}, inactive{c.inactive}, swaptotal{c.swaptotal},
-        swapfree{c.swapfree}, dirty{c.dirty}, fieldMap{{"MemTotal", &memtotal},
-                                                       {"MemFree", &memfree},
-                                                       {"MemAvailable",
-                                                        &memavailable}}
+  MemInfoData(const MemInfoData& c)
+  : memtotal{ c.memtotal }
+  , memfree{ c.memfree }
+  , memavailable{ c.memavailable }
+  , buffers{ c.buffers }
+  , cached{ c.cached }
+  , swapcached{ c.swapcached }
+  , active{ c.active }
+  , inactive{ c.inactive }
+  , swaptotal{ c.swaptotal }
+  , swapfree{ c.swapfree }
+  , dirty{ c.dirty }
+  , fieldMap{ { "MemTotal", &memtotal }, { "MemFree", &memfree }, { "MemAvailable", &memavailable } }
   {
   }
-  MemInfoData &operator=(const MemInfoData &r)
+  MemInfoData& operator=(const MemInfoData& r)
   {
     memtotal = r.memtotal;
     memfree = r.memfree;
@@ -384,29 +447,28 @@ struct MemInfoData
   // unsigned long sreclaimable = 0;
   // unsigned long sunreclaim = 0;
   // unsigned long kernelstack = 0;
-  const std::unordered_map<std::string, unsigned long *> fieldMap;
-  void ParseRow(const ProcRow &row)
+  const std::unordered_map<std::string, unsigned long*> fieldMap;
+  void ParseRow(const ProcRow& row)
   {
     auto field = fieldMap.find(row.rowElements.at(0));
     if (field != fieldMap.end())
       *(field->second) = std::stoul(row.rowElements.at(1));
   }
 
-  unsigned long GetField(const std::string &value, const bool optional = false)
+  unsigned long GetField(const std::string& value, const bool optional = false)
   {
     auto field = fieldMap.find(value);
     if (field == fieldMap.end())
     {
       if (optional)
         return 1;
-      throw std::runtime_error(
-          "Field not found in /proc/meminfo! Field name: " + value);
+      throw std::runtime_error("Field not found in /proc/meminfo! Field name: " + value);
     }
     return *(field->second);
   }
 };
 
-MemInfoData GetMemInfo(const std::string &memInfoLocation);
+MemInfoData GetMemInfo(const std::string& memInfoLocation);
 
 } // namespace FileSystem
 } // namespace Linux

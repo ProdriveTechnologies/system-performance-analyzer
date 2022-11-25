@@ -1,37 +1,41 @@
 #include "trace_parser.h"
 
+#include "handler.h"
+#include "measurement_types.h"
 #include "src/helpers/helper_functions.h"
+
 #include <iostream>
 #include <memory>
 
-#include "handler.h"
-#include "measurement_types.h"
-
 namespace GStreamer
 {
-void TraceHandler::TraceCallbackFunction(
-    [[maybe_unused]] GstDebugCategory *category, GstDebugLevel level,
-    [[maybe_unused]] const gchar *file, [[maybe_unused]] const gchar *function,
-    [[maybe_unused]] gint line, [[maybe_unused]] GObject *object,
-    GstDebugMessage *message, gpointer userData)
+void TraceHandler::TraceCallbackFunction([[maybe_unused]] GstDebugCategory* category,
+                                         GstDebugLevel level,
+                                         [[maybe_unused]] const gchar* file,
+                                         [[maybe_unused]] const gchar* function,
+                                         [[maybe_unused]] gint line,
+                                         [[maybe_unused]] GObject* object,
+                                         GstDebugMessage* message,
+                                         gpointer userData)
 {
   if (level != GST_LEVEL_TRACE)
   {
     // Cannot parse this message, return
     return;
   }
-  TracerUserData *logData = reinterpret_cast<TracerUserData *>(userData);
+  TracerUserData* logData = reinterpret_cast<TracerUserData*>(userData);
 
-  const char *debugMessage = gst_debug_message_get(message);
+  const char* debugMessage = gst_debug_message_get(message);
   std::string debugMessageStr = debugMessage;
   logData->parent->pipe_->Write("$" + debugMessageStr + "$");
 }
 
-void TraceHandler::ParseTraceStructure(const std::string &gstStructureStr)
+void TraceHandler::ParseTraceStructure(const std::string& gstStructureStr)
 {
   std::unique_ptr<GstStructure, decltype(&gst_structure_free)> gstStructure{
-      gst_structure_from_string(gstStructureStr.c_str(), nullptr),
-      gst_structure_free};
+    gst_structure_from_string(gstStructureStr.c_str(), nullptr),
+    gst_structure_free
+  };
   if (!gstStructure)
   {
     // No proper structure included, returning as there is no data to parse
@@ -40,7 +44,7 @@ void TraceHandler::ParseTraceStructure(const std::string &gstStructureStr)
   ParseTraceStructure(gstStructure.get());
 }
 
-void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
+void TraceHandler::ParseTraceStructure(const GstStructure* gstStructure)
 {
   GStreamer::EMeasurement trace;
   switch (Helpers::hash(g_quark_to_string(gstStructure->name)))
@@ -80,8 +84,7 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
   break;
   default:
     std::cout << "New: " << g_quark_to_string(gstStructure->name) << std::endl;
-    std::cout << "Result: " << gst_structure_to_string(gstStructure)
-              << std::endl;
+    std::cout << "Result: " << gst_structure_to_string(gstStructure) << std::endl;
   }
   if (trace.type != EMeasureType::NONE)
   {
@@ -96,7 +99,7 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
  * @param time format: 0:00:00.000000000
  * @return int
  */
-int TraceHandler::TimeToInt(const std::string &time)
+int TraceHandler::TimeToInt(const std::string& time)
 {
   std::string timeCpy = time;
   Helpers::replaceStr(timeCpy, ".", ":");

@@ -2,29 +2,27 @@
 
 #include <iostream>
 
-void SummaryWriter::PrintValue(const std::string_view &text,
-                               const std::string &value)
+void SummaryWriter::PrintValue(const std::string_view& text, const std::string& value)
 {
-  std::string row{text};
+  std::string row{ text };
   row += GetTabs(text.size());
   row += rowCenter_;
   row += value;
   PrintRow(row);
 }
 
-void SummaryWriter::PrintValue(const std::string_view &text,
-                               const std::string_view &value)
+void SummaryWriter::PrintValue(const std::string_view& text, const std::string_view& value)
 {
   PrintValue(text, std::string(value));
 }
 
-void SummaryWriter::PrintSection(const std::string_view &section)
+void SummaryWriter::PrintSection(const std::string_view& section)
 {
   PrintRow(section);
   PrintLine(sectionLine_);
 }
 
-void SummaryWriter::PrintSubSection(const std::string_view &subsection)
+void SummaryWriter::PrintSubSection(const std::string_view& subsection)
 {
   PrintRow(subsection);
   PrintLine(subsectionLine_);
@@ -35,7 +33,7 @@ void SummaryWriter::PrintSubSection(const std::string_view &subsection)
  *
  * @param title
  */
-void SummaryWriter::PrintTitle(const std::string_view &title)
+void SummaryWriter::PrintTitle(const std::string_view& title)
 {
   PrintRow(title);
   PrintRow();
@@ -46,7 +44,7 @@ void SummaryWriter::PrintTitle(const std::string_view &title)
  *
  * @param text the text to print on the row
  */
-void SummaryWriter::PrintRow(const std::string_view &text)
+void SummaryWriter::PrintRow(const std::string_view& text)
 {
   std::cout << text << std::endl;
 }

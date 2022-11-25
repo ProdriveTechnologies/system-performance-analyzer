@@ -1,16 +1,16 @@
 #pragma once
 
+#include "config.h"
+
+#include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
 
-#include "config.h"
-#include <iostream>
-
 namespace PlatformConfig
 {
-SConfig Parse(const std::string &jsonFile);
+SConfig Parse(const std::string& jsonFile);
 
-inline void from_json(const nlohmann::json &j, SDatafields &p)
+inline void from_json(const nlohmann::json& j, SDatafields& p)
 {
   j.at("name").get_to(p.name);
   p.nameClass = p.name;
@@ -52,8 +52,7 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
     if (!j.contains("maximum"))
     {
       CLogger::Log(CLogger::Types::WARNING,
-                   "Live mode requires a maximum for metric: " + p.name +
-                       " , live mode disabled!");
+                   "Live mode requires a maximum for metric: " + p.name + " , live mode disabled!");
     }
     else
     {
@@ -62,7 +61,7 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
   }
 }
 
-inline void from_json(const nlohmann::json &j, SConfig &p)
+inline void from_json(const nlohmann::json& j, SConfig& p)
 {
   j.at("name").get_to(p.name);
   j.at("sensors").get_to(p.sensors);

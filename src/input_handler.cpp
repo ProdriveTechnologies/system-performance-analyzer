@@ -2,6 +2,7 @@
 
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/logger.h"
+
 #include <iostream>
 #include <stdexcept>
 #include <string.h>
@@ -12,14 +13,13 @@
  * @return true Error occured, incorrect arguments
  * @return false Input arguments handled succesfully
  */
-bool CInputHandler::Parse(int argc, char *argv[])
+bool CInputHandler::Parse(int argc, char* argv[])
 {
   SUserArgs userArgs;
 
-  int optionIndex{0};
+  int optionIndex{ 0 };
   int c;
-  while ((c = getopt_long(argc, argv, "hc:s:l:", longopts_, &optionIndex)) !=
-         -1)
+  while ((c = getopt_long(argc, argv, "hc:s:l:", longopts_, &optionIndex)) != -1)
   {
     auto incorrectArgs = HandleOption(c, optionIndex);
     if (incorrectArgs || argc < 2)
@@ -36,8 +36,7 @@ bool CInputHandler::Parse(int argc, char *argv[])
  * @return true Error occured, incorrect arguments
  * @return false Option handled correctly
  */
-bool CInputHandler::HandleOption(const int getoptRetVal,
-                                 const int getoptOptIndex)
+bool CInputHandler::HandleOption(const int getoptRetVal, const int getoptOptIndex)
 {
   bool incorrectArgs = false;
   switch (getoptRetVal)
@@ -66,8 +65,7 @@ bool CInputHandler::HandleOption(const int getoptRetVal,
   case Helpers::ToUnderlying(Arguments::SENSORS):
   case Helpers::ToUnderlying(Arguments::LOG):
     if (optarg)
-      ParseArguments(static_cast<Arguments>(getoptRetVal), &userArguments_,
-                     optarg);
+      ParseArguments(static_cast<Arguments>(getoptRetVal), &userArguments_, optarg);
     break;
   case '?':
     std::cout << "Unknown option: " << optopt << std::endl;
@@ -86,8 +84,7 @@ bool CInputHandler::HandleOption(const int getoptRetVal,
 /**
  * @brief parses the arguments and stores it accordingly in the user arguments
  */
-void CInputHandler::ParseArguments(const Arguments arg, SUserArgs *userArgs,
-                                   char *extraArg)
+void CInputHandler::ParseArguments(const Arguments arg, SUserArgs* userArgs, char* extraArg)
 {
   switch (arg)
   {
@@ -104,7 +101,7 @@ void CInputHandler::ParseArguments(const Arguments arg, SUserArgs *userArgs,
   }
 }
 
-void CInputHandler::ParseLog(SUserArgs *userArgs, const std::string &extraArg)
+void CInputHandler::ParseLog(SUserArgs* userArgs, const std::string& extraArg)
 {
   try
   {
@@ -124,11 +121,10 @@ void CInputHandler::ParseLog(SUserArgs *userArgs, const std::string &extraArg)
       userArgs->enableDebugLog = true;
       break;
     default:
-      CLogger::Log(CLogger::Types::WARNING,
-                   "Log argument unknown! Disabled logging");
+      CLogger::Log(CLogger::Types::WARNING, "Log argument unknown! Disabled logging");
     }
   }
-  catch (const std::exception &err)
+  catch (const std::exception& err)
   {
     throw std::runtime_error("The \"log\" argument should be a numeric value!");
   }

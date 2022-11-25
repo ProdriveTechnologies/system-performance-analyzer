@@ -1,12 +1,12 @@
-#include <gtest/gtest.h>
-
 #include "src/helpers/helper_functions.h"
+
+#include <gtest/gtest.h>
 
 // Demonstrate some basic assertions.
 TEST(Helpers, SplitString)
 {
   char delim = ';';
-  std::vector<std::string> result = {"a", "bc", "d ", "e"};
+  std::vector<std::string> result = { "a", "bc", "d ", "e" };
   std::string text;
   for (size_t i = 0; i < result.size() - 1; i++)
   {
@@ -33,9 +33,9 @@ TEST(Helpers, IsNumber)
 
 TEST(Helpers, RemoveIntersection)
 {
-  std::vector<int> vec1{1, 2, 3, 4};
-  std::vector<int> vec2{4, 5, 6, 7};
-  std::vector<int> result1{1, 2, 3};
+  std::vector<int> vec1{ 1, 2, 3, 4 };
+  std::vector<int> vec2{ 4, 5, 6, 7 };
+  std::vector<int> result1{ 1, 2, 3 };
 
   auto tempvec = vec1;
   Helpers::RemoveIntersection(tempvec, vec2);
@@ -47,10 +47,10 @@ TEST(Helpers, RemoveIntersection)
 
 TEST(Helpers, CombineVectors)
 {
-  std::vector<int> vec1{1, 2, 3, 4};
-  std::vector<int> vec2{4, 5, 6, 7};
-  std::vector<int> result{1, 2, 3, 4, 4, 5, 6, 7};
-  std::vector<int> result2{4, 5, 6, 7, 1, 2, 3, 4};
+  std::vector<int> vec1{ 1, 2, 3, 4 };
+  std::vector<int> vec2{ 4, 5, 6, 7 };
+  std::vector<int> result{ 1, 2, 3, 4, 4, 5, 6, 7 };
+  std::vector<int> result2{ 4, 5, 6, 7, 1, 2, 3, 4 };
 
   auto combined = Helpers::CombineVectors(vec1, vec2);
   EXPECT_EQ(result, combined);
