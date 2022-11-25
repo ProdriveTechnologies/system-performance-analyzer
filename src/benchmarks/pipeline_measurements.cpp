@@ -65,6 +65,7 @@ std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
   for (auto &e : streams_)
   {
     size_t queueSize = e.second->GetMeasurementsSize();
+
     // Read each measurement of the GStreamer pipeline and put it in a map
     std::vector<PlatformConfig::SMeasureField> measureField_;
     std::unordered_map<Identifier, GStreamer::Measurement> summarizeMap;
@@ -77,7 +78,7 @@ std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
     }
     // Convert the measured data to an Exports::MeasuredItem type
     Exports::PipelineInfo gsData;
-    gsData.pipelineId = e.second->GetThreadPid();
+    gsData.pipelineId = e.second->GetProcessId();
     for (const auto &m : summarizeMap)
     {
       Exports::MeasuredItem field{GetUniqueId(e.first, m.first),

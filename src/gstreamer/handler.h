@@ -17,12 +17,16 @@ public:
   CGstreamerHandler(const CGstreamerHandler &gstreamer);
   ~CGstreamerHandler();
 
-  void StartThread(const std::string &command);
+  void StartThread(const std::string &pipelineStr);
+
   void RunPipelineThread(const std::string &pipelineStr);
 
   void RunPipeline(const std::string &pipelineStr);
+  // void ChildExecPipeline(const std::string &pipelineStr);
 
-  int GetThreadPid() const { return threadPid_; }
+  void ParentWaitProcess();
+
+  int GetThreadPid() const { return applicationPid_; }
   std::string GetPipeline() const { return pipelineStr_; }
   bool IsRunning() const { return running_; }
 
@@ -42,7 +46,6 @@ public:
 private:
   std::string pipelineStr_;
   Synchronizer *threadSync_;
-  std::atomic<int> threadPid_;
   const int processId_;
   bool running_;
   GstElement *gstPipeline_;
@@ -54,11 +57,8 @@ private:
   GStreamer::TraceHandler traceHandler_;
   // std::thread pipelineThread_;
 
+  pid_t applicationPid_;
+
   void FreeMemory();
   void SetTracingEnvironmentVars();
-  static void logFunction(GstDebugCategory *category, GstDebugLevel level,
-                          const gchar *file, const gchar *function, gint line,
-                          GObject *object, GstDebugMessage *message,
-                          gpointer userData) G_GNUC_NO_INSTRUMENT;
-  inline static int q = 0;
 };

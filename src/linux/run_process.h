@@ -28,9 +28,6 @@ private:
   bool running_;
   std::string processName_;
 
-  Linux::PipeCommunicator pipe_;
-
-  void ChildWaitProcess();
   void ParentWaitProcess();
   void ChildExecProcess(const std::string &command);
 };

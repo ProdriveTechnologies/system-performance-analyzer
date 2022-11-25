@@ -22,6 +22,8 @@ public:
     return readSize;
   }
   std::string ReadUntil(const size_t bytes);
+  unsigned int GetBytesAvailable();
+  std::string ReadBetweenChars(const char character);
 
 private:
   int parentReadPipe_[2];
@@ -31,6 +33,7 @@ private:
   static constexpr int READ = 0;
   static constexpr int WRITE = 1;
   static constexpr size_t READ_BUFFER_SIZE = 1024;
+  static constexpr int specialCharsToCount_ = 2;
 };
 
 } // namespace Linux

@@ -77,36 +77,23 @@ void RunProcess::ChildExecProcess(const std::string &command)
   exit(EXIT_SUCCESS);
 }
 
-void RunProcess::ChildWaitProcess()
-{
-  pipe_.Write("WAIT");
-  char readMsg[5];
-  while (true)
-  {
-    pipe_.Read(readMsg, 4);
-
-    if (strcmp(readMsg, "DONE") == 0)
-      return;
-  }
-}
-
 void RunProcess::ParentWaitProcess()
 {
   int waitCount = 0;
   const int maxWaitCount = 2; // Initial waits are twice
-  char readMsg[5];
+  char readMsg[7];
   while (waitCount != maxWaitCount)
   {
-    pipe_.Read(readMsg, 4);
+    pipe_.Read(readMsg, waitMessage_.size());
 
-    if (strcmp(readMsg, "WAIT") == 0)
+    if (strcmp(readMsg, waitMessage_.data()) == 0)
     {
       CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1,
                    " for child");
       processSync_->WaitForProcess();
       waitCount++;
       strcpy(readMsg, "    ");
-      pipe_.Write("DONE");
+      pipe_.Write(waitDoneMsg_);
     }
   }
   // Waiting until the stress test is fully executes

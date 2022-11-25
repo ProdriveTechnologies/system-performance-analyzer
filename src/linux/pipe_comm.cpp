@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string.h>
+#include <sys/ioctl.h> // GetBytesAvailable()
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -56,6 +57,17 @@ void PipeCommunicator::Write(void *message, const size_t bytes)
   }
 }
 
+unsigned int PipeCommunicator::GetBytesAvailable()
+{
+  int fd = isParent_ ? parentReadPipe_[READ] : parentWritePipe_[READ];
+  unsigned int bytes;
+  auto retVal = ioctl(fd, FIONREAD, &bytes);
+  if (retVal < 0)
+    throw std::runtime_error("PipeCommunicator: ioctl call failed! Could not "
+                             "retrieve bytes available!");
+  return bytes;
+}
+
 std::string PipeCommunicator::Read()
 {
   char charBuff[READ_BUFFER_SIZE];
@@ -103,6 +115,30 @@ std::string PipeCommunicator::ReadUntil(const size_t bytes)
   }
   messageData[bytes] = '\0';
   return messageData;
+}
+
+/**
+ * @brief Reads until the begin char and end char are received
+ *
+ * @param message The message
+ * @param specialChar
+ * @return std::string
+ */
+std::string PipeCommunicator::ReadBetweenChars(const char specialChar)
+{
+  std::string result;
+  int receivedCharacter = 0;
+  char singleChar[2];
+  while (receivedCharacter != specialCharsToCount_)
+  {
+    auto readChars = Read(singleChar, 1);
+    if (readChars == 0)
+      continue;
+    result += singleChar[0];
+    if (singleChar[0] == specialChar)
+      receivedCharacter++;
+  }
+  return result;
 }
 
 } // namespace Linux

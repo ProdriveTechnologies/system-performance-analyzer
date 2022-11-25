@@ -1,0 +1,90 @@
+/** Classification:
+System resource usage values: 1
+
+*/
+{
+    "name": "Jetson AGX Xavier",
+    "sensors": [
+        {
+            "name": "cpu",
+            "type": "ARRAY",
+            "size": 16,
+            "data": [
+                {
+                    "name": "cooling",
+                    "id": "cooling",
+                    "type": "DIRECT",
+                    "path": "/sys/class/thermal/cooling_device$INDEX$/cur_state"
+                },
+                {
+                    "name": "CPU utilization",
+                    "id": "cpu",
+                    "type": "PROC",
+                    "value": "all_excl_idle",
+                    "compared_to": "all",
+                    "path": "cpu$INDEX$"
+                },
+                {
+                    "name": "CPU IO time",
+                    "type": "PROC",
+                    "value": "iowait",
+                    "compared_to": "all",
+                    "path": "cpu$INDEX$"
+                }
+            ]
+        },
+        {
+            "name": "CPU utilization",
+            "class": 1,
+            "type": "PROC",
+            "compared_to": "all",
+            "value": "all_excl_idle",
+            "path": "cpu"
+        },
+        {
+            "name": "CPU IO time",
+            "class": 1,
+            "id": "cpu-io", // Must be an unique identifier, how to handle arrays? add id at the back
+            "type": "PROC",
+            "compared_to": "all",
+            "value": "iowait",
+            "path": "cpu"
+        },
+        {
+            "name": "Memory usage",
+            "class": 1,
+            "type": "PROCMEM",
+            "value": "MemFree"
+        },
+        {
+            "name": "Memory utilization",
+            "class": 1,
+            "type": "PROCMEM",
+            "value": "MemFree",
+            "compared_to": "MemTotal"
+        },
+        {
+            "name": "Priority",
+            "class": 1,
+            "type": "PIDSTAT",
+            "path": "/proc/$PID$/stat",
+            "value": "priority",
+            "compared_to": "stime"
+        },
+        {
+            "name": "Size",
+            "class": 1,
+            "type": "PIDSTATM",
+            "path": "/proc/$PID$/stat",
+            "value": "size",
+            "compared_to": "data"
+        },
+        {
+            "name": "Timerslack",
+            //"class": 1,
+            "type": "DIRECT_PID",
+            "path2": "/sys/class/thermal/cooling_device0/cur_state",
+            "path": "/proc/$PID$/timerslack_ns"
+        }
+    ]
+}

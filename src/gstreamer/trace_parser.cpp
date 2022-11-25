@@ -22,22 +22,23 @@ void TraceHandler::TraceCallbackFunction(
   }
   TracerUserData *logData = reinterpret_cast<TracerUserData *>(userData);
 
-  std::unique_ptr<GstStructure, decltype(&gst_structure_free)> gstStructure{
-      gst_structure_from_string(gst_debug_message_get(message), nullptr),
-      gst_structure_free};
+  const char *debugMessage = gst_debug_message_get(message);
+  std::cout << "Gst structure string1: " << debugMessage << std::endl;
+  std::string debugMessageStr = debugMessage;
+  logData->parent->pipe_->Write("$" + debugMessageStr + "$");
+}
 
+void TraceHandler::ParseTraceStructure(const std::string &gstStructureStr)
+{
+  std::unique_ptr<GstStructure, decltype(&gst_structure_free)> gstStructure{
+      gst_structure_from_string(gstStructureStr.c_str(), nullptr),
+      gst_structure_free};
   if (!gstStructure)
   {
     // No proper structure included, returning as there is no data to parse
     return;
   }
-  // if (object == nullptr || object == NULL)
-  //   std::cout << "Ofcourse! Object pointer is a null pointer, how related..."
-  //             << std::endl;
-  // std::cout << "File: " << file << " and functor" << function << std::endl;
-  // std::cout << gst_debug_message_get(message) << std::endl;
-  // if (gstStructure->)
-  logData->parent->ParseTraceStructure(gstStructure.get());
+  ParseTraceStructure(gstStructure.get());
 }
 
 void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
@@ -59,9 +60,6 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     trace.type = MeasureType::FPS;
     trace.pluginName = gst_structure_get_string(gstStructure, "pad");
     gst_structure_get_uint(gstStructure, "fps", &trace.valueInt);
-    std::cout << "FPS: " << trace.valueInt << std::endl;
-    std::cout << "Frame rate! : " << gst_structure_to_string(gstStructure)
-              << std::endl;
   }
   break;
   default:

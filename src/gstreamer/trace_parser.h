@@ -4,6 +4,7 @@
 
 #include "measurement_types.h"
 #include "src/helpers/atomic_queue.h"
+#include "src/linux/pipe_comm.h"
 
 class CGstreamerHandler; // Pre-defined value
 
@@ -12,6 +13,8 @@ namespace GStreamer
 class TraceHandler
 {
 public:
+  TraceHandler(Linux::PipeCommunicator *pipe) : pipe_{pipe} {}
+
   static void TraceCallbackFunction([[maybe_unused]] GstDebugCategory *category,
                                     GstDebugLevel level,
                                     [[maybe_unused]] const gchar *file,
@@ -19,6 +22,7 @@ public:
                                     [[maybe_unused]] gint line, GObject *object,
                                     GstDebugMessage *message,
                                     gpointer user_data);
+  void ParseTraceStructure(const std::string &gstStructureStr);
   void ParseTraceStructure(const GstStructure *gstStructure);
 
   struct TracerUserData
@@ -49,6 +53,7 @@ public:
 
 private:
   Helpers::AtomicQueue<Measurement> fifoMeasurements;
+  Linux::PipeCommunicator *pipe_;
   // static std::unordered_map()
 };
 } // namespace GStreamer

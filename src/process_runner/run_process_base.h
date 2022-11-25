@@ -1,8 +1,11 @@
 #pragma once
 
 #include <string>
+// #include <string_view>
 #include <thread>
 #include <vector>
+
+#include "src/linux/pipe_comm.h"
 // #include "src/helpers/synchronizer.h"
 class Synchronizer;
 
@@ -16,8 +19,14 @@ public:
   Base(const Base &base);
   virtual void StartThread(const std::string &command) = 0;
 
+  void ChildWaitProcess();
+
 protected:
   Synchronizer *processSync_;
   std::thread pipelineThread_;
+  Linux::PipeCommunicator pipe_;
+
+  inline static const std::string waitMessage_ = "$WAIT$";
+  inline static const std::string waitDoneMsg_ = "$DONE$";
 }; // namespace ProcessRunner
 } // namespace ProcessRunner

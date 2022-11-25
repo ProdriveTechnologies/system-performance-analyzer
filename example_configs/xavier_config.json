@@ -1,0 +1,239 @@
+/** Classification:
+System resource usage values: 1
+
+*/
+{
+    "name": "Jetson AGX Xavier",
+    "sensors": [
+        {
+            "name": "cpu",
+            "type": "ARRAY",
+            "size": 8,
+            "data": [
+                {
+                    "name": "Current Frequency",
+                    "class": 1,
+                    "type": "DIRECT",
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq"
+                },
+                {
+                    "name": "Current Frequency",
+                    "class": 1,
+                    "type": "DIRECT",
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq"
+                },
+                {
+                    "name": "Min Frequency",
+                    "class": 1,
+                    "type": "DIRECT",
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_min_freq"
+                },
+                {
+                    "name": "Max Frequency",
+                    "class": 1,
+                    "type": "DIRECT",
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_max_freq"
+                },
+                {
+                    "name": "CPU utilization per core",
+                    "class": 1,
+                    "type": "PROC",
+                    "value": "all_excl_idle",
+                    "compared_to": "all",
+                    "path": "cpu$INDEX$"
+                },
+                {
+                    "name": "CPU IO time",
+                    "class": 1,
+                    "type": "PROC",
+                    "value": "iowait",
+                    "compared_to": "all",
+                    "path": "cpu$INDEX$"
+                }
+            ]
+        },
+        {
+            "name": "CPU utilization",
+            "class": 1,
+            "type": "PROC",
+            "compared_to": "all",
+            "value": "all_excl_idle",
+            "path": "cpu"
+        },
+        {
+            "name": "CPU IO time",
+            "class": 1,
+            "type": "PROC",
+            "compared_to": "all",
+            "value": "iowait",
+            "path": "cpu"
+        },
+        {
+            "name": "Memory usage",
+            "class": 1,
+            "type": "PROCMEM",
+            "value": "MemFree"
+        },
+        {
+            "name": "Memory utilization",
+            "class": 1,
+            "type": "PROCMEM",
+            "value": "MemFree",
+            "compared_to": "MemTotal"
+        },
+        // {
+        //     "name": "Memory usage",
+        //     "class": 1,
+        //     "type": "PROCMEM",
+        //     "path": "/proc/$PID$/statm"
+        // }
+        /*******************************************/
+        /**
+        * @brief Temperature sensors on the Xavier
+        */
+        {
+            "name": "CPU temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone0/temp"
+        },
+        {
+            "name": "GPU temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone1/temp"
+        },
+        {
+            "name": "AUX temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone2/temp"
+        },
+        {
+            "name": "Always On thermal zone",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone3/temp"
+        },
+        {
+            "name": "PMIC-Die temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone4/temp"
+        },
+        {
+            "name": "Board temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone5/temp"
+        },
+        {
+            "name": "Diode temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone6/temp"
+        },
+        {
+            "name": "FAN temperature",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/thermal/thermal_zone7/temp"
+        },
+        /*******************************************/
+        /**
+        * @brief Voltages and current to GPU/CPU/SOC
+        */
+        {
+            "name": "Voltage GPU",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon2/in1_input"
+        },
+        {
+            "name": "Current GPU",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon2/curr1_input"
+        },
+        {
+            "name": "Voltage CPU",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon2/in2_input"
+        },
+        {
+            "name": "Current CPU",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon2/curr2_input"
+        },
+        {
+            "name": "Voltage SOC",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon2/in3_input"
+        },
+        {
+            "name": "Current SOC",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon2/curr3_input"
+        },
+        /*******************************************/
+        /**
+        * @brief Voltages and current to GPU/CPU/SOC
+        */
+        {
+            "name": "Voltage Computer-vision components",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon3/in1_input"
+        },
+        {
+            "name": "Current Computer-vision components",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon3/curr1_input"
+        },
+        {
+            "name": "Voltage VDDRQ",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon3/in2_input"
+        },
+        {
+            "name": "Current VDDRQ",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon3/curr2_input"
+        },
+        {
+            "name": "Voltage SYS5V",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon3/in3_input"
+        },
+        {
+            "name": "Current SYS5V",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/class/hwmon/hwmon3/curr3_input"
+        },
+        /*******************************************/
+        /**
+        * @brief EMC information
+        */
+        {
+            "name": "EMC Frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/bpmp/debug/clk/emc/rate"
+        } //,
+        // {
+        //     "name": "EMC Utilization",
+        //     "class": 1,
+        //     "type": "DIRECT",
+        //     "path": "/sys/kernel/actmon_avg_activity/mc_all"
+        // }
+    ]
+}

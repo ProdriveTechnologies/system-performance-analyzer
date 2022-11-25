@@ -1,99 +1,37 @@
 #include "handler.h"
 
-#include "src/helpers/synchronizer.h"
 #include <gst/gst.h>
 #include <iostream>
+#include <memory>
 #include <stdlib.h>
 #include <sys/types.h> //gettid()
 #include <thread>
 #include <unistd.h>
+#include <vector>
 
 #include "src/gstreamer/measurement_types.h"
 #include "src/helpers/logger.h"
+#include "src/helpers/synchronizer.h"
 #include "trace_parser.h"
-#include <memory>
-#include <vector>
-
-/* Structure to contain all our information, so we can pass it to callbacks */
-typedef struct _CustomData
-{
-  GstElement *pipeline;
-  GstElement *source;
-  GstElement *convert;
-  GstElement *resample;
-  GstElement *sink;
-} CustomData;
-
-/* This function will be called by the pad-added signal */
-/**
- * @brief This function is not used anymore and can therefore be
- * removed (including the unnecessary data)
- */
-static void pad_added_handler(GstElement *src, GstPad *new_pad,
-                              CustomData *data)
-{
-  std::cout << "daymy" << std::endl;
-  GstPad *sink_pad = gst_element_get_static_pad(data->convert, "sink");
-  GstPadLinkReturn ret;
-  GstCaps *new_pad_caps = NULL;
-  GstStructure *new_pad_struct = NULL;
-  const gchar *new_pad_type = NULL;
-
-  g_print("Received new pad '%s' from '%s':\n", GST_PAD_NAME(new_pad),
-          GST_ELEMENT_NAME(src));
-
-  /* If our converter is already linked, we have nothing to do here */
-  if (gst_pad_is_linked(sink_pad))
-  {
-    g_print("We are already linked. Ignoring.\n");
-    return;
-  }
-
-  /* Check the new pad's type */
-  new_pad_caps = gst_pad_get_current_caps(new_pad);
-  new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
-  new_pad_type = gst_structure_get_name(new_pad_struct);
-  if (!g_str_has_prefix(new_pad_type, "audio/x-raw"))
-  {
-    g_print("It has type '%s' which is not raw audio. Ignoring.\n",
-            new_pad_type);
-    return;
-  }
-
-  /* Attempt the link */
-  ret = gst_pad_link(new_pad, sink_pad);
-  if (GST_PAD_LINK_FAILED(ret))
-  {
-    g_print("Type is '%s' but link failed.\n", new_pad_type);
-  }
-  else
-  {
-    g_print("Link succeeded (type '%s').\n", new_pad_type);
-  }
-  /* Unreference the new pad's caps, if we got them */
-  if (new_pad_caps != NULL)
-    gst_caps_unref(new_pad_caps);
-
-  /* Unreference the sink pad */
-  gst_object_unref(sink_pad);
-}
 
 CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer,
                                      const int processId)
     : ProcessRunner::Base{synchronizer}, threadSync_{synchronizer},
       processId_{processId}, running_{false}, gstPipeline_{nullptr},
-      gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{nullptr}
+      gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{nullptr}, traceHandler_{
+                                                                     &pipe_}
 {
 }
 CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler &gstreamer)
     : ProcessRunner::Base{gstreamer.threadSync_},
-      threadSync_{gstreamer.threadSync_},
-      processId_{gstreamer.processId_}, running_{false}, gstPipeline_{nullptr},
-      gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{nullptr}
+      threadSync_{gstreamer.threadSync_}, processId_{gstreamer.processId_},
+      running_{false}, gstPipeline_{nullptr}, gstBus_{nullptr},
+      gstMsg_{nullptr}, gstErrorMsg_{nullptr}, traceHandler_{&pipe_}
 {
 }
 
-static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data)
+static gboolean bus_call([[maybe_unused]] GstBus *bus, GstMessage *msg,
+                         gpointer data)
 {
   auto *userData = reinterpret_cast<CGstreamerHandler::LogStructure *>(data);
   switch (GST_MESSAGE_TYPE(msg))
@@ -153,9 +91,60 @@ void CGstreamerHandler::FreeMemory()
 
 void CGstreamerHandler::StartThread(const std::string &command)
 {
+  // if (pipelineThread_.joinable())
+  //   pipelineThread_.join();
+  // pipelineThread_ = std::thread{&CGstreamerHandler::RunPipeline, this,
+  // command};
   if (pipelineThread_.joinable())
     pipelineThread_.join();
-  pipelineThread_ = std::thread{&CGstreamerHandler::RunPipeline, this, command};
+  applicationPid_ = fork();
+  if (applicationPid_ < 0)
+  {
+    std::string response{strerror(errno)};
+    response = "Fork failed! Reason: " + response;
+    throw std::runtime_error(response);
+  }
+  else if (applicationPid_ == 0)
+  {
+    pipe_.SetChild();
+    RunPipeline(command);
+    exit(EXIT_SUCCESS);
+  }
+  else
+  {
+    if (!gst_is_initialized())
+      gst_init(nullptr, nullptr);
+    pipe_.SetParent();
+    pipelineThread_ = std::thread(&CGstreamerHandler::ParentWaitProcess, this);
+    // Parent process
+    return;
+  }
+}
+void CGstreamerHandler::ParentWaitProcess()
+{
+  int waitCount = 0;
+  const int maxWaitCount = 3; // Initial waits are twice
+  while (waitCount != maxWaitCount)
+  {
+    std::string message = pipe_.ReadBetweenChars('$');
+    if (message == waitMessage_)
+    {
+      CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1,
+                   " for child");
+      processSync_->WaitForProcess();
+      waitCount++;
+      pipe_.Write(waitDoneMsg_);
+    }
+    else
+    {
+      std::cout << "Message received; " << message << std::endl;
+      message.pop_back();
+      message.erase(0, 1);
+      traceHandler_.ParseTraceStructure(message);
+    }
+  }
+  // Waiting until the stress test is fully executes
+  // processSync_->WaitForProcess();
 }
 
 void CGstreamerHandler::RunPipelineThread(const std::string &pipelineStr)
@@ -164,58 +153,6 @@ void CGstreamerHandler::RunPipelineThread(const std::string &pipelineStr)
     pipelineThread_.join();
   pipelineThread_ =
       std::thread{&CGstreamerHandler::RunPipeline, this, pipelineStr};
-}
-
-/**
- * @note This function is NOT used! Anymore RIP!
- * @todo remove this function, as it is not in use anymore...
- */
-void CGstreamerHandler::logFunction(GstDebugCategory *category,
-                                    GstDebugLevel level, const gchar *file,
-                                    const gchar *function, gint line,
-                                    GObject *object, GstDebugMessage *message,
-                                    gpointer userData)
-{
-  // std::cout << "category: " << category->name << " and "
-  //          << category->description << std::endl;
-  if (strcmp(category->name, "GST_TRACER"))
-  {
-    std::cout << "Not a GST_TRACER subsystem!" << std::endl;
-    return;
-  }
-  if (object == nullptr)
-  {
-    std::cout << "Thingy relates to nothingg" << std::endl;
-  }
-  else
-  {
-    std::cout << "THINGY relates to something: "
-              << object->g_type_instance.g_class->g_type << std::endl;
-  }
-  LogStructure *logData = reinterpret_cast<LogStructure *>(userData);
-  q++;
-  std::cout << "File: " << file << "  line: " << line
-            << " function: " << function
-            << "  and type: " << gst_debug_message_get(message)
-            << "\n and Q: " << q << std::endl;
-
-  GstStructure *gstStructure =
-      gst_structure_from_string(gst_debug_message_get(message), nullptr);
-  std::cout << "Came here already" << std::endl;
-  if (gstStructure == NULL)
-  {
-    std::cout << "Couldn't parse it" << std::endl;
-  }
-  else
-  {
-    auto value = gst_structure_get_value(gstStructure, "average-cpuload");
-    if (value != NULL)
-    {
-      std::cout << "Value: " << value->data->v_int << std::endl;
-    }
-    std::cout << "GstStructure" << gstStructure->name
-              << " types: " << gstStructure->type << " values" << std::endl;
-  }
 }
 
 void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
@@ -347,7 +284,8 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
 
   threadSync_->setThreadId(gettid());
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize for gstreamer");
-  threadSync_->WaitForProcess();
+  ChildWaitProcess();
+  //  threadSync_->WaitForProcess();
   running_ = true;
   pipelineStr_ = pipelineStr;
   FreeMemory();
@@ -373,7 +311,8 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   gst_object_unref(bussy);
 
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for gstreamer");
-  threadSync_->WaitForProcess();
+  // threadSync_->WaitForProcess();
+  ChildWaitProcess();
   CLogger::Log(CLogger::Types::INFO,
                "Starting the pipeline (finally) for gstreamer");
   // start playing
@@ -382,24 +321,11 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   g_main_loop_run(loop);
   g_source_remove(bus_watch_id);
   g_main_loop_unref(loop);
-  // wait until error or EOS ( End Of Stream )
-  // gstBus_ = gst_element_get_bus(gstPipeline_);
-  // do
-  // {
-  //   if (gstMsg_ != nullptr)
-  //     g_clear_error(&gstErrorMsg_);
 
-  //   gstMsg_ = gst_bus_timed_pop_filtered(
-  //       gstBus_, GST_CLOCK_TIME_NONE,
-  //       static_cast<GstMessageType>(GST_MESSAGE_ERROR | GST_MESSAGE_EOS |
-  //                                   GST_MESSAGE_LATENCY | GST_MESSAGE_ANY));
-
-  //   //   std::cout << "Received a message" << std::endl;
-  //   //   std::cout << "Message type: " << gstMsg_->type << std::endl;
-
-  // } while (gstMsg_->type != GST_MESSAGE_EOS);
-
+  ChildWaitProcess();
   threadSync_->WaitForProcess();
+  FreeMemory();
+  gst_deinit();
   running_ = false;
 }
 
@@ -412,5 +338,4 @@ void CGstreamerHandler::SetTracingEnvironmentVars()
   setenv("GST_DEBUG", "GST_TRACER:7", true);
   // setenv("GST_TRACERS", "rusage;latency;framerate", true);
   setenv("GST_TRACERS", "framerate", true);
-  // setenv("GST_TRACE_CHANNEL", "");
 }

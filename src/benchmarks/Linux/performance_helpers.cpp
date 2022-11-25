@@ -193,7 +193,7 @@ GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
     // This is the loop for the datapoints, only the uniqueId datapoint is used
     for (const auto &e2 : e.processInfo)
     {
-      for (const auto &e3 : e.measuredItems)
+      for (const auto &e3 : e2.measuredItems)
         if (e3.id == uniqueId)
           summarizedData.AddDataPoint(e3);
     }
