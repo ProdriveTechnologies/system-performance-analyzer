@@ -70,7 +70,8 @@ std::vector<Sensors> CSensors::GetSensors() const
   {
     Sensors sensor{datafield};
     sensor.data = PerformanceHelpers::GetSummarizedData(
-        Measurements::Classification::SYSTEM, allData_, datafield.id);
+        Measurements::Classification::SYSTEM, allData_, datafield.id,
+        sensor.multiplier);
     result.push_back(sensor);
   }
   // Add the collective groups, such as the combined cpu's instead of the single

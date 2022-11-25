@@ -79,6 +79,7 @@ void CSummaryGenerator::PrintThresholds(const AllSensors &allSensors)
   {
     SummaryWriter::PrintRow(SummaryTranslations::thresholdExceeded);
   }
+  SummaryWriter::PrintRow();
 }
 
 void CSummaryGenerator::PrintApplicationInfo(const std::string &totalExecTime)

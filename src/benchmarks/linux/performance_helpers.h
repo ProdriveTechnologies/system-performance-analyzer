@@ -19,7 +19,8 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
 Measurements::SensorData
 GetSummarizedData(const Measurements::Classification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
-                  const int uniqueId, const bool useSteadyState = false);
+                  const int uniqueId, const double multiplier,
+                  const bool useSteadyState = false);
 
 Measurements::Sensors
 GetSummarizedData(const Measurements::Classification classification,

@@ -90,7 +90,8 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
 Measurements::SensorData
 GetSummarizedData(const Measurements::Classification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
-                  const int uniqueId, const bool useSteadyState)
+                  const int uniqueId, const double multiplication,
+                  const bool useSteadyState)
 {
   Measurements::CSummarizeData summarizedData{useSteadyState};
   // This is the loop for each measurement
@@ -101,9 +102,14 @@ GetSummarizedData(const Measurements::Classification classification,
     for (const auto &e2 : datapoints)
     {
       if (e2.id == uniqueId)
+      {
         summarizedData.AddDataPoint(e2);
+        break; // May leave the (inner) loop for the datapoints, go to next
+               // datapoint
+      }
     }
   }
+  summarizedData.SetMultiplier(multiplication);
   return summarizedData.GetSensorData();
 }
 
@@ -128,6 +134,7 @@ GetSummarizedData(const Measurements::Classification classification,
   }
   Measurements::Sensors result = sensorTemplate;
   result.uniqueId = PerformanceHelpers::GetUniqueId();
+  summarizedData.SetMultiplier(sensorTemplate.multiplier);
   result.data = summarizedData.GetSensorData();
   return result;
 }

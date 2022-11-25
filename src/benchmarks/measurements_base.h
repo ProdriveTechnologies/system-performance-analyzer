@@ -10,8 +10,12 @@ namespace Measurements
 class CClassificationBase
 {
 public:
-  std::vector<Sensors> GetSensors() const;
-  void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
+  void SetDataPointer(std::vector<Measurements::SMeasurementsData> *allData)
+  {
+    allData_ = allData;
+  }
+  virtual std::vector<Sensors> GetSensors() const = 0;
+  virtual std::vector<Measurements::SMeasurementGroup> GetMeasurements() = 0;
 
 private:
   std::vector<Measurements::SMeasurementsData> *allData_;

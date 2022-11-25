@@ -103,7 +103,8 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
       Sensors sensor{datafield};
       sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
       sensor.data = PerformanceHelpers::GetSummarizedData(
-          Measurements::Classification::PROCESSES, allData_, sensor.uniqueId);
+          Measurements::Classification::PROCESSES, allData_, sensor.uniqueId,
+          sensor.multiplier);
 
       sensorGroup.sensors.push_back(sensor);
     }

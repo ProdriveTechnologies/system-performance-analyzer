@@ -43,6 +43,10 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
     j.at("suffix").get_to(p.suffix);
   if (j.contains("multiplier"))
     j.at("multiplier").get_to(p.multiplier);
+  if (j.contains("maximum"))
+    j.at("maximum").get_to(p.maximumValue);
+  if (j.contains("minimum"))
+    j.at("minimum").get_to(p.minimumValue);
 }
 
 inline void from_json(const nlohmann::json &j, SConfig &p)

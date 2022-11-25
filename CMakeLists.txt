@@ -6,6 +6,9 @@ set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 # include(ExernalProject)
 message("Starting compilation of project: " ${PROJECT_NAME})
 
+# options
+option(EXECUTE_TESTS "Build the tests" OFF)
+
 # ### Getting Git hash for the application
 # Get the current working branch
 execute_process(
@@ -126,6 +129,10 @@ if(Boost_FOUND)
 else()
   message(SEND_ERROR "Boost not installed! Please install boost (V1.70 or higher)"
     " Minimum required Ubuntu package: libboost-dev")
+endif()
+
+if(EXECUTE_TESTS)
+  add_subdirectory(tests)
 endif()
 
 # ################# Hardware info Library ##################

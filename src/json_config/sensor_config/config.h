@@ -73,6 +73,9 @@ struct SDatafields
   std::string enabledPath;
   std::string calculation;
 
+  double maximumValue = -1.0;
+  double minimumValue = -1.0;
+
   // Required for type: PROC or DIRECT
   std::string path;
 

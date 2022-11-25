@@ -158,7 +158,7 @@ CPipelineMeasurements::GetSensors() const
       sensor.SetDataInfo(GetMeasureType(e.first.type));
       sensor.data = PerformanceHelpers::GetSummarizedData(
           Measurements::Classification::PIPELINE, allData_, e.second,
-          useSteadyState);
+          sensor.multiplier, useSteadyState);
       sensorGroup.sensors.push_back(sensor);
     }
     for (const auto &[type, _] : predefinedSensors)

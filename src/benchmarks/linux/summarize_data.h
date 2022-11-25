@@ -13,6 +13,7 @@ public:
       : firstDataPoint_{true}, useSteadyState_{useSteadyState}
   {
   }
+  void SetMultiplier(const double multiplier) { multiplier_ = multiplier; }
   void AddDataPoint(const Exports::MeasuredItem item)
   {
     if (firstDataPoint_)
@@ -30,13 +31,13 @@ public:
     if (average_.datapoints != 0)
     {
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MIN, GetMin()});
+          SensorData::MeasureValue{ValueTypes::MIN, GetMin() * multiplier_});
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MAX, GetMax()});
-      sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::AVERAGE, average_.Get()});
-      sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MEDIAN, GetMedian()});
+          SensorData::MeasureValue{ValueTypes::MAX, GetMax() * multiplier_});
+      sensorData.summarizedValues.push_back(SensorData::MeasureValue{
+          ValueTypes::AVERAGE, average_.Get() * multiplier_});
+      sensorData.summarizedValues.push_back(SensorData::MeasureValue{
+          ValueTypes::MEDIAN, GetMedian() * multiplier_});
     }
     return sensorData;
   }
@@ -46,6 +47,7 @@ private:
   SensorData sensorData_;
   bool firstDataPoint_;
   bool useSteadyState_;
+  double multiplier_;
   double minFound_;
   double maxFound_;
   struct Average

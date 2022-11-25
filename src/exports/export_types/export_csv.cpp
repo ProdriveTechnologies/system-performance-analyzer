@@ -19,7 +19,7 @@ std::string CCsv::ParseData(const std::string &timeStr,
       row += DELIMITER;
       auto value = FindMeasuredItem(items, e.uniqueId);
       if (value.id == e.uniqueId)
-        row += std::to_string(value.measuredValue);
+        row += std::to_string(value.measuredValue * e.multiplier);
     }
   }
   return row;
