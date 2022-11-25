@@ -22,6 +22,18 @@ public:
   }
   void restart();
   bool elapsed() const;
+  template <typename LocalTimeType = std::milli>
+  uint64_t timeTillElapsed() const
+  {
+    const auto timeNow = std::chrono::system_clock::now();
+    auto timePassed =
+        std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(
+            _startingTime - timeNow);
+    auto timeTillElapsed =
+        std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(
+            _timerLength - timePassed);
+    return timeTillElapsed.count();
+  }
 
 private:
   std::chrono::time_point<std::chrono::system_clock> _startingTime;

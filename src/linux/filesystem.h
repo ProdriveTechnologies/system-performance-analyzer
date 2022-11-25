@@ -140,6 +140,18 @@ struct ProcStatData
     long jiffiesIoWait;
     long jiffiesIrq;
     long jiffiesSoftIrq;
+    Cpu operator-(const Cpu &r) const
+    {
+      Cpu newResult;
+      newResult.jiffiesUser = jiffiesUser - r.jiffiesUser;
+      newResult.jiffiesNice = jiffiesNice - r.jiffiesNice;
+      newResult.jiffiesSystem = jiffiesSystem - r.jiffiesSystem;
+      newResult.jiffiesIdle = jiffiesIdle - r.jiffiesIdle;
+      newResult.jiffiesIoWait = jiffiesIoWait - r.jiffiesIoWait;
+      newResult.jiffiesIrq = jiffiesIrq - r.jiffiesIrq;
+      newResult.jiffiesSoftIrq = jiffiesSoftIrq - r.jiffiesSoftIrq;
+      return newResult;
+    }
     Cpu(const ProcStatRow &cpuRow)
     {
       if (!Add(cpuRow))
@@ -165,6 +177,19 @@ struct ProcStatData
     }
     bool Add(const ProcStatRow &cpuRow) { return Add(cpuRow.rowElements); };
   };
+  ProcStatData operator-(const ProcStatData &r)
+  {
+    ProcStatData newResult;
+    newResult.totalCpu = this->totalCpu - r.totalCpu;
+
+    for (size_t i = 0; i < cpus.size(); i++)
+    {
+      const auto &cpuLeft = cpus.at(i);
+      const auto &cpuRight = r.cpus.at(i);
+      newResult.cpus.push_back(cpuLeft - cpuRight);
+    }
+    return newResult;
+  }
   Cpu totalCpu;
   std::vector<Cpu> cpus;
 };

@@ -36,4 +36,5 @@ private:
   // std::thread pipelineThread_;
 
   void FreeMemory();
+  void SetTracingEnvironmentVars();
 };

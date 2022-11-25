@@ -1,6 +1,7 @@
 #include "export_csv.h"
 
 #include "src/helpers/helper_functions.h"
+#include <iostream>
 namespace Exports
 {
 double GetCpuUtilization(Linux::FileSystem::ProcStatData::Cpu data)

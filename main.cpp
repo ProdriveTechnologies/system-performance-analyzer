@@ -14,6 +14,7 @@
 #include "src/helpers/stopwatch.h"
 #include "src/helpers/synchronizer.h"
 #include "src/json_config/config_parser.h"
+#include "src/linux/filesystem.h"
 #include "src/linux/run_process.h"
 #include "src/linux/shared_memory.h"
 
@@ -37,7 +38,6 @@ void print_info()
       << "\"json_example.json\" contains the configuration for the benchmarks"
       << std::endl;
 }
-
 int main()
 {
   if (!Helpers::FileExists("json_example.json"))

@@ -16,10 +16,14 @@
 
 #include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
+#include "xavier_sensors_live.h"
 namespace Linux
 {
+// TODO: Make cpuUtilizationTimer_ configurable through the JSON
 CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer)
-    : threadSync_{synchronizer}, xavierSensors_{XAVIER_CORES}
+    : threadSync_{synchronizer}, xavierSensors_{XAVIER_CORES},
+      cpuUtilizationTimer_{std::chrono::milliseconds{1000}},
+      liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
 {
 }
 
@@ -42,6 +46,16 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
   excludedThreads_ = FileSystem::GetFiles(processPath.GetPath());
 
   std::vector<std::string> monitoredThreads;
+
+  // cpuUtilizationTimer_.restart();
+  // lastCpuDataAggregated_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
+  // while (!cpuUtilizationTimer_.elapsed())
+  // {
+  //   std::this_thread::sleep_for(
+  //       std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
+  // }
+  liveFilesystemData_.Init();
+
   // Sync before start, when synced, will start
   //    directly
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for benchmarks");
@@ -61,8 +75,23 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
     Exports::ExportData exportData;
     exportData.time =
         std::to_string(stopwatch.GetTime<std::milli>()); // Millisecond accuracy
-    exportData.cpuInfo = xavierSensors_.GetCoresInfo();
+    // exportData.cpuInfo = xavierSensors_.GetCoresInfo();
     exportData.cpuUtilization = Linux::FileSystem::GetProcStat(XAVIER_CORES);
+
+    exportData.cpuUtilization = liveFilesystemData_.getLastData();
+    // if (cpuUtilizationTimer_.elapsed())
+    // {
+    //   auto previousAggregated = lastCpuDataAggregated_;
+    //   lastCpuDataAggregated_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
+    //   cpuUtilizationTimer_.restart();
+    //   lastCpuData_ = lastCpuDataAggregated_ - previousAggregated;
+    //   exportData.cpuUtilization = lastCpuData_;
+    // }
+    // else
+    // {
+    //   lastCpuData_;
+    // }
+
     SendExportsData(exportData);
 
     std::this_thread::sleep_for(

@@ -3,6 +3,7 @@
 #include "src/helpers/synchronizer.h"
 #include <gst/gst.h>
 #include <iostream>
+#include <stdlib.h>
 #include <sys/types.h> //gettid()
 #include <thread>
 #include <unistd.h>
@@ -100,8 +101,14 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   running_ = true;
   FreeMemory();
 
+  SetTracingEnvironmentVars();
   // gstreamer initialization
   gst_init(nullptr, nullptr);
+
+  // Enable tracing
+  // gst_debug_set_active(true);
+  // gst_debug_set_default_threshold(GST_LEVEL_TRACE);
+
   GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
   gstPipeline_ = gst_parse_launch(pipelineStr.c_str(), &gstErrorMsg_);
@@ -147,4 +154,11 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
 
   threadSync_->WaitForProcess();
   running_ = false;
+}
+
+void CGstreamerHandler::SetTracingEnvironmentVars()
+{
+  // setenv("GST_DEBUG", "GST_TRACER:7", true);
+  // setenv("GST_TRACERS", "stats;rusage;latency", true);
+  // setenv("GST_TRACE_CHANNEL", "");
 }

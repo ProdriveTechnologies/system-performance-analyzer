@@ -7,8 +7,9 @@
 #include <vector>
 
 #include "src/exports/export.h"
+#include "src/helpers/timer.h"
 #include "src/json_config/config.h"
-#include "xavier_sensors.h"
+#include "xavier_sensors_live.h"
 
 class Synchronizer; // pre-definition
 
@@ -38,9 +39,13 @@ private:
   Core::SConfig config_;
   CXavierSensors xavierSensors_;
   static constexpr int XAVIER_CORES = 8;
+  Timer<> cpuUtilizationTimer_;
+  Linux::FileSystem::ProcStatData lastCpuDataAggregated_;
+  Linux::FileSystem::ProcStatData lastCpuData_;
 
   std::vector<std::string> excludedThreads_;
   std::unique_ptr<Exports::CExport> pExportObj_;
+  FileSystem::CLiveData<> liveFilesystemData_;
 
   void MeasureThread(const std::string &threadProcLoc);
   void MeasureSystem();
