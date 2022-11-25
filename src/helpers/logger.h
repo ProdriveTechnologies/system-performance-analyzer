@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/helpers/helper_functions.h"
+#include <iostream>
 
 class CLogger
 {

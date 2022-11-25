@@ -31,17 +31,17 @@ Stat GetStats(const std::string &statLocation)
   return Stat{statElements};
 }
 
-ProcStatData GetProcStat()
+ProcStatData GetProcStat(const std::string &procStatLocation)
 {
-  std::ifstream statFile{"/proc/stat", std::ios_base::in};
+  std::ifstream statFile{procStatLocation, std::ios_base::in};
   if (!statFile.good())
   {
     throw std::runtime_error("Linux::FileSystem: stat file not existent!");
   }
-  std::vector<ProcStatRow> statElements;
+  std::vector<ProcRow> statElements;
   for (std::string val; std::getline(statFile, val);)
   {
-    ProcStatRow row{Helpers::Split(val, ' ')};
+    ProcRow row{Helpers::Split(val, ' ')};
     if (row.rowElements.back().back() == '\n')
       row.rowElements.back().pop_back();
     statElements.push_back(row);
@@ -100,6 +100,44 @@ long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
     // case Helpers::hash("guest_nice"):
   }
   throw std::runtime_error("Name: " + groupName + "not recognised!");
+}
+
+MemInfoData GetMemInfo(const std::string &memInfoLocation)
+{
+  std::ifstream memoryFile{memInfoLocation, std::ios_base::in};
+  if (!memoryFile.good())
+  {
+    throw std::runtime_error("Linux::FileSystem: Memory file not existent!");
+  }
+  std::vector<ProcRow> memoryRows;
+  for (std::string val; std::getline(memoryFile, val);)
+  {
+    ProcRow row{Helpers::Split(val, ' ')};
+    if (row.rowElements.empty())
+      continue; // Zero size check before assuming a minimum size of 1
+    if (row.rowElements.back().back() == '\n')
+      row.rowElements.back().pop_back();
+    if (row.rowElements.at(0).back() == ':')
+      row.rowElements.at(0).pop_back();
+    memoryRows.push_back(row);
+  }
+
+  // const auto &procStatRow = statElements.at(0);
+  MemInfoData memoryData;
+  // procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
+
+  for (const auto &memoryRow : memoryRows)
+  {
+    try
+    {
+      memoryData.ParseRow(memoryRow);
+    }
+    catch (const std::exception &e)
+    {
+      return memoryData;
+    }
+  }
+  return memoryData;
 }
 } // namespace FileSystem
 } // namespace Linux

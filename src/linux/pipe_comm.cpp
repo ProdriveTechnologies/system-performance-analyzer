@@ -92,7 +92,7 @@ size_t PipeCommunicator::ReadRaw(void *message, const size_t bytes)
  */
 std::string PipeCommunicator::ReadUntil(const size_t bytes)
 {
-  size_t readBytes;
+  size_t readBytes{0};
 
   char messageData[bytes + 1];
   while (readBytes != bytes)

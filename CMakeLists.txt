@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.7.2)
 
 set(PROJECT_NAME benchmarks)
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
@@ -16,13 +16,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Set the sources
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.cpp
-
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/Benchmarking/Linux/Monitoring.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/pipe_comm.cpp
-
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/shared_memory.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/base_class.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/modules/filestream/filestream.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/config_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/helper_functions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/handler.cpp
@@ -36,7 +30,14 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_csv.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/sensor_config/config_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/proc_handler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/stdout_export/summary_writer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/stdout_export/summary_generator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/performance_helpers.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/json_helpers.cpp
 )
+message(" - Enabling static code analyser: clang-tidy")
+
+# set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=.;-checks=llvm-,clang-analyzer-,modernize-")
 
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp ${SOURCES})
@@ -78,13 +79,28 @@ include(FetchContent)
 
 FetchContent_Declare(json
   GIT_REPOSITORY https://github.com/nlohmann/json.git
-  GIT_TAG v3.7.3)
+  GIT_TAG v3.10.5)
 
 FetchContent_GetProperties(json)
 
 if(NOT json_POPULATED)
   FetchContent_Populate(json)
   add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# ################# Hardware info Library ##################
+message(" -- Downloading hardware info library")
+include(FetchContent)
+
+FetchContent_Declare(infoware
+  GIT_REPOSITORY https://github.com/ThePhD/infoware.git
+  GIT_TAG v0.6.0)
+
+FetchContent_GetProperties(infoware)
+
+if(NOT infoware_POPULATED)
+  FetchContent_Populate(infoware)
+  add_subdirectory(${infoware_SOURCE_DIR} ${infoware_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
 # ################### GStreamer ########################
@@ -111,10 +127,10 @@ find_package(Threads)
 find_library(LIBRT rt) # Note: LIBRT is not a Windows library. Therefore, for Windows this should be ignored
 
 if(LIBRT)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json infoware ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-message(" -- JSON library downloaded")
+message(" -- Libraries downloaded")
 
 # Link libraries

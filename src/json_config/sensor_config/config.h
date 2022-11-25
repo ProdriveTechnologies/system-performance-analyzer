@@ -1,28 +1,80 @@
 #pragma once
 
+#include "src/helpers/helper_functions.h"
+#include "src/helpers/logger.h"
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace PlatformConfig
 {
+enum class Types
+{
+  PROC_STAT,
+  DIRECT,
+  ARRAY,
+  PROC_MEM
+};
+enum class Class : int
+{
+  NONE = 0,
+  SYS_RESOURCE_USAGE = 1
+};
+
+inline Types GetType(const std::string &typeStr)
+{
+  switch (Helpers::hash(typeStr))
+  {
+  case Helpers::hash("PROC"):
+    return Types::PROC_STAT;
+  case Helpers::hash("DIRECT"):
+    return Types::DIRECT;
+  case Helpers::hash("ARRAY"):
+    return Types::ARRAY;
+  case Helpers::hash("PROCMEM"):
+    return Types::PROC_MEM;
+  default:
+    throw std::runtime_error("Platform Config: Type unknown! Type: " + typeStr);
+  }
+}
+inline Class GetClass(const int classNr)
+{
+  switch (classNr)
+  {
+  case Helpers::ToUnderlying(Class::SYS_RESOURCE_USAGE):
+    return Class::SYS_RESOURCE_USAGE;
+  default:
+    CLogger::Log(CLogger::Types::WARNING,
+                 "Class type not found! Number: " + std::to_string(classNr));
+  }
+  return Class::NONE;
+}
+
 struct SDatafields
 {
   std::string name;
   int id = 0;
-  std::string type;
+  Types type;
+  Class classType = Class::NONE;
+  std::string suffix;
+  std::string calculation;
 
   // Required for type: PROC or DIRECT
-  std::string pathStr;
   std::string path;
 
-  // Required for type: PROC
+  // Required for type: PROC and PROCMEM
   std::string value;
   std::string comparedTo;
 
   // Required for type: ARRAY
   size_t size = 0;
   std::vector<SDatafields> datafields;
+};
+struct SMeasureField
+{
+  int id = 0;
+  std::string path;
+  Types type;
 };
 struct SConfig
 {

@@ -24,6 +24,12 @@ public:
   int GetThreadPid() const { return threadPid_; }
   bool IsRunning() const { return running_; }
 
+  struct LogStructure
+  {
+    GMainLoop *loop;
+    CGstreamerHandler *parentClass;
+  };
+
 private:
   Synchronizer *threadSync_;
   std::atomic<int> threadPid_;
@@ -42,4 +48,6 @@ private:
                           GObject *object, GstDebugMessage *message,
                           gpointer user_data) G_GNUC_NO_INSTRUMENT;
   inline static int q = 0;
+
+  LogStructure logUserData_;
 };

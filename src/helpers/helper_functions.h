@@ -62,15 +62,15 @@ constexpr typename std::underlying_type<Enum>::type ToUnderlying(Enum e)
   return static_cast<typename std::underlying_type<Enum>::type>(e);
 }
 
-// for c++17 and higher:
-template <auto val> constexpr void static_print()
-{
-#if !defined(__GNUC__) || defined(__clang__)
-  int static_print_is_implemented_only_for_gcc = 0;
-#else
-  int unused = 0;
-#endif
-}
+// // for c++17 and higher:
+// template <auto val> constexpr void static_print()
+// {
+// #if !defined(__GNUC__) || defined(__clang__)
+//   int static_print_is_implemented_only_for_gcc = 0;
+// #else
+//   int unused = 0;
+// #endif
+// }
 inline constexpr uint32_t hash(const std::string_view data) noexcept
 {
   uint32_t hash = 5381;

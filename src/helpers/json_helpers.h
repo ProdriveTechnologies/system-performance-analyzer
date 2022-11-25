@@ -1,5 +1,6 @@
 #pragma once
 #include <nlohmann/json.hpp>
+#include <string>
 #include <variant>
 
 namespace JsonHelpers
@@ -25,4 +26,7 @@ nlohmann::json GetVariantValue(const VariantType variantType)
   }
   return {}; // not found
 }
+
+nlohmann::json GetJsonObj(const std::string &jsonFile);
+std::string ReadFileIntoString(const std::string &path);
 } // namespace JsonHelpers

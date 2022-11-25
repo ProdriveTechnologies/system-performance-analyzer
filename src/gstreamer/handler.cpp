@@ -89,12 +89,12 @@ CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler &gstreamer)
 
 static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data)
 {
-  GMainLoop *loop = (GMainLoop *)data;
+  auto *userData = reinterpret_cast<CGstreamerHandler::LogStructure *>(data);
   switch (GST_MESSAGE_TYPE(msg))
   {
   case GST_MESSAGE_EOS:
-    g_print("End of stream\n");
-    g_main_loop_quit(loop);
+    CLogger::Log(CLogger::Types::INFO, "GStreamer: End of stream occured");
+    g_main_loop_quit(userData->loop);
     break;
 
   case GST_MESSAGE_ERROR:
@@ -108,9 +108,14 @@ static gboolean bus_call(GstBus *bus, GstMessage *msg, gpointer data)
     g_printerr("Error: %s\n", error->message);
     g_error_free(error);
 
-    g_main_loop_quit(loop);
+    g_main_loop_quit(userData->loop);
     break;
   }
+  case GST_MESSAGE_STREAM_STATUS:
+    CLogger::Log(CLogger::Types::INFO,
+                 "GStreamer: Received GST message stream status");
+
+    break;
   default:
     break;
   }
@@ -123,6 +128,7 @@ CGstreamerHandler::~CGstreamerHandler()
   FreeMemory();
   if (pipelineThread_.joinable())
     pipelineThread_.join();
+  gst_deinit();
 }
 
 void CGstreamerHandler::FreeMemory()
@@ -345,18 +351,23 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   gst_debug_add_log_function(&GStreamer::TraceHandler::TraceCallbackFunction,
                              nullptr, nullptr);
 
+  logUserData_.loop = loop;
+  logUserData_.parentClass = this;
+
   gstPipeline_ = gst_parse_launch(pipelineStr.c_str(), &gstErrorMsg_);
   GstBus *bussy = gst_pipeline_get_bus(GST_PIPELINE(gstPipeline_));
-  int bus_watch_id = gst_bus_add_watch(bussy, bus_call, loop);
+  int bus_watch_id = gst_bus_add_watch(bussy, bus_call, &logUserData_);
   gst_object_unref(bussy);
 
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for gstreamer");
   threadSync_->WaitForProcess();
-
+  CLogger::Log(CLogger::Types::INFO,
+               "Starting the pipeline (finally) for gstreamer");
   // start playing
   gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
 
   g_main_loop_run(loop);
+  g_source_remove(bus_watch_id);
   g_main_loop_unref(loop);
   // wait until error or EOS ( End Of Stream )
   // gstBus_ = gst_element_get_bus(gstPipeline_);

@@ -5,6 +5,7 @@ temp/
 build/
 buildManual/
 .vscode/
+gst_plugins/
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

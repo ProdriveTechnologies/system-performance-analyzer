@@ -1,15 +1,10 @@
 #pragma once
 
-#include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
 
 #include "config.h"
 #include "src/helpers/json_helpers.h"
-
-namespace Module
-{
-} // namespace Module
 
 namespace Core
 {
@@ -19,7 +14,6 @@ public:
   static SConfig Parse(const std::string &jsonFile);
 
 private:
-  static nlohmann::json getJsonObj(const std::string &jsonFile);
 };
 
 //*********** Conversions for the Core structs to JSON objects ***************//

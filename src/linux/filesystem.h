@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "src/helpers/helper_functions.h"
-
+#include <iostream>
 namespace Linux
 {
 namespace FileSystem
@@ -126,7 +126,12 @@ struct Stat
 };
 
 Stat GetStats(const std::string &statLocation);
-struct ProcStatRow
+
+/**
+ * @brief Begin of the /proc/stat parsing
+ *
+ */
+struct ProcRow
 {
   std::vector<std::string> rowElements;
 };
@@ -153,7 +158,7 @@ struct ProcStatData
       newResult.jiffiesSoftIrq = jiffiesSoftIrq - r.jiffiesSoftIrq;
       return newResult;
     }
-    Cpu(const ProcStatRow &cpuRow)
+    Cpu(const ProcRow &cpuRow)
     {
       if (!Add(cpuRow))
         throw std::runtime_error("/proc/stat CPU data incorrect!");
@@ -176,7 +181,7 @@ struct ProcStatData
     {
       return cpuString.size() >= 3 && cpuString.substr(0, 3) == "cpu";
     }
-    bool Add(const ProcStatRow &cpuRow) { return Add(cpuRow.rowElements); };
+    bool Add(const ProcRow &cpuRow) { return Add(cpuRow.rowElements); };
   };
   ProcStatData operator-(const ProcStatData &r)
   {
@@ -197,9 +202,104 @@ struct ProcStatData
   std::map<std::string, Cpu> cpus;
 };
 
-ProcStatData GetProcStat();
+ProcStatData GetProcStat(const std::string &procStatLocation);
 long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
                            const std::string &groupName);
+
+/**
+ * @brief Begin of the /proc/meminfo parsing
+ *
+ */
+struct MemInfoData
+{
+  MemInfoData()
+      : memtotal{0}, memfree{0}, memavailable{0}, buffers{0}, cached{0},
+        swapcached{0}, active{0}, inactive{0}, swaptotal{0}, swapfree{0},
+        dirty{0}, fieldMap{{"MemTotal", &memtotal},
+                           {"MemFree", &memfree},
+                           {"MemAvailable", &memavailable}}
+  {
+  }
+  MemInfoData(const MemInfoData &c)
+      : memtotal{c.memtotal}, memfree{c.memfree}, memavailable{c.memavailable},
+        buffers{c.buffers}, cached{c.cached}, swapcached{c.swapcached},
+        active{c.active}, inactive{c.inactive}, swaptotal{c.swaptotal},
+        swapfree{c.swapfree}, dirty{c.dirty}, fieldMap{{"MemTotal", &memtotal},
+                                                       {"MemFree", &memfree},
+                                                       {"MemAvailable",
+                                                        &memavailable}}
+  {
+  }
+  MemInfoData &operator=(const MemInfoData &r)
+  {
+    memtotal = r.memtotal;
+    memfree = r.memfree;
+    memavailable = r.memavailable;
+    buffers = r.buffers;
+    cached = r.cached;
+    swapcached = r.swapcached;
+    active = r.active;
+    inactive = r.inactive;
+    swaptotal = r.swaptotal;
+    swapfree = r.swapfree;
+    dirty = r.dirty;
+    return *this;
+  }
+
+  unsigned long memtotal;
+  unsigned long memfree;
+  unsigned long memavailable;
+  unsigned long buffers;
+  unsigned long cached;
+  unsigned long swapcached;
+  unsigned long active;
+  unsigned long inactive;
+  // unsigned long activeAnon = 0;
+  // unsigned long inactiveAnon = 0;
+  // unsigned long activeFile = 0;
+  // unsigned long inactiveFile = 0;
+  // unsigned long unevictable = 0;
+  // unsigned long mlocked = 0;
+  // unsigned long hightotal = 0;
+  // unsigned long highfree = 0;
+  // unsigned long lowtotal = 0;
+  // unsigned long lowfree = 0;
+  // unsigned long mmapCopy = 0;
+  unsigned long swaptotal;
+  unsigned long swapfree;
+  unsigned long dirty;
+  // unsigned long writeback = 0;
+  // unsigned long anonpages = 0;
+  // unsigned long mapped = 0;
+  // unsigned long shmem = 0;
+  // unsigned long kreclaimable = 0;
+  // unsigned long slab = 0;
+  // unsigned long sreclaimable = 0;
+  // unsigned long sunreclaim = 0;
+  // unsigned long kernelstack = 0;
+  const std::unordered_map<std::string, unsigned long *> fieldMap;
+  void ParseRow(const ProcRow &row)
+  {
+    auto field = fieldMap.find(row.rowElements.at(0));
+    if (field != fieldMap.end())
+      *(field->second) = std::stoul(row.rowElements.at(1));
+  }
+
+  unsigned long GetField(const std::string &value, const bool optional = false)
+  {
+    auto field = fieldMap.find(value);
+    if (field == fieldMap.end())
+    {
+      if (optional)
+        return 1;
+      throw std::runtime_error(
+          "Field not found in /proc/meminfo! Field name: " + value);
+    }
+    return *(field->second);
+  }
+};
+
+MemInfoData GetMemInfo(const std::string &memInfoLocation);
 
 } // namespace FileSystem
 } // namespace Linux

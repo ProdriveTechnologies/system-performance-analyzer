@@ -18,7 +18,8 @@ public:
   CBase() {}
   virtual ~CBase() {}
 
-  virtual std::string InitExport(const PlatformConfig::SConfig &config) = 0;
+  virtual std::string
+  InitExport(const std::vector<PlatformConfig::SDatafields> &config) = 0;
   virtual std::string ParseData(const ExportData &data) = 0;
   virtual std::string FinishExport() = 0;
 };

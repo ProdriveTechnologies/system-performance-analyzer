@@ -1,11 +1,13 @@
 #include "proc_handler.h"
 
+#include "performance_helpers.h"
 #include "src/linux/filesystem.h"
+
 namespace Measurements
 {
 void ProcHandler::ParseProcStat()
 {
-  auto currentProcStat = Linux::FileSystem::GetProcStat();
+  auto currentProcStat = Linux::FileSystem::GetProcStat("/proc/stat");
   if (procStat_.cpus.size() != 0)
   {
     procStatCorrected_ = currentProcStat - procStat_;
@@ -13,24 +15,14 @@ void ProcHandler::ParseProcStat()
   procStat_ = currentProcStat;
 }
 
-std::vector<PlatformConfig::SDatafields>
-ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo)
+/**
+ * @brief Retrieves the meminfo structure from the /proc/meminfo file location
+ *
+ */
+void ProcHandler::ParseMeminfo()
 {
-  if (procInfo.size == 0)
-    return {procInfo};
-  else
-  {
-    std::vector<PlatformConfig::SDatafields> items;
-    for (size_t i = 0; i < procInfo.size; i++)
-    {
-      PlatformConfig::SDatafields dataFields{procInfo};
-      Helpers::replaceStr(dataFields.path, "$INDEX$", std::to_string(i));
-      items.push_back(dataFields);
-    }
-    return items;
-  }
+  meminfo_ = Linux::FileSystem::GetMemInfo("/proc/meminfo");
 }
-
 Exports::MeasuredItem
 ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
                             const std::string &fieldName)
@@ -43,13 +35,27 @@ ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
   }
 
   Exports::MeasuredItem measuredItem;
-  measuredItem.id = 340;
-  measuredItem.measuredValue = cpuField->second.jiffiesIdle;
+  measuredItem.id = procInfo.id;
   long long comparedTo = Linux::FileSystem::GetProcStatGroup(
       cpuField->second, procInfo.comparedTo);
   long long value =
       Linux::FileSystem::GetProcStatGroup(cpuField->second, procInfo.value);
   measuredItem.measuredValue = static_cast<double>(value) / comparedTo;
+  return measuredItem;
+}
+
+Exports::MeasuredItem
+ProcHandler::ParseMemField(const PlatformConfig::SDatafields &procInfo)
+{
+  auto memValue = meminfo_.GetField(procInfo.value);
+  auto comparedTo = meminfo_.GetField(procInfo.comparedTo, true);
+
+  Exports::MeasuredItem measuredItem;
+  measuredItem.id = procInfo.id;
+  // std::cout << "Value second: " << memValue->second << std::endl;
+  //  std::cout << "Value direct output: "
+  //            << meminfo_.fieldMap.find(procInfo.value)->second << std::endl;
+  measuredItem.measuredValue = static_cast<double>(memValue) / comparedTo;
   return measuredItem;
 }
 
