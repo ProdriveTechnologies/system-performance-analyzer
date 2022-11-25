@@ -113,12 +113,18 @@ ftxui::Element CTerminalUI::GetElement(const Measurements::Sensors &sensor,
                                        const double &item, const int processId)
 {
   double value = GetPercentage(sensor.userData, item);
+  std::string name;
+  if (processId == -1)
+    name = sensor.userId;
+  else
+    name = std::to_string(processId) + "." + sensor.userId;
+
   return ftxui::hbox(
-      {ftxui::text(std::to_string(processId) + "." + sensor.userId) |
-           ftxui::border,
+      {ftxui::text(name) | ftxui::border,
        ftxui::color(GetColor(sensor.uniqueId), ftxui::gauge(value)) |
            ftxui::border | ftxui::flex,
-       ftxui::text(std::to_string(item)) | ftxui::border});
+       ftxui::text(std::to_string(item * sensor.multiplier) + sensor.suffix) |
+           ftxui::border});
 }
 void CTerminalUI::FinishLiveMeasurements() {}
 
