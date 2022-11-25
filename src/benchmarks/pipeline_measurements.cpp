@@ -108,7 +108,7 @@ CPipelineMeasurements::GetPipelineConfig() const
 Exports::MeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
 {
   Exports::MeasurementItem pipelineConfig;
-  pipelineConfig.name = "Pipeline config";
+  pipelineConfig.name = "PipelineMeasurements";
   pipelineConfig.type = Exports::Type::INFO;
   // What info should this return? The pipeline command, the pipeline id, and
   // the pipeline measurement values

@@ -43,7 +43,7 @@ void CSensors::SetDataHandlers()
 Exports::MeasurementItem CSensors::GetConfig() const
 {
   Exports::MeasurementItem config;
-  config.name = "Measurement fields";
+  config.name = "SystemResources";
   config.type = Exports::Type::INFO;
   config.value = GetMeasurementFields();
   return config;

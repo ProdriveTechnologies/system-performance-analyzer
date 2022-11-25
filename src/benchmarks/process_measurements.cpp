@@ -58,7 +58,7 @@ void CProcessMeasurements::SetDataHandlers()
 Exports::MeasurementItem CProcessMeasurements::GetConfig() const
 {
   Exports::MeasurementItem config;
-  config.name = "Process config";
+  config.name = "ProcessMeasurements";
   config.type = Exports::Type::INFO;
   config.value = GetMeasurementFields();
   return config;
