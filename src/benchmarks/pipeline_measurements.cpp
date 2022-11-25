@@ -69,6 +69,7 @@ std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
     // Read each measurement of the GStreamer pipeline and put it in a map
     std::vector<PlatformConfig::SMeasureField> measureField_;
     std::unordered_map<Identifier, GStreamer::Measurement> summarizeMap;
+
     for (size_t qI = 0; qI < queueSize; qI++)
     {
       auto measurement = e.second->GetMeasurement();

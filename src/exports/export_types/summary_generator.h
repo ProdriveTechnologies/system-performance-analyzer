@@ -26,11 +26,18 @@ public:
 
 private:
   // Static info based on the host system
-  void PrintApplicationInfo();
+  void PrintApplicationInfo(const std::string &totalExecTime);
   void PrintSystemInfo();
   void PrintCacheInfo();
   void PrintPcieInfo();
   void PrintThresholds(const AllSensors &allSensors);
+  std::string GetTotalTime(const FullMeasurement &fullMeasurement)
+  {
+    if (fullMeasurement->empty())
+      return "0";
+    else
+      return fullMeasurement->back().time;
+  }
   std::string PrintValues(const Measurements::SensorData data)
   {
     std::string result = "\n";

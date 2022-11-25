@@ -52,7 +52,12 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     // std::cout << "P";
     break;
   case Helpers::hash("latency"):
-    // std::cout << "L";
+    // std::cout << "Received latency: " <<
+    // gst_structure_to_string(gstStructure)
+    //          << std::endl;
+    trace.type = MeasureType::LATENCY;
+    trace.pluginName = gst_structure_get_string(gstStructure, "src-element");
+    gst_structure_get_uint(gstStructure, "time", &trace.valueInt);
     break;
   case Helpers::hash("framerate"):
   {

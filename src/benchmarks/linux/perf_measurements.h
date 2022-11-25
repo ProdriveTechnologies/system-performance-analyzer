@@ -125,9 +125,13 @@ private:
 
   std::unique_ptr<std::vector<ProcessesMeasure>> pProcessesData_;
 
+  template <typename ExportClass>
+  void ExecuteExport(const std::string &filename,
+                     const std::vector<Exports::MeasurementItem> &items,
+                     const Exports::AllSensors &allSensors);
   void Initialize();
   void StartMeasurementsLoop();
-  void ExportData();
+  void ExportData(const Exports::AllSensors &sensors);
   void AnalyzeData();
 
   void CheckTresholds();
@@ -147,12 +151,6 @@ private:
     return result;
   }
 
-  void MeasureThread(const std::string &threadProcLoc);
-  // void MeasureProcesses(const std::vector<int> processIds);
-
-  void InitExports(const MeasureFieldsDefType &config);
-  // void SendExportsData(const Exports::ExportData &data);
-
   void SetThresholdResults(Measurements::AllSensors allSensors);
 
   // MeasureCombo GetFields(
@@ -170,5 +168,23 @@ private:
   // std::vector<Exports::MeasuredItem>
   // GetMeasuredItems(const MeasureFieldsType &measureFields);
 };
+
+template <typename ExportType>
+void CPerfMeasurements::ExecuteExport(
+    const std::string &filename,
+    const std::vector<Exports::MeasurementItem> &items,
+    const Exports::AllSensors &allSensors)
+{
+  try
+  {
+    ExportType exportTypeClass{};
+    Exports::CExport exportGenericClass{&exportTypeClass, filename, false};
+    exportGenericClass.FullExport(items, pMeasurementsData_.get(), allSensors);
+  }
+  catch (const std::exception &err)
+  {
+    CLogger::Log(CLogger::Types::ERROR, "Export failed: ", err.what());
+  }
+}
 
 } // namespace Linux

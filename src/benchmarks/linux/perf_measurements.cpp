@@ -69,7 +69,6 @@ void CPerfMeasurements::Start(const Core::SConfig &config,
   threadSync_->WaitForProcess();
 
   // Finish the analysis
-  ExportData();
   AnalyzeData();
 }
 
@@ -89,7 +88,6 @@ void CPerfMeasurements::Initialize()
   //     GetFields(parsed.sensors, &CPerfMeasurements::GetProcessFields, this);
   // processFields_ = processFields.fields;
   // processFieldsDef_ = processFields.definition;
-  InitExports(sensorMeasurements_.GetDefinition());
 
   OrganizeGstreamerPipelines();
 
@@ -148,10 +146,7 @@ void CPerfMeasurements::StartMeasurementsLoop()
     // monitoredThreads = FileSystem::GetFiles(processPath.GetPath());
     // Helpers::RemoveIntersection(monitoredThreads, excludedThreads_);
     // // 2. Loop through threads and execute benchmarks on them
-    // for (const auto &e : monitoredThreads)
-    // {
-    //   MeasureThread(e);
-    // }
+
     // Filling the export data
     // procHandler_.ParseMeminfo(); // Parse the /proc/meminfo struct
     Exports::ExportData exportData;
@@ -182,50 +177,15 @@ void CPerfMeasurements::StartMeasurementsLoop()
   exportConfig_.pipelineConfig = gstMeasurements_.GetPipelineConfig();
 }
 
-/**
- * @brief initializes the resources used for the measurements
- */
-void CPerfMeasurements::InitExports(const MeasureFieldsDefType &config)
+void CPerfMeasurements::ExportData(const Exports::AllSensors &sensors)
 {
-  if (config_.settings.enableLogs)
-  {
-    pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CCsv{},
-                                                     "jsonfile.json", true);
-    // pExportObj_->InitExport(config);
-  }
-}
-
-/**
- * @brief sends the exports data to the export objects
- *
- * @param data the measurements data
- */
-// void CPerfMeasurements::SendExportsData(const Exports::ExportData &data)
-// {
-//   pExportObj_->DataExport(data);
-// }
-
-void CPerfMeasurements::MeasureThread(const std::string &threadProcLoc)
-{
-  auto stats = Linux::FileSystem::GetStats(threadProcLoc + "/stat");
-  std::cout << "CPU usage: " << stats.cutime << std::endl;
-  std::cout << "Minor Faults: " << stats.minFaults << std::endl;
-}
-
-void CPerfMeasurements::ExportData()
-{
-  // for (const auto &e : *pMeasurementsData_)
-  // {
-  //   SendExportsData(e);
-  // }
-
-  // Do the full export with all data
   std::vector<Exports::MeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
   items.push_back(gstMeasurements_.GetPipelineConfig2());
   items.push_back(processMeasurements_.GetConfig());
-  pExportObj_->FullExport(items, pMeasurementsData_.get(),
-                          Measurements::AllSensors{});
+
+  ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors);
+  ExecuteExport<Exports::CCsv>("filename", items, sensors);
 }
 
 /**
@@ -299,20 +259,8 @@ void CPerfMeasurements::AnalyzeData()
 
   // Check thresholds
   SetThresholdResults(allSensors);
-  // SetThresholdResults(sysSensorsMap);
 
-  // pExportObj_ = std::make_unique<Exports::CExport>(
-  //     new Exports::CSummaryGenerator{}, "filename", true);
-  Exports::CSummaryGenerator generator;
-  // generator.Generate(*pMeasurementsData_,
-  // sensorMeasurements_.GetDefinition());
-  // generator.GenerateProcesses(*pProcessesData_);
-
-  std::vector<Exports::MeasurementItem> items;
-  items.push_back(sensorMeasurements_.GetConfig());
-  items.push_back(gstMeasurements_.GetPipelineConfig2());
-  items.push_back(processMeasurements_.GetConfig());
-  generator.FullExport(items, pMeasurementsData_.get(), allSensors);
+  ExportData(allSensors);
 }
 
 void CPerfMeasurements::SetThresholdResults(Measurements::AllSensors allSensors)

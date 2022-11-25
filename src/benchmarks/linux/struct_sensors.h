@@ -52,11 +52,6 @@ struct SensorData
   }
   // int *rawData; // TODO: Change pointer type;
 };
-// struct
-// {
-//   std::vector<Sensors> sensors;
-// };
-
 struct Sensors
 {
   bool thresholdExceeded = false;
@@ -68,16 +63,16 @@ struct Sensors
   std::string suffix;
   double multiplier = 1.0;
 
-  // std::string groupId; // Only applicable for arrays, this is the groupname
-  // and therefore does not contain the array number. This is the "original"
-  // user id of the sensor
-
+  // The summarized data, such as average, minimum found, maximum found
   SensorData data;
+
+  // Constructor with the name and unique id
   Sensors(const std::string &userId_, const int uniqueId_,
           PlatformConfig::Class sensorClass_ = PlatformConfig::Class::NONE)
       : userId{userId_}, uniqueId{uniqueId_}, classType{sensorClass_}
   {
   }
+  // Constructor with an SDataFields object
   Sensors(const PlatformConfig::SDatafields &fields)
       : userId{fields.name}, uniqueId{fields.id}, classType{fields.classType},
         suffix{fields.suffix}, multiplier{fields.multiplier}
@@ -101,6 +96,7 @@ enum class Classification
 using SensorName = std::string;
 using SensorProcessId = int;
 using SensorIdentifier = std::pair<SensorName, SensorProcessId>;
+// Hash function for the Measurements::SensorIdentifier field
 struct SensorIdHash
 {
   inline size_t operator()(const Measurements::SensorIdentifier &k) const
@@ -114,7 +110,6 @@ struct SensorIdHash
     {
       result = (result * 16777619) ^ k.first[i];
     }
-
     return result ^ (k.second << 1);
   }
 };
@@ -132,6 +127,8 @@ struct AllSensors
     std::vector<Sensors> sensors;
   };
 
+  // All the sensors classified by the different groups (Pipeline data, process
+  // data, system data)
   std::unordered_map<Classification, std::vector<SensorGroups>> data;
 
   using SensorMap = std::unordered_map<std::string, Measurements::Sensors *>;
@@ -171,12 +168,16 @@ struct AllSensors
     }
     throw std::runtime_error("Couldn't find sensor in map!");
   }
+
+  /**
+   * @brief Returns all process IDs
+   */
   std::unordered_set<int> GetProcesses() const
   {
     std::unordered_set<int> result;
-    for (const auto &e : data)
+    for (const auto &[classifier, sensors] : data)
     {
-      for (const auto &processSensors : e.second)
+      for (const auto &processSensors : sensors)
       {
         result.insert(processSensors.processId);
       }

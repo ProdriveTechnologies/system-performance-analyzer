@@ -24,11 +24,8 @@ bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
 {
   // Generic info, not specific to the measurements
   SummaryWriter::PrintTitle(SummaryTranslations::headerName);
-  PrintApplicationInfo();
-
-  for (const auto &e : config)
-  {
-  }
+  std::string totalTime = GetTotalTime(data);
+  PrintApplicationInfo(totalTime);
 
   PrintSystemSummary(allSensors);
   PrintThresholds(allSensors);
@@ -81,7 +78,7 @@ void CSummaryGenerator::PrintThresholds(const AllSensors &allSensors)
 //   return true;
 // }
 
-void CSummaryGenerator::PrintApplicationInfo()
+void CSummaryGenerator::PrintApplicationInfo(const std::string &totalExecTime)
 {
   SummaryWriter::PrintValue(SummaryTranslations::version, Globals::version);
   std::string created{Globals::compilationDate};
@@ -90,6 +87,7 @@ void CSummaryGenerator::PrintApplicationInfo()
   SummaryWriter::PrintValue(SummaryTranslations::created, created);
   SummaryWriter::PrintValue(SummaryTranslations::gitHash,
                             std::string(GIT_COMMIT_HASH));
+  SummaryWriter::PrintValue(SummaryTranslations::executionTime, totalExecTime);
   SummaryWriter::PrintRow();
 }
 void CSummaryGenerator::PrintSystemInfo()

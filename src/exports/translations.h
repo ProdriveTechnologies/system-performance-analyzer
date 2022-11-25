@@ -7,6 +7,7 @@ constexpr std::string_view headerName{"SPA Tool Summary Report"};
 constexpr std::string_view version{"Version"};
 constexpr std::string_view created{"Created"};
 constexpr std::string_view gitHash{"Git Hash"};
+constexpr std::string_view executionTime{"Total execution time[ms]"};
 constexpr std::string_view systemInfo{"Processor and System Information"};
 constexpr std::string_view physicalCores{"Physical Cores"};
 constexpr std::string_view logicalCores{"Logical Cores"};

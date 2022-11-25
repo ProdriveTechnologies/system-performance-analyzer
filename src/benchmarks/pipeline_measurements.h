@@ -76,6 +76,7 @@ private:
     return result;
   }
 
-  static inline std::vector<MeasureType> predefinedSensors = {MeasureType::FPS};
+  static inline std::vector<MeasureType> predefinedSensors = {
+      MeasureType::FPS /*MeasureType::LATENCY */};
 };
 } // namespace GStreamer
