@@ -6,22 +6,22 @@
 
 namespace Core
 {
-template <typename ValueType> struct ConfigParam
+template <typename ValueType> struct SConfigParam
 {
   std::string name;
   std::string unit;
   ValueType value;
 };
 
-struct BenchmarkConfig
+struct SBenchmarkConfig
 {
   int minLatency;
   int maxLatency;
   int maxLatencyVariation;
-  std::vector<ConfigParam<float>> customParamsF;
-  std::vector<ConfigParam<int>> customParamsI;
+  std::vector<SConfigParam<float>> customParamsF;
+  std::vector<SConfigParam<int>> customParamsI;
 };
-struct Task
+struct STask
 {
   std::string name;
   int taskId;
@@ -29,8 +29,8 @@ struct Task
   std::string mode;
   std::vector<int> inIds;
   std::vector<int> outIds;
-  std::vector<ConfigParam<std::string>> customParams;
-  BenchmarkConfig benchmarks;
+  std::vector<SConfigParam<std::string>> customParams;
+  SBenchmarkConfig benchmarks;
   std::string getValWithName(const std::string &name_) const
   {
     for (const auto &e : customParams)
@@ -50,7 +50,7 @@ struct Task
     return false;
   }
 };
-struct Config
+struct SConfig
 {
   std::string getStr()
   {
@@ -61,7 +61,8 @@ struct Config
   std::string description;
   int id;
   std::string version;
-  std::vector<Task> tasks;
+  std::string gstreamerPipeline;
+  std::vector<STask> tasks;
 };
 
 } // namespace Core

@@ -17,7 +17,7 @@ struct Config
     caddr_t addressPtr = nullptr;
     int unitId;
   };
-  Core::Task taskConfig;
+  Core::STask taskConfig;
   std::string moduleName;
   Linux::PipeCommunicator parentComm;
   std::vector<Stream> inputStreams;

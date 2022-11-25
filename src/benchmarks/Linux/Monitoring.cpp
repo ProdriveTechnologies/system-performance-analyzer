@@ -1,9 +1,57 @@
 #include "Monitoring.h"
 
+#include <iostream>
+#include <regex>       // std::regex_replace
+#include <sys/types.h> // getpid()
+#include <thread>
+#include <unistd.h> // getpid()
+
 #include "Helpers.h"
-#include <regex> // std::regex_replace
+#include "src/helpers/synchronizer.h"
+#include "src/linux/filesystem.h"
+
 namespace Linux
 {
+CMonitoring::CMonitoring(Synchronizer *synchronizer) : threadSync_{synchronizer}
+{
+}
+
+void CMonitoring::start(const int threadId, const bool *runningPtr)
+{
+  using Path = Linux::FileSystem::Path;
+  threadSync_->waitForProcess();
+  // Thread exists now, store threads that already exist for the monitoring. The
+  // newly added ones are from gstreamer and need to be monitored
+  std::cerr << "Monitoring thread: " << threadSync_->getThreadId();
+
+  Path processPath;
+  processPath.AddItems("proc", getpid(), "task");
+  excludedThreads_ = Linux::FileSystem::GetFiles(processPath.GetPath());
+
+  threadSync_
+      ->waitForProcess(); // Sync before start, when synced, will start directly
+  std::vector<std::string> monitoredThreads;
+  while (*runningPtr)
+  {
+    // 1. get all threads that will be monitored
+    monitoredThreads = Linux::FileSystem::GetFiles(processPath.GetPath());
+    Helpers::RemoveIntersection(monitoredThreads, excludedThreads_);
+
+    // 2. Loop through threads and execute benchmarks on them
+    for (const auto &e : monitoredThreads)
+    {
+      measureThread(e);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  }
+}
+
+void CMonitoring::measureThread(const std::string &threadProcLoc)
+{
+  auto stats = Linux::FileSystem::GetStats(threadProcLoc + "/stat");
+  std::cout << "CPU usage: ";
+}
+
 /*
 CMonitoring::SCpuInfo CMonitoring::GetCPUInfo()
 {
@@ -31,8 +79,8 @@ CMonitoring::SBandwidth CMonitoring::GetMemoryBandwidth() { return {}; } */
 
 /**
  * \brief temperature returns the temperature of the processor
- * \return a double with the processor temperature in degrees Celsius or -1 when
- * an error occurs
+ * \return a double with the processor temperature in degrees Celsius or -1
+ * when an error occurs
  */
 /* double CMonitoring::GetCPUTemperature(const std::string &tempLocation)
 {

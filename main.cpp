@@ -1,17 +1,31 @@
 #include <iostream>
 
-#include "modules/filestream/filestream.h"
-#include "src/helpers/stopwatch.h"
-#include "src/json_config/config_parser.h"
-#include "src/linux/shared_memory.h"
-#include "src/modules/unit_handler.h"
 #include <chrono>
 #include <sys/wait.h>
 #include <thread>
 
+#include "modules/filestream/filestream.h"
+#include "src/benchmarks/Linux/Monitoring.h"
 #include "src/benchmarks/Linux/xavier_sensors.h"
+#include "src/gstreamer/handler.h"
+#include "src/helpers/helper_functions.h"
+#include "src/helpers/stopwatch.h"
+#include "src/helpers/synchronizer.h"
+#include "src/json_config/config_parser.h"
+#include "src/linux/shared_memory.h"
+#include "src/modules/unit_handler.h"
 
 void print_func() { std::cout << "Printing the world" << std::endl; }
+
+void print_info()
+{
+  std::cout
+      << "Execute this application using ./benchmarks\n"
+      << "NOTE: Make sure that file \"json_example.json\" is included in the "
+         "same directory as the application\n"
+      << "\"json_example.json\" contains the configuration for the benchmarks"
+      << std::endl;
+}
 
 struct CommPipes
 {
@@ -21,7 +35,21 @@ struct CommPipes
 
 int main()
 {
-  CXavierSensors xavierSensors;
+  if (!Helpers::FileExists("json_example.json"))
+  {
+    print_info();
+    return -1;
+  }
+
+  auto config = Core::ConfigParser::Parse("json_example.json");
+  Synchronizer synchronizer;
+  CGstreamerHandler gstreamer{&synchronizer}; //{config.gstreamerPipeline};
+  Linux::CMonitoring measurements{&synchronizer};
+
+  gstreamer.runPipelineThread(config.gstreamerPipeline);
+  measurements.start(gstreamer.getThreadPid(), gstreamer.getRunningPtr());
+
+  CXavierSensors xavierSensors{8};
   auto result = xavierSensors.GetCoreInfo(1);
   std::cout << "Enabled: " << result.enabled << std::endl;
   std::cout << "Frequency: " << result.frequency << std::endl;

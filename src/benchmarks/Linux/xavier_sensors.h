@@ -7,7 +7,7 @@
 class CXavierSensors
 {
 public:
-  CXavierSensors();
+  CXavierSensors(const int maxCores);
   struct CpuCoreInfo
   {
     double temperature;
@@ -49,6 +49,7 @@ public:
 private:
   std::vector<CoreSensor> coreSensors_;
 
+  const int maxCores_;
   inline static const std::string preCoreNumberPath =
       "/sys/devices/system/cpu/cpu";
   inline static const std::string preCoreThermalPath =

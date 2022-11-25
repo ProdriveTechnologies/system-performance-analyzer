@@ -7,11 +7,11 @@
 
 namespace Core
 {
-Config ConfigParser::Parse(const std::string &jsonFile)
+SConfig ConfigParser::Parse(const std::string &jsonFile)
 {
   using json = nlohmann::json;
   json jsonObj = getJsonObj(jsonFile);
-  Config configuration = jsonObj;
+  SConfig configuration = jsonObj;
   return configuration;
 }
 

@@ -3,6 +3,8 @@
 # Custom added
 temp/
 build/
+buildManual/
+.vscode/
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
