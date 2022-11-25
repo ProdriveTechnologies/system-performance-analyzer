@@ -1,6 +1,7 @@
 #pragma once
 
 #include "export_struct.h"
+#include "src/json_config/sensor_config/config.h"
 
 namespace Exports
 {
@@ -17,7 +18,7 @@ public:
   CBase() {}
   virtual ~CBase() {}
 
-  virtual std::string InitExport() = 0;
+  virtual std::string InitExport(const PlatformConfig::SConfig &config) = 0;
   virtual std::string ParseData(const ExportData &data) = 0;
   virtual std::string FinishExport() = 0;
 };

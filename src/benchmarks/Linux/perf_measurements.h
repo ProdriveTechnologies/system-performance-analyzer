@@ -4,11 +4,14 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "src/exports/export.h"
+#include "src/exports/export_struct.h"
 #include "src/helpers/timer.h"
 #include "src/json_config/config.h"
+#include "src/json_config/sensor_config/config.h"
 #include "xavier_sensors_live.h"
 
 class Synchronizer; // pre-definition
@@ -37,7 +40,7 @@ public:
 private:
   Synchronizer *threadSync_;
   Core::SConfig config_;
-  CXavierSensors xavierSensors_;
+  // CXavierSensors xavierSensors_;
   static constexpr int XAVIER_CORES = 8;
   Timer<> cpuUtilizationTimer_;
   Linux::FileSystem::ProcStatData lastCpuDataAggregated_;
@@ -47,11 +50,21 @@ private:
   std::unique_ptr<Exports::CExport> pExportObj_;
   FileSystem::CLiveData<> liveFilesystemData_;
 
+  using MeasureFieldsType = std::vector<PlatformConfig::SDatafields>;
+  MeasureFieldsType measureFields_;
+
   void MeasureThread(const std::string &threadProcLoc);
   void MeasureSystem();
 
-  void InitExports();
+  void InitExports(const PlatformConfig::SConfig &config);
   void SendExportsData(const Exports::ExportData &data);
+  std::vector<PlatformConfig::SDatafields>
+  GetMeasureFields(const PlatformConfig::SConfig &e);
+
+  std::vector<PlatformConfig::SDatafields>
+  ParseArray(const PlatformConfig::SSensors &data);
+  std::vector<Exports::MeasuredItem>
+  GetMeasuredItems(const MeasureFieldsType &measureFields);
 
   // static constexpr double tempNotAvailable_ = -1.0;
   // static constexpr double tempUnreadable = -2.0;

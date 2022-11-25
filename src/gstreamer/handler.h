@@ -37,4 +37,9 @@ private:
 
   void FreeMemory();
   void SetTracingEnvironmentVars();
+  static void logFunction(GstDebugCategory *category, GstDebugLevel level,
+                          const gchar *file, const gchar *function, gint line,
+                          GObject *object, GstDebugMessage *message,
+                          gpointer user_data) G_GNUC_NO_INSTRUMENT;
+  inline static int q = 0;
 };

@@ -57,3 +57,13 @@ std::vector<CXavierSensors::SCpuCoreInfo> CXavierSensors::GetCoresInfo()
   }
   return coresInfo;
 }
+
+Exports::MeasuredItem
+CXavierSensors::ParseDirect(const PlatformConfig::SDatafields &datafield)
+{
+  Exports::MeasuredItem item;
+  item.id = datafield.id;
+  item.measuredValue =
+      std::stoi(Linux::CPerfMeasurements::ReadLocation(datafield.pathStr));
+  return item;
+}

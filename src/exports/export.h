@@ -16,7 +16,7 @@ public:
           const bool autoDeleteObj);
   ~CExport();
 
-  bool InitExport();
+  bool InitExport(const PlatformConfig::SConfig &config);
   bool DataExport(const ExportData &data);
   bool FinishExport();
 
@@ -44,9 +44,9 @@ inline bool CExport::DataExport(const ExportData &data)
 {
   return file_.AddRow(pExportObj_->ParseData(data), false);
 }
-inline bool CExport::InitExport()
+inline bool CExport::InitExport(const PlatformConfig::SConfig &config)
 {
-  return file_.AddRow(pExportObj_->InitExport(), false);
+  return file_.AddRow(pExportObj_->InitExport(config), false);
 }
 inline bool CExport::FinishExport()
 {

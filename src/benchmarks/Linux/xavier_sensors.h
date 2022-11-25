@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+#include "src/exports/export_struct.h"
+#include "src/json_config/sensor_config/config.h"
+
 class CXavierSensors
 {
 public:
@@ -46,6 +49,8 @@ public:
 
   SCpuCoreInfo GetCoreInfo(const unsigned int coreID);
   std::vector<SCpuCoreInfo> GetCoresInfo();
+  static Exports::MeasuredItem
+  ParseDirect(const PlatformConfig::SDatafields &datafield);
 
 private:
   std::vector<CoreSensor> coreSensors_;

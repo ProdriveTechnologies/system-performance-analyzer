@@ -10,7 +10,7 @@ namespace Exports
 class CCsv : public CBase
 {
 public:
-  std::string InitExport();
+  std::string InitExport(const PlatformConfig::SConfig &config);
   std::string ParseData(const ExportData &data);
   std::string FinishExport();
 

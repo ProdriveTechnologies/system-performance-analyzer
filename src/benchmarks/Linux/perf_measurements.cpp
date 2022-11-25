@@ -16,13 +16,14 @@
 
 #include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
+#include "src/json_config/sensor_config/config_parser.h"
 #include "xavier_sensors_live.h"
 namespace Linux
 {
 // TODO: Make cpuUtilizationTimer_ configurable through the JSON
 CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer)
-    : threadSync_{synchronizer}, xavierSensors_{XAVIER_CORES},
-      cpuUtilizationTimer_{std::chrono::milliseconds{1000}},
+    : threadSync_{synchronizer}, cpuUtilizationTimer_{std::chrono::milliseconds{
+                                     1000}},
       liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
 {
 }
@@ -35,7 +36,9 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
   config_ = config;
   Stopwatch stopwatch;
 
-  InitExports();
+  auto parsed = PlatformConfig::Parse("xavier_config.json");
+  measureFields_ = GetMeasureFields(parsed);
+  InitExports(parsed);
 
   // Thread exists now, store threads that already exist for the monitoring. The
   // newly added ones are from gstreamer and need to be monitored
@@ -56,8 +59,7 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
   // }
   liveFilesystemData_.Init();
 
-  // Sync before start, when synced, will start
-  //    directly
+  // Sync before start, when synced, will start directly
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for benchmarks");
   threadSync_->WaitForProcess();
   stopwatch.Start();
@@ -75,10 +77,11 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
     Exports::ExportData exportData;
     exportData.time =
         std::to_string(stopwatch.GetTime<std::milli>()); // Millisecond accuracy
+    exportData.measuredItems = GetMeasuredItems(measureFields_);
     // exportData.cpuInfo = xavierSensors_.GetCoresInfo();
-    exportData.cpuUtilization = Linux::FileSystem::GetProcStat(XAVIER_CORES);
+    // exportData.cpuUtilization = Linux::FileSystem::GetProcStat(XAVIER_CORES);
 
-    exportData.cpuUtilization = liveFilesystemData_.getLastData();
+    // exportData.cpuUtilization = liveFilesystemData_.getLastData();
     // if (cpuUtilizationTimer_.elapsed())
     // {
     //   auto previousAggregated = lastCpuDataAggregated_;
@@ -104,13 +107,13 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
 /**
  * @brief initializes the resources used for the measurements
  */
-void CPerfMeasurements::InitExports()
+void CPerfMeasurements::InitExports(const PlatformConfig::SConfig &config)
 {
   if (config_.settings.enableLogs)
   {
     pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CCsv{},
                                                      "csvfile.csv", true);
-    pExportObj_->InitExport();
+    pExportObj_->InitExport(config);
   }
 }
 
@@ -133,8 +136,8 @@ void CPerfMeasurements::MeasureThread(const std::string &threadProcLoc)
 
 void CPerfMeasurements::MeasureSystem()
 {
-  CXavierSensors xavierSensors{8};
-  auto coresStats = xavierSensors.GetCoresInfo();
+  // CXavierSensors xavierSensors{8};
+  // auto coresStats = xavierSensors.GetCoresInfo();
   // std::cout << "Some sensor info: " << coresStats.at(0)()
 }
 
@@ -217,6 +220,62 @@ std::string CPerfMeasurements::ReadLocation(const std::string &path)
   fileObj.close();
 
   return dataBuffer;
+}
+
+std::vector<PlatformConfig::SDatafields>
+CPerfMeasurements::GetMeasureFields(const PlatformConfig::SConfig &configFile)
+{
+  std::vector<PlatformConfig::SDatafields> measureFields;
+  for (const auto &e : configFile.sensors)
+  {
+    switch (Helpers::hash(e.type))
+    {
+    case Helpers::hash("array"):
+      measureFields = Helpers::CombineVectors(measureFields, ParseArray(e));
+      break;
+    default:
+      throw std::runtime_error(
+          "Monitoring: unknown type in the configuration file!");
+    }
+  }
+  return measureFields;
+}
+
+std::vector<PlatformConfig::SDatafields>
+CPerfMeasurements::ParseArray(const PlatformConfig::SSensors &data)
+{
+  std::vector<PlatformConfig::SDatafields> measureFields;
+  for (size_t i = 0; i < data.size; ++i)
+  {
+    for (const auto &e : data.datafields)
+    {
+      PlatformConfig::SDatafields dataField{e};
+      std::for_each(e.path.begin(), e.path.end(),
+                    [&](const std::string &pathElem) {
+                      dataField.pathStr +=
+                          pathElem == "_INDEX_" ? std::to_string(i) : pathElem;
+                    });
+      measureFields.push_back(dataField);
+    }
+  }
+  return measureFields;
+}
+
+std::vector<Exports::MeasuredItem>
+CPerfMeasurements::GetMeasuredItems(const MeasureFieldsType &measureFields)
+{
+  std::vector<Exports::MeasuredItem> measuredItems;
+  for (const auto &e : measureFields)
+  {
+    switch (Helpers::hash(e.type))
+    {
+    case Helpers::hash("DIRECT"):
+      measuredItems.push_back(
+          CXavierSensors::ParseDirect(e)); // ParseDirect(e);
+      break;
+    }
+  }
+  return measuredItems;
 }
 
 } // namespace Linux

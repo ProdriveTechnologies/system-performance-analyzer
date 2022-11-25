@@ -62,4 +62,34 @@ constexpr typename std::underlying_type<Enum>::type ToUnderlying(Enum e)
   return static_cast<typename std::underlying_type<Enum>::type>(e);
 }
 
+// for c++17 and higher:
+template <auto val> constexpr void static_print()
+{
+#if !defined(__GNUC__) || defined(__clang__)
+  int static_print_is_implemented_only_for_gcc = 0;
+#else
+  int unused = 0;
+#endif
+}
+inline constexpr uint32_t hash(const std::string_view data) noexcept
+{
+  uint32_t hash = 5381;
+
+  for (const auto &e : data)
+    hash = ((hash << 5) + hash) + e;
+
+  return hash;
+}
+
+template <typename VectorType>
+std::vector<VectorType> CombineVectors(const std::vector<VectorType> &a,
+                                       const std::vector<VectorType> &b)
+{
+  std::vector<VectorType> ab;
+  ab.reserve(a.size() + b.size()); // preallocate memory
+  ab.insert(ab.end(), a.begin(), a.end());
+  ab.insert(ab.end(), b.begin(), b.end());
+  return ab;
+}
+
 } // namespace Helpers
