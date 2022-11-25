@@ -1,16 +1,15 @@
 #pragma once
 
 #include "src/benchmarks/gstreamer_identifier.h"
+#include "src/benchmarks/linux/struct_measurements.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/json_config/sensor_config/config.h"
+#include "src/linux/filesystem.h"
 
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
-//#include "src/benchmarks/linux/xavier_sensors.h"
-#include "src/benchmarks/linux/struct_measurements.h"
-#include "src/benchmarks/linux/struct_sensors.h"
-#include "src/linux/filesystem.h"
 
 namespace Exports
 {

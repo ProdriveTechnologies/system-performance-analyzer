@@ -25,6 +25,7 @@ CGstreamerHandler::CGstreamerHandler(Synchronizer* synchronizer,
 , gstPipeline_{ nullptr }
 , gstBus_{ nullptr }
 , gstMsg_{ nullptr }
+, busWatchId_{ -1 }
 , gstErrorMsg_{ nullptr }
 , settings_{ settings }
 , traceHandler_{ &pipe_ }
@@ -38,6 +39,7 @@ CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler& gstreamer)
 , gstPipeline_{ nullptr }
 , gstBus_{ nullptr }
 , gstMsg_{ nullptr }
+, busWatchId_{ -1 }
 , gstErrorMsg_{ nullptr }
 , settings_{ gstreamer.settings_ }
 , traceHandler_{ &pipe_ }
@@ -122,8 +124,6 @@ void CGstreamerHandler::StartThread(const std::string& command)
   {
     // Initialize GST for the parent, such that it can also use the GStreamer
     // functions to parse the trace messages
-    // if (!gst_is_initialized())
-    //   gst_init(nullptr, nullptr);
     pipe_.SetParent();
     pipelineThread_ = std::thread(&CGstreamerHandler::ParentWaitProcess, this);
     traceHandler_.pid = processId_;
@@ -159,15 +159,6 @@ void CGstreamerHandler::ParentWaitProcess()
       traceHandler_.ParseTraceStructure(message);
     }
   }
-  // Waiting until the stress test is fully executes
-  // processSync_->WaitForProcess();
-}
-
-void CGstreamerHandler::RunPipelineThread(const std::string& pipelineStr)
-{
-  if (pipelineThread_.joinable())
-    pipelineThread_.join();
-  pipelineThread_ = std::thread{ &CGstreamerHandler::RunPipeline, this, pipelineStr };
 }
 
 void CGstreamerHandler::RunPipeline(const std::string& pipelineStr)

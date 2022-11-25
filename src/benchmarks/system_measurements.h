@@ -27,7 +27,7 @@ namespace Measurements
 class CSystemSensors
 {
 public:
-  CSystemSensors(const std::string& configFile);
+  explicit CSystemSensors(const std::string& configFile);
 
   void Initialize(std::vector<Measurements::SMeasurementsData>* allData);
 

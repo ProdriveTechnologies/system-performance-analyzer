@@ -18,10 +18,10 @@ RunProcess::RunProcess(Synchronizer* synchronizer, const Core::SProcess& userPro
 , running_{ false }
 {
 }
+
 RunProcess::RunProcess(const RunProcess& process)
 : ProcessRunner::Base{ process.processSync_, process.userProcessInfo_ }
 , running_{ false }
-
 {
 }
 
@@ -64,7 +64,7 @@ void RunProcess::ChildExecProcess(const std::string& command)
   CLogger::Log(CLogger::Types::INFO, "Child writing into pipe 2");
   ChildWaitProcess();
   std::this_thread::sleep_for(std::chrono::milliseconds(userProcessInfo_.startDelay));
-  // auto execvArgs{parameters};
+
   CLogger::Log(CLogger::Types::INFO, "Executing linux command: ", command);
   std::vector<std::string> parameters = Helpers::Split(command, ' ');
   auto parametersCStr = Helpers::ToCString(parameters);

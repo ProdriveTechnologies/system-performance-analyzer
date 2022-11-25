@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <functional>
 #include "src/gstreamer/measurement_types.h"
 #include "src/helpers/helper_functions.h"
 
@@ -32,10 +31,11 @@ struct hash<GStreamer::SIdentifier>
     // of the Fowler-Noll-Vo hash function
     // from: https://en.cppreference.com/w/cpp/utility/hash/operator()
     size_t result = 2166136261;
+    int hashNr2 = 16777619;
 
     for (size_t i = 0, ie = k.moduleName.size(); i != ie; ++i)
     {
-      result = (result * 16777619) ^ k.moduleName[i];
+      result = (result * hashNr2) ^ k.moduleName[i];
     }
 
     return result ^ (Helpers::ToUnderlying(k.type) << 1);

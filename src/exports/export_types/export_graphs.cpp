@@ -1,5 +1,7 @@
 #include "export_graphs.h"
 
+#include "src/benchmarks/linux/struct_sensors.h"
+
 #include <cmath>
 #include <iostream>
 #include <src/globals.h>
@@ -29,7 +31,7 @@ void CGraphs::CreateGraph(const Measurements::SSensors& sensor1, const Measureme
   fputs("set terminal png \n", pipe_gp);
   std::string outputStr = "set output 'graphs/" + sensor1.userId + " + " + sensor2.userId + ".png' \n";
   fputs(outputStr.c_str(), pipe_gp);
-  //   fputs("set xlabel 'f' \n", pipe_gp);
+
   fputs("set datafile separator ','\n", pipe_gp);
   fputs("set key autotitle columnhead \n", pipe_gp);
   fputs("set terminal png size 1000, 1000 enhanced font 'Sans,10'\n", pipe_gp);
@@ -53,21 +55,13 @@ void CGraphs::CreateGraph(const Measurements::SSensors& sensor1, const Measureme
 }
 
 /**
- * @brief TODO: remove and replace by configable filename
- *
- * @param c
- * @return std::string
+ * @brief Gets the filename from the CSV file (as this export depends on the CSV export)
+ * @note The name of the CSV file export and this function must both depend on GetClassificationStr() for proper
+ * functioning
  */
 std::string CGraphs::GetFileName(const Measurements::EClassification c)
 {
-  std::string sensorfile;
-  if (c == Measurements::EClassification::PIPELINE)
-    sensorfile = "PipelineMeasurements.csv";
-  else if (c == Measurements::EClassification::PROCESSES)
-    sensorfile = "ProcessMeasurements.csv";
-  else
-    sensorfile = "SystemResources.csv";
-  return sensorfile;
+  return Measurements::GetClassificationStr(c) + ".csv";
 }
 
 } // namespace Exports

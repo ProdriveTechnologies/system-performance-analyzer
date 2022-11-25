@@ -21,14 +21,15 @@ std::string ToString(const EValueTypes t)
 
 size_t SensorIdHash::operator()(const Measurements::SensorIdentifier& k) const
 {
-  // computes the hash of a Measurements::SensorIdentifier using a variant
-  // of the Fowler-Noll-Vo hash function
+  // computes the hash of a Measurements::SensorIdentifier using a variant of the Fowler-Noll-Vo hash function
   // from: https://en.cppreference.com/w/cpp/utility/hash/operator()
-  size_t result = 2166136261;
+  int hashNr1 = 2166136261;
+  int hashNr2 = 16777619;
+  size_t result = hashNr1;
 
   for (size_t i = 0, ie = k.first.size(); i != ie; ++i)
   {
-    result = (result * 16777619) ^ k.first[i];
+    result = (result * hashNr2) ^ k.first[i];
   }
   return result ^ (k.second << 1);
 }
@@ -37,7 +38,7 @@ size_t SensorIdHash::operator()(const Measurements::SensorIdentifier& k) const
  * @brief Returns the sensors based on a group classification and
  * optionally a process ID
  *
- * @param c
+ * @param c classification type
  * @param processId the id of the process in the json configuration. If
  * empty, it will return either the only pipeline that exists, or add the
  * sensors of the pipelines together and return the combined sensors

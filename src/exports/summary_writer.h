@@ -4,8 +4,7 @@
 #include <string>
 
 /**
- * @brief Wrapper around a C++ file object. Adds the functionality of writing
- * data row by row explicitly
+ * @brief Wrapper around a C++ file object. Adds the functionality of writing data, row by row, explicitly
  */
 class SummaryWriter
 {

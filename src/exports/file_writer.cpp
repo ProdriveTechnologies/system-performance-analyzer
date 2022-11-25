@@ -23,8 +23,7 @@ bool FileWriter::AddRow(const std::string& text)
 }
 
 /**
- * @brief adds a row in the file, except if "addEmptyString" is false and "text"
- * is empty
+ * @brief adds a row in the file, except if "addEmptyString" is false and "text" is empty
  *
  * @return true no errors occured
  * @return false could not add the text in the file, file corrupt

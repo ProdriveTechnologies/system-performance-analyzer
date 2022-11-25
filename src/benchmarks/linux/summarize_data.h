@@ -16,7 +16,7 @@ public:
   , multiplier_{ 1.0 }
   {
   }
-  CSummarizeData(const bool useSteadyState)
+  explicit CSummarizeData(const bool useSteadyState)
   : useSteadyState_{ useSteadyState }
   , multiplier_{ 1.0 }
   {
@@ -45,9 +45,6 @@ public:
   int GetSize() const { return average_.datapoints; }
 
 private:
-  SSensorData sensorData_;
-  bool useSteadyState_;
-  double multiplier_;
   struct Average
   {
     double aggregatedData = 0.0;
@@ -57,11 +54,19 @@ private:
       aggregatedData += item.measuredValue;
       datapoints += 1;
     }
-    double Get() const { return datapoints != 0 ? aggregatedData / datapoints : 0; }
+    double Get() const { return datapoints != 0 ? (aggregatedData / datapoints) : 0; }
   };
+
+  SSensorData sensorData_;
+  bool useSteadyState_;
+  double multiplier_;
+
   Average average_;
   std::vector<double> allMeasurements_;
 
+  /**
+   * @brief Returns the minimum value of the summarized data
+   */
   double GetMin() const
   {
     auto localVector = allMeasurements_;
@@ -72,6 +77,9 @@ private:
     }
     return *std::min_element(localVector.begin(), localVector.end());
   }
+  /**
+   * @brief Returns the maximum value of the summarized data
+   */
   double GetMax() const
   {
     auto localVector = allMeasurements_;
@@ -83,6 +91,10 @@ private:
     return *std::max_element(localVector.begin(), localVector.end());
   }
   inline bool IsEven(int value) const { return (value % 2) == 0; }
+
+  /**
+   * @brief returns the median of the summarized data
+   */
   double GetMedian() const
   {
     auto sortFunction = [](const double& lhs, const double& rhs) { return lhs < rhs; };

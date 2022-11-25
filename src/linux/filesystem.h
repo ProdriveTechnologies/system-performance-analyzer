@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <numeric> // std::accumulate
 #include <string>
 #include <variant>
 #include <vector>
@@ -19,10 +20,10 @@ struct Path
   std::vector<std::string> pathItems;
   std::string GetPath() const
   {
-    std::string path;
-    for (const auto& e : pathItems)
-      path += "/" + e;
-    return path;
+    return std::accumulate(pathItems.begin(),
+                           pathItems.end(),
+                           std::string{},
+                           [](const std::string& sum, const auto& e) { return sum + "/" + e; });
   }
   template <typename... Args>
   void AddItems(const Args&... args)
@@ -35,12 +36,7 @@ struct Path
     std::ifstream fileObj{ GetPath() };
     return fileObj.good();
   }
-  //   void insertPath(const std::string& path) {
-  //       reset();
-  //   }
 };
-
-std::vector<std::string> GetFiles(const std::string& path);
 
 struct Stat
 {
@@ -98,7 +94,7 @@ struct Stat
   long unsigned envEnd;
   int exitCode;
 
-  Stat(const std::vector<std::string>& stats_)
+  explicit Stat(const std::vector<std::string>& stats_)
   : pid{ std::stoi(stats_[0]) }
   , exeName{ stats_[1] }
   , state{ stats_[2][0] }
@@ -317,7 +313,7 @@ struct ProcStatData
       newResult.jiffiesSoftIrq = jiffiesSoftIrq - r.jiffiesSoftIrq;
       return newResult;
     }
-    Cpu(const ProcRow& cpuRow)
+    explicit Cpu(const ProcRow& cpuRow)
     {
       if (!Add(cpuRow))
         throw std::runtime_error("/proc/stat CPU data incorrect!");

@@ -9,11 +9,13 @@ struct SMeasuredItem
   int id = -1;
   double measuredValue = -1.0;
 };
+
 struct SMeasurementGroup
 {
   int pipelineId = -1;
   std::vector<SMeasuredItem> measuredItems;
 };
+
 struct SMeasurementsData
 {
   std::string time;

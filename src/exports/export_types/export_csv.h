@@ -14,7 +14,7 @@ public:
   bool FullExport(const std::vector<SMeasurementItem>& config,
                   const FullMeasurement data,
                   const AllSensors& allSensors,
-                  const std::vector<Measurements::CCorrelation::SResult>& correlations);
+                  const std::vector<Measurements::CCorrelation::SResult>& correlations) override;
 
 private:
   static constexpr char DELIMITER = ',';

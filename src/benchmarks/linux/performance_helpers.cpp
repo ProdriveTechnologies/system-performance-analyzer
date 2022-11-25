@@ -22,22 +22,6 @@ int GetUniqueId()
 }
 
 /**
- * @brief Create a Map With Id object
- *
- * @param data
- * @return std::unordered_map<int, Measurements::SSensors>
- */
-std::unordered_map<std::string, Measurements::SSensors> CreateMapWithId(const std::vector<Measurements::SSensors>& data)
-{
-  std::unordered_map<std::string, Measurements::SSensors> mapData;
-  for (const auto& e : data)
-  {
-    mapData.insert(std::make_pair(e.userId, e));
-  }
-  return mapData;
-}
-
-/**
  * @brief
  *
  * @param sensor
@@ -94,8 +78,6 @@ Measurements::SSensorData GetSummarizedData(const Measurements::EClassification 
       if (e2.id == uniqueId)
       {
         summarizedData.AddDataPoint(e2);
-        //  break; // May leave the (inner) loop for the datapoints, go to next
-        // datapoint
       }
     }
   }
@@ -105,7 +87,7 @@ Measurements::SSensorData GetSummarizedData(const Measurements::EClassification 
 
 Measurements::SSensors GetSummarizedData(const Measurements::EClassification classification,
                                          const std::vector<Measurements::SMeasurementsData>* data,
-                                         const std::unordered_set<int> uniqueIds,
+                                         const std::unordered_set<int>& uniqueIds,
                                          const Measurements::SSensors& sensorTemplate,
                                          const bool useSteadyState)
 {

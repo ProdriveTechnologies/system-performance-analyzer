@@ -21,7 +21,6 @@ public:
   ~CGstreamerHandler();
 
   void StartThread(const std::string& pipelineStr);
-  void RunPipelineThread(const std::string& pipelineStr);
   void RunPipeline(const std::string& pipelineStr);
   void ParentWaitProcess();
 
@@ -35,8 +34,8 @@ public:
   GStreamer::EMeasurement GetMeasurement() { return traceHandler_.GetMeasurement(); }
   struct LogStructure
   {
-    GMainLoop* loop;
-    CGstreamerHandler* parentClass;
+    GMainLoop* loop = nullptr;
+    CGstreamerHandler* parentClass = nullptr;
   };
 
 private:
@@ -53,7 +52,6 @@ private:
   const Core::SSettings settings_;
   GStreamer::TraceHandler::TracerUserData tracerUserData_;
   GStreamer::TraceHandler traceHandler_;
-  // std::thread pipelineThread_;
 
   pid_t applicationPid_;
 

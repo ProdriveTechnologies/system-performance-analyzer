@@ -11,8 +11,6 @@ namespace PerformanceHelpers
 {
 int GetUniqueId();
 
-std::unordered_map<std::string, Measurements::SSensors> CreateMapWithId(
-  const std::vector<Measurements::SSensors>& data);
 bool HandleThreshold(const Measurements::SSensors* sensor, Core::SThreshold threshold);
 
 Measurements::SSensorData GetSummarizedData(const Measurements::EClassification classification,
@@ -23,7 +21,7 @@ Measurements::SSensorData GetSummarizedData(const Measurements::EClassification 
 
 Measurements::SSensors GetSummarizedData(const Measurements::EClassification classification,
                                          const std::vector<Measurements::SMeasurementsData>* data,
-                                         const std::unordered_set<int> uniqueId,
+                                         const std::unordered_set<int>& uniqueId,
                                          const Measurements::SSensors& sensorTemplate,
                                          const bool useSteadyState = false);
 

@@ -13,7 +13,6 @@ bool CJson::FullExport(const std::vector<SMeasurementItem>& config,
                        [[maybe_unused]] const AllSensors& allSensors,
                        const std::vector<Measurements::CCorrelation::SResult>& correlations)
 {
-  std::string labels;
   nlohmann::json jsonObject;
 
   for (size_t i = 0; i < config.size(); ++i)
@@ -41,27 +40,27 @@ bool CJson::FullExport(const std::vector<SMeasurementItem>& config,
 nlohmann::json CJson::ParseLabel(const SMeasurementItem& item, const nlohmann::json parent)
 {
   nlohmann::json result = parent;
-  // How do i know the difference between level deeper or same level? I dont
-  // name with an array should be level deeper with values, if the values
-  // contain something, it is again level
+  // This visit checks every field and places them in the JSON
   std::visit(Overload{ [&](const auto& e) { result[item.name] = e; }, // for string, double, and int
                        [&](const std::vector<SMeasurementItem>& items) {
                          if (item.type == EType::ARRAY)
                          {
                            nlohmann::json newJson = nlohmann::json::array();
-                           for (const auto& e2 : items)
-                           {
-                             newJson.push_back(ParseLabel(e2));
-                           }
+
+                           std::transform(items.begin(),
+                                          items.end(),
+                                          std::back_inserter(newJson),
+                                          [this](const auto& e2) { return ParseLabel(e2); });
                            result[item.name] = newJson;
                          }
                          else
                          {
-                           nlohmann::json newJson;
-                           for (const auto& e2 : items)
-                           {
-                             newJson = ParseLabel(e2, newJson);
-                           }
+                           nlohmann::json newJson =
+                             std::accumulate(items.begin(),
+                                             items.end(),
+                                             nlohmann::json{},
+                                             [this](const auto& sum, const auto& e2) { return ParseLabel(e2, sum); });
+
                            result[item.name] = newJson;
                          }
                        } },

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "src/helpers/helper_functions.h"
+
+#include <numeric>
 #include <string>
 
 namespace GStreamer
@@ -11,20 +14,30 @@ enum class EMeasureType : int
   LATENCY = 2,
   PROCESSING_TIME = 3
 };
+
+const inline std::unordered_map<EMeasureType, std::string> typeMapping_{ { EMeasureType::FPS, "fps" },
+                                                                         { EMeasureType::LATENCY, "latency" },
+                                                                         { EMeasureType::PROCESSING_TIME,
+                                                                           "processing time" } };
+
+inline EMeasureType GetMeasureType(const std::string& t)
+{
+  for (const auto& e : typeMapping_)
+  {
+    if (e.second == t)
+      return e.first;
+  }
+  std::string err{ "Could not find pipeline measurement type \"" + t + "\"! Possible types: " };
+  err = std::accumulate(typeMapping_.begin(), typeMapping_.end(), err, [](const auto& sum, const auto& value) {
+    return sum + "\"" + value.second + "\" ";
+  });
+  throw std::runtime_error(err);
+}
+
 inline std::string GetMeasureType(const EMeasureType t)
 {
-  switch (t)
-  {
-  case EMeasureType::FPS:
-    return "fps";
-  case EMeasureType::LATENCY:
-    return "latency";
-  case EMeasureType::PROCESSING_TIME:
-    return "processing time";
-  case EMeasureType::NONE:
-  default:
-    return "";
-  }
+  auto result = typeMapping_.find(t);
+  return (result == typeMapping_.end()) ? "" : result->second;
 }
 
 struct EMeasurement

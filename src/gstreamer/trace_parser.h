@@ -13,8 +13,9 @@ namespace GStreamer
 class TraceHandler
 {
 public:
-  TraceHandler(Linux::PipeCommunicator* pipe)
-  : pipe_{ pipe }
+  explicit TraceHandler(Linux::PipeCommunicator* pipe)
+  : pid{ 0 }
+  , pipe_{ pipe }
   {
   }
 
@@ -31,7 +32,7 @@ public:
 
   struct TracerUserData
   {
-    TraceHandler* parent;
+    TraceHandler* parent = nullptr;
   };
 
   size_t GetMeasurementsSize() const { return fifoMeasurements_.size(); }

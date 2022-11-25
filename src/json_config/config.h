@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/exports/export_types.h"
+#include "src/gstreamer/measurement_types.h"
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/logger.h"
 
@@ -75,6 +76,15 @@ struct SExports
 
 struct SSettings
 {
+  struct SPipelineSensorConfig
+  {
+    // The minimum and maximum value used for the live performance bar. These are only used for pipeline values, as the
+    // sensorfile is not used for them
+    int minimumValue = 0;
+    int maximumValue = 250;
+    GStreamer::EMeasureType sensorType = GStreamer::EMeasureType::NONE;
+  };
+
   bool verbose;
   bool verboseSummary = false;
   bool enableLogs;
@@ -83,6 +93,15 @@ struct SSettings
   bool enableProcTime = false;
   bool enableLiveMode = false;
   bool enablePretestZeroes = false; // Used for better bottleneck detection
+  std::vector<SPipelineSensorConfig> pipelineConfig;
+
+  SPipelineSensorConfig GetSensorConfig(const GStreamer::EMeasureType sensorType) const
+  {
+    auto res = std::find_if(pipelineConfig.begin(), pipelineConfig.end(), [sensorType](const auto& e) {
+      return e.sensorType == sensorType;
+    });
+    return res == pipelineConfig.end() ? SPipelineSensorConfig{} : *res;
+  }
 };
 struct SConfig
 {
@@ -95,7 +114,6 @@ struct SConfig
   int id;
   std::string version;
   std::vector<SProcess> processes;
-  // std::vector<STask> tasks;
   std::vector<SThreshold> thresholds;
   SSettings settings;
 

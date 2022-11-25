@@ -39,17 +39,6 @@ public:
                     const std::vector<Core::SThreshold>& thresholds);
   void Start(const Core::SConfig& config, std::vector<ProcessInfo>* processes);
 
-  // struct ProcessMeasurements
-  // {
-  //   int pid = -1;
-  //   Linux::FileSystem::Stat stats;
-  //   std::vector<int> threadIds;
-  // };
-  // struct ProcessesMeasure
-  // {
-  //   std::vector<ProcessMeasurements> processes;
-  // };
-
 private:
   std::vector<ProcessInfo>* processes_;
 
@@ -57,12 +46,8 @@ private:
   Synchronizer* threadSync_;
   Core::SConfig config_;
   const std::string sensorConfigFile_;
-  // CXavierSensors xavierSensors_;
-  Timer<> cpuUtilizationTimer_;
   Exports::CExport exportObj_;
   Measurements::SAllSensors allSensors_;
-
-  // Measurements data
   std::vector<Measurements::SMeasurementsData> measurementsData_;
 
   GStreamer::CPipelineMeasurements gstMeasurements_;
@@ -72,15 +57,12 @@ private:
 
   Stopwatch testRunningTimer_;
 
-  // std::unique_ptr<std::vector<ProcessesMeasure>> pProcessesData_;
-
   void Initialize();
   void StartMeasurementsLoop();
   void ExportData(const Exports::AllSensors& sensors,
                   const std::vector<Measurements::CCorrelation::SResult>& correlationResults);
   void AnalyzeData();
   void CheckTresholds();
-  void RemoveProcessId(const int pid);
   void OrganizeGstreamerPipelines();
 
   template <typename T>
@@ -95,7 +77,7 @@ private:
     return result;
   }
 
-  void SetThresholdResults(Measurements::SAllSensors allSensors);
+  void SetThresholdResults(const Measurements::SAllSensors& allSensors);
 };
 
 } // namespace Linux

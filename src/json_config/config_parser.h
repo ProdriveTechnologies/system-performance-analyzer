@@ -67,6 +67,16 @@ inline void from_json(const nlohmann::json& j, SExports& p)
     j.at("filename").get_to(p.filename);
 }
 
+inline void from_json(const nlohmann::json& j, SSettings::SPipelineSensorConfig& p)
+{
+  j.at("minimum").get_to(p.minimumValue);
+  j.at("maximum").get_to(p.maximumValue);
+
+  std::string measureType;
+  j.at("sensortype").get_to(measureType);
+  p.sensorType = GStreamer::GetMeasureType(measureType);
+}
+
 inline void from_json(const nlohmann::json& j, SSettings& p)
 {
   j.at("measure_loop_ms").get_to(p.measureLoopMs);
@@ -86,6 +96,8 @@ inline void from_json(const nlohmann::json& j, SSettings& p)
     j.at("enable_pretest_zeroes").get_to(p.enablePretestZeroes);
 
   j.at("enable_logs").get_to(p.enableLogs);
+  if (j.contains("pipeline_config"))
+    j.at("pipeline_config").get_to(p.pipelineConfig);
 }
 
 inline void from_json(const nlohmann::json& j, SConfig& p)

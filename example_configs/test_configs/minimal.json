@@ -41,13 +41,25 @@
                 "enabled": true,
                 "filename": ""
             }
+        ],
+        "pipeline_config": [
+            {
+                "minimum": 0,
+                "maximum": 10,
+                "sensortype": "fps"
+            },
+            {
+                "minimum": 0,
+                "maximum": 250,
+                "sensortype": "processing time"
+            }
         ]
     },
     "processes": [
         {
             "id": 1,
             "type": "gstreamer",
-            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! queue  ! fakesink sync=true"
+            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! queue ! fakesink sync=true"
         },
         {
             "id": 2,

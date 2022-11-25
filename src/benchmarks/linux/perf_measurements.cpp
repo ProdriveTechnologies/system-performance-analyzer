@@ -1,11 +1,14 @@
 #include "perf_measurements.h"
 
+#include "performance_helpers.h"
 #include "proc_handler.h"
+#include "src/benchmarks/analysis/correlation.h"
 #include "src/benchmarks/linux/xavier_sensors.h"
 #include "src/exports/export.h"
 #include "src/exports/export_types/export_csv.h"
 #include "src/exports/export_types/export_graphs.h"
 #include "src/exports/export_types/export_json.h"
+#include "src/exports/export_types/summary_generator.h"
 #include "src/globals.h"
 #include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
@@ -19,25 +22,18 @@
 #include <sys/types.h> // getpid()
 #include <thread>
 #include <unistd.h> // getpid()
-// #include "xavier_sensors_live.h"
-
-#include "performance_helpers.h"
-#include "src/benchmarks/analysis/correlation.h"
-#include "src/exports/export_types/summary_generator.h"
 
 namespace Linux
 {
-// TODO: Make cpuUtilizationTimer_ configurable through the JSON
 CPerfMeasurements::CPerfMeasurements(Synchronizer* synchronizer,
                                      const std::string& sensorConfig,
                                      const std::vector<Core::SThreshold>& thresholds)
-: threadSync_{ synchronizer }
+: processes_{ nullptr }
+, threadSync_{ synchronizer }
 , sensorConfigFile_{ sensorConfig }
-, cpuUtilizationTimer_{ std::chrono::milliseconds{ 1000 } }
 , sensorMeasurements_{ sensorConfig }
 , processMeasurements_{ sensorConfig }
-, thresholds_{ thresholds } //,
-// liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
+, thresholds_{ thresholds }
 {
 }
 
@@ -82,10 +78,9 @@ void CPerfMeasurements::Initialize()
   OrganizeGstreamerPipelines();
   gstMeasurements_.setProctime(config_.settings.enableProcTime);
   gstMeasurements_.SetConfig(config_);
+
   if (config_.settings.enableLiveMode)
-  {
     exportObj_.InitialiseLiveMeasurements(&allSensors_, config_);
-  }
 
   sensorMeasurements_.Initialize(&measurementsData_);
   gstMeasurements_.Initialize(&measurementsData_);
@@ -95,11 +90,7 @@ void CPerfMeasurements::Initialize()
   allSensors_.AddSensors(Measurements::EClassification::SYSTEM, sensorMeasurements_.GetSensors(false));
   allSensors_.AddSensors(Measurements::EClassification::PROCESSES, processMeasurements_.GetSensors(false));
 
-  cpuUtilizationTimer_.restart();
-  while (!cpuUtilizationTimer_.elapsed())
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
-  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(config_.settings.measureLoopMs));
 }
 
 /**
@@ -118,27 +109,22 @@ void CPerfMeasurements::OrganizeGstreamerPipelines()
  */
 void CPerfMeasurements::StartMeasurementsLoop()
 {
-  // std::vector<std::string> monitoredThreads;
   testRunningTimer_.Restart();
   while (!threadSync_->AllCompleted())
   {
-    // 1. get all threads that will be monitored
-    // monitoredThreads = FileSystem::GetFiles(processPath.GetPath());
-    // Helpers::RemoveIntersection(monitoredThreads, excludedThreads_);
-    // // 2. Loop through threads and execute benchmarks on them
-
     // Filling the export data
     Measurements::SMeasurementsData measurementData;
 
     measurementData.time = std::to_string(testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
 
+    // Get the measurements from each source
     measurementData.AddMeasurements(Measurements::EClassification::SYSTEM, sensorMeasurements_.GetMeasurements());
     measurementData.AddMeasurements(Measurements::EClassification::PROCESSES, processMeasurements_.GetMeasurements());
-
     measurementData.AddMeasurements(Measurements::EClassification::PIPELINE, gstMeasurements_.ProcessGstreamer());
 
     // Measure data on each GStreamer pipeline
     measurementsData_.push_back(measurementData);
+
     // Send it to the live exports
     if (config_.settings.enableLiveMode)
     {
@@ -173,32 +159,11 @@ void CPerfMeasurements::ExportData(const Exports::AllSensors& sensors,
 }
 
 /**
- * @brief Remove process id from the processPids_ vector
+ * @brief Collects all the data from the performed measurements, executes some analysis and sends this data to the
+ * export methods
  */
-void CPerfMeasurements::RemoveProcessId(const int pid)
-{
-  for (size_t i = 0; i < processPids_.size(); i++)
-  {
-    const auto& e = processPids_[i];
-    if (e == pid)
-      processPids_.erase(processPids_.begin() + i);
-  }
-}
-
 void CPerfMeasurements::AnalyzeData()
 {
-  /**
-   * @brief Steps to execute:
-   * 1. Summarize the necessary data (also min, max, average)
-   * 2. Check thresholds on said summarized data
-   * 3. Add boolean to say whether the test failed/was succesful
-   * 4. Execute correlation checks nevertheless. If failed, check correlation
-   * between performance and resources
-   * 5. Create report with the summarized data. Exports should have access to
-   * the analyzed data as well. Maybe create one structure that can be extended
-   * for this?
-   */
-
   // Collect all sensors
   auto gstSensors = gstMeasurements_.GetSensors();
   auto sysSensors = sensorMeasurements_.GetSensors();
@@ -219,7 +184,7 @@ void CPerfMeasurements::AnalyzeData()
   ExportData(allSensors, corrResults);
 }
 
-void CPerfMeasurements::SetThresholdResults(Measurements::SAllSensors allSensors)
+void CPerfMeasurements::SetThresholdResults(const Measurements::SAllSensors& allSensors)
 {
   auto allProcessIds = allSensors.GetProcesses();
   for (const auto& processId : allProcessIds)

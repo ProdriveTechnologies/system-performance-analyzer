@@ -11,7 +11,8 @@
 namespace GStreamer
 {
 CPipelineMeasurements::CPipelineMeasurements()
-: enableProctime_{ false }
+: allData_{ nullptr }
+, enableProctime_{ false }
 {
 }
 void CPipelineMeasurements::Initialize(std::vector<Measurements::SMeasurementsData>* allData)
@@ -67,7 +68,6 @@ std::vector<Measurements::SMeasurementGroup> CPipelineMeasurements::ProcessGstre
     size_t queueSize = e.second->GetMeasurementsSize();
 
     // Read each measurement of the GStreamer pipeline and put it in a map
-    std::vector<PlatformConfig::SMeasureField> measureField_;
     std::unordered_map<SIdentifier, GStreamer::EMeasurement> summarizeMap;
 
     for (size_t qI = 0; qI < queueSize; qI++)
@@ -128,10 +128,9 @@ Exports::SMeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
  * @brief Returns the sensors supported and measured by the pipeline
  *
  * @return Measurements::SSensors
- * @note For the live mode, we need to assign one "fps" measurement to
- * visualize. Because it is shown during runtime, we don't have access to the
- * averages. Therefore, the "fps" of the first component will be marked for the
- * live view (For each MeasureType, one component will be marked)
+ * @note For the live mode, we need to assign one "fps" measurement to visualize. Because it is shown during runtime, we
+ * don't have access to the averages. Therefore, the "fps" of the first component will be marked for the live view (For
+ * each MeasureType, one component will be marked)
  */
 std::vector<Measurements::SAllSensors::SSensorGroups> CPipelineMeasurements::GetSensors(const bool summarizeData) const
 {
@@ -139,7 +138,6 @@ std::vector<Measurements::SAllSensors::SSensorGroups> CPipelineMeasurements::Get
 
   for (const auto& pipeline : uniqueIds_)
   {
-    std::cout << "Unique ID execution: " << pipeline.first << std::endl;
     std::unordered_set<GStreamer::EMeasureType> livemodeTypes;
     Measurements::SAllSensors::SSensorGroups sensorGroup;
     sensorGroup.processId = pipeline.first;
@@ -148,16 +146,17 @@ std::vector<Measurements::SAllSensors::SSensorGroups> CPipelineMeasurements::Get
 
     for (const auto& e : pipeline.second)
     {
-      std::vector<Measurements::SSensors> sensors;
       std::string sensorName = CreateSensorName(e.first.moduleName, e.first.type);
       Measurements::SSensors sensor{ sensorName, e.second };
       sensor.measuredRaw = true;
 
       sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
       sensor.SetDataInfo(GetMeasureType(e.first.type));
-      // TODO: remove magic numbers, ideally, make it configurable by the user
-      sensor.userData.minimumValue = 0;
-      sensor.userData.maximumValue = 250;
+
+      // Configure the minimum and maximum values for the live view
+      auto sensorconfig = config_.settings.GetSensorConfig(e.first.type);
+      sensor.userData.minimumValue = sensorconfig.minimumValue;
+      sensor.userData.maximumValue = sensorconfig.maximumValue;
       if (livemodeTypes.find(e.first.type) == livemodeTypes.end())
       {
         livemodeTypes.insert(e.first.type);
@@ -245,7 +244,9 @@ std::vector<Exports::SMeasurementItem> CPipelineMeasurements::GetMeasurementLabe
   }
 
   std::vector<Exports::SMeasurementItem> result;
-  std::transform(mapResult.begin(), mapResult.end(), std::back_inserter(result), [](const auto p) { return p.second; });
+  std::transform(mapResult.begin(), mapResult.end(), std::back_inserter(result), [](const auto& p) {
+    return p.second;
+  });
   return result; // the vector ordered by unique IDs of the measurements
 }
 
@@ -293,7 +294,7 @@ int CPipelineMeasurements::GetUniqueId(const int pipelineId, const SIdentifier& 
  *
  * @param pipelineNr should be the number from the pipeline, indexed from 0
  */
-std::string CPipelineMeasurements::CreateSensorName(const std::string moduleName,
+std::string CPipelineMeasurements::CreateSensorName(const std::string& moduleName,
                                                     EMeasureType type,
                                                     const int pipelineNr) const
 {

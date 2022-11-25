@@ -8,7 +8,7 @@
  *
  * @note this constructor can throw when a wrong JSON file is inserted
  */
-CSystemPerformanceAnalyzer::CSystemPerformanceAnalyzer(const std::string& configFile, const std::string sensorFile)
+CSystemPerformanceAnalyzer::CSystemPerformanceAnalyzer(const std::string& configFile, const std::string& sensorFile)
 : configFile_{ Core::ConfigParser::Parse(configFile) }
 , synchronizer_{ configFile_.processes.size() + 1 } // + 1 because of monitoring thread
 , measurements_{ &synchronizer_, sensorFile, configFile_.thresholds }

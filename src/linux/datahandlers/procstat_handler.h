@@ -35,7 +35,6 @@ public:
   }
 
 private:
-  // static inline const char procStatPath_[] = "/proc/stat";
   Measurements::ProcHandler procHandler_;
 };
 } // namespace Linux

@@ -17,7 +17,9 @@ enum class EValueTypes
   AVERAGE,
   MEDIAN
 };
+
 std::string ToString(const EValueTypes t);
+
 struct SSensorData
 {
   struct SMeasureValue
@@ -45,6 +47,7 @@ struct SSensorData
     return result;
   }
 };
+
 struct SSensors
 {
   bool thresholdExceeded = false;
@@ -74,7 +77,7 @@ struct SSensors
   {
   }
   // Constructor with an SDataFields object
-  SSensors(const PlatformConfig::SDatafields& fields)
+  explicit SSensors(const PlatformConfig::SDatafields& fields)
   : userId{ fields.name }
   , uniqueId{ fields.id }
   , classType{ fields.classType }
@@ -99,6 +102,7 @@ enum class EClassification
   PROCESSES,
   SYSTEM
 };
+
 inline std::unordered_map<EClassification, std::string> classificationToString = {
   { EClassification::PIPELINE, "PipelineMeasurements" },
   { EClassification::PROCESSES, "ProcessMeasurements" },
@@ -125,6 +129,7 @@ inline void SetClassificationStr(const EClassification c, const std::string& new
 using SensorName = std::string;
 using SensorProcessId = int;
 using SensorIdentifier = std::pair<SensorName, SensorProcessId>;
+
 // Hash function for the Measurements::SensorIdentifier field
 struct SensorIdHash
 {
@@ -152,8 +157,7 @@ struct SAllSensors
     SSensorGroups() = default;
   };
 
-  // All the sensors classified by the different groups (Pipeline data, process
-  // data, system data)
+  // All the sensors classified by the different groups (Pipeline data, process data, system data)
   std::unordered_map<EClassification, std::vector<SSensorGroups>> data;
 
   using SensorMap = std::unordered_map<std::string, Measurements::SSensors*>;

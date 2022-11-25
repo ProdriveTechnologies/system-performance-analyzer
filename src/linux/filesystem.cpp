@@ -6,14 +6,6 @@ namespace Linux
 {
 namespace FileSystem
 {
-std::vector<std::string> GetFiles(const std::string& path)
-{
-  std::vector<std::string> dirFiles;
-  for (const auto& entry : std::filesystem::directory_iterator(path))
-    dirFiles.push_back(entry.path());
-  return dirFiles;
-}
-
 Stat GetStats(const std::string& statLocation)
 {
   std::ifstream statFile{ statLocation, std::ios_base::in };
@@ -54,9 +46,7 @@ ProcStatData GetProcStat(const std::string& procStatLocation)
     statElements.push_back(row);
   }
 
-  // const auto &procStatRow = statElements.at(0);
   ProcStatData procStatData;
-  // procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
 
   for (const auto& procStatRow : statElements)
   {

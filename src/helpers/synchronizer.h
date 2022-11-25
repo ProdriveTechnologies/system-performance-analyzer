@@ -7,7 +7,7 @@
 class Synchronizer
 {
 public:
-  Synchronizer(const size_t threadNr);
+  explicit Synchronizer(const size_t threadNr);
 
   void WaitForProcess();
   void setRunning(const bool runningState) { processRunning_ = runningState; }

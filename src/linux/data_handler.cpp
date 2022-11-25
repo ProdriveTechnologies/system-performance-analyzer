@@ -28,7 +28,7 @@ std::unordered_map<PlatformConfig::ETypes, Linux::CDataHandler::Config> GetDatah
   return result;
 }
 
-void CDataHandler::Initialize(std::unordered_map<PlatformConfig::ETypes, Config> parsers,
+void CDataHandler::Initialize(const std::unordered_map<PlatformConfig::ETypes, Config>& parsers,
                               const std::vector<PlatformConfig::SDatafields>& datafields)
 {
   parsers_ = parsers;

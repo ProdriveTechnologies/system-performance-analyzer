@@ -10,6 +10,7 @@
 namespace Linux
 {
 PipeCommunicator::PipeCommunicator()
+: isParent_{ false }
 {
   int status = pipe(parentReadPipe_);
   int status2 = pipe(parentWritePipe_);
@@ -35,8 +36,6 @@ void PipeCommunicator::SetParent()
 
 void PipeCommunicator::Write(const std::string& message)
 {
-  // Write(static_cast<void *>(&message), message.size());
-
   int fd = isParent_ ? parentWritePipe_[WRITE] : parentReadPipe_[WRITE];
   int writtenBytes = write(fd, message.c_str(), message.size());
   if (writtenBytes < 0)

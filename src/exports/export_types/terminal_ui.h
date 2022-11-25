@@ -24,11 +24,11 @@ public:
   bool FullExport(const std::vector<SMeasurementItem>& config,
                   const FullMeasurement data,
                   const AllSensors& allSensors,
-                  const std::vector<Measurements::CCorrelation::SResult>& correlations);
+                  const std::vector<Measurements::CCorrelation::SResult>& correlations) override;
 
-  void StartLiveMeasurements() {}
-  void AddMeasurements(const Measurements::SMeasurementsData data);
-  void FinishLiveMeasurements() {}
+  void StartLiveMeasurements() override {}
+  void AddMeasurements(const Measurements::SMeasurementsData data) override;
+  void FinishLiveMeasurements() override {}
 
 private:
   struct ColorRange

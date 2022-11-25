@@ -65,7 +65,7 @@ private:
   std::unordered_map<int, SIdentifier> GetPluginNames(const int pipelineId) const;
   int GetProcessDelay(const int pipelineId) const;
 
-  std::string CreateSensorName(const std::string moduleName, EMeasureType type, const int pipelineNr = -1) const;
+  std::string CreateSensorName(const std::string& moduleName, EMeasureType type, const int pipelineNr = -1) const;
 
   bool GetPerformanceIndicator(const EMeasureType type) const
   {

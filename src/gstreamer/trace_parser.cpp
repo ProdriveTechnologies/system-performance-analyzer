@@ -50,10 +50,8 @@ void TraceHandler::ParseTraceStructure(const GstStructure* gstStructure)
   switch (Helpers::hash(g_quark_to_string(gstStructure->name)))
   {
   case Helpers::hash("thread-rusage"):
-    // std::cout << "T";
     break;
   case Helpers::hash("proc-rusage"):
-    // std::cout << "P";
     break;
   case Helpers::hash("proctime"):
   {
@@ -64,17 +62,14 @@ void TraceHandler::ParseTraceStructure(const GstStructure* gstStructure)
   }
   break;
   case Helpers::hash("latency"):
-    // std::cout << "Received latency: " <<
-    // gst_structure_to_string(gstStructure)
-    //          << std::endl;
-    {
-      //   trace.type = MeasureType::LATENCY;
-      //   trace.pluginName = gst_structure_get_string(gstStructure,
-      //   "src-element");
-      // gst_structure_get_uint(gstStructure, "fps", &trace.valueInt);
-      // Todo: Better implement this time
-    }
-    break;
+  {
+    trace.type = EMeasureType::LATENCY;
+    trace.pluginName = gst_structure_get_string(gstStructure, "src-element");
+    // gst_structure_get_uint(gstStructure, "fps", &trace.valueInt);
+    // Latency should be enabled in gstreamer/handler.cpp if necessary
+    // And the latency should be correctly retrieved from the gst message
+  }
+  break;
   case Helpers::hash("framerate"):
   {
     trace.type = EMeasureType::FPS;

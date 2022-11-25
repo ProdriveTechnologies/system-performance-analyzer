@@ -23,8 +23,8 @@ public:
     std::string configFile;
     // Default file name:
     std::string sensorInfoFile = "sensor_config.json";
-    bool enableDebugLog;
-    bool enableInfoLog;
+    bool enableDebugLog = false;
+    bool enableInfoLog = false;
   };
 
   bool Parse(int argc, char* argv[]);

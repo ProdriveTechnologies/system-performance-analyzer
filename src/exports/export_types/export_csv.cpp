@@ -3,6 +3,7 @@
 #include "src/exports/file_writer.h"
 #include "src/helpers/helper_functions.h"
 
+#include <numeric>
 #include <unordered_map>
 
 namespace Exports
@@ -51,20 +52,12 @@ bool CCsv::FullExport([[maybe_unused]] const std::vector<SMeasurementItem>& conf
 
 /**
  * @brief Loops through the items and retrieves the labels out of them
- *
- * @param item
- * @return std::string
  */
 std::string CCsv::ParseLabel(const std::vector<Measurements::SSensors>& sensors)
 {
-  std::string result;
-
-  for (const auto& e : sensors)
-  {
-    if (e.measuredRaw)
-      result += DELIMITER + e.userId;
-  }
-  return result;
+  return std::accumulate(sensors.begin(), sensors.end(), std::string{}, [](const std::string& sum, const auto& e) {
+    return sum + (e.measuredRaw ? DELIMITER + e.userId : "");
+  });
 }
 
 } // namespace Exports

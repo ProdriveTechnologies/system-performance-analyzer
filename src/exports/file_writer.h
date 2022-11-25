@@ -9,7 +9,7 @@
 class FileWriter
 {
 public:
-  FileWriter(const std::string& fileName);
+  explicit FileWriter(const std::string& fileName);
 
   bool AddRow(const std::string& text);
   bool AddRow(const std::string& text, const bool addEmptyString);

@@ -16,6 +16,7 @@ namespace Measurements
  */
 CSystemSensors::CSystemSensors(const std::string& configFile)
 : configFile_{ configFile }
+, allData_{ nullptr }
 {
 }
 

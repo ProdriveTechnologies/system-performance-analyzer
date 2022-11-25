@@ -24,6 +24,7 @@ class CBase
 public:
   CBase()
   : hasLiveMode_{ false }
+  , liveSensors_{ nullptr }
   {
   }
   virtual ~CBase() {}

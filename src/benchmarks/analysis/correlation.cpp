@@ -92,8 +92,7 @@ std::vector<CCorrelation::SSensorMeasurements> CCorrelation::CreateEqualSizedVec
         {
           SSensorMeasurements::SMeasurement resMeasurement;
           auto measurementGroup = measurement.GetItems(classification);
-          // Loop through all the measured fields and find the one equal to
-          // sensor
+          // Loop through all the measured fields and find the one equal to sensor
           for (const auto& field : measurementGroup)
           {
             if (field.id == sensor.sensor.uniqueId)
@@ -194,6 +193,9 @@ double CCorrelation::GetCorrelationCoefficient(const std::vector<double>& arrU, 
   return corr;
 }
 
+/**
+ * @brief Removes the fields that are not measured from the vectors
+ */
 std::pair<CCorrelation::SSensorMeasurements, CCorrelation::SSensorMeasurements> CCorrelation::RemoveNotMeasured(
   const SSensorMeasurements& vec1,
   const SSensorMeasurements& vec2)
@@ -213,8 +215,7 @@ std::pair<CCorrelation::SSensorMeasurements, CCorrelation::SSensorMeasurements> 
 
   auto RemoveIndexes = [](const SSensorMeasurements& vec, const std::set<int, std::greater<int>>& indexes) {
     auto vecCpy = vec.rawMeasurements;
-    // Start with removal of the largest index, therefore the set is ordered
-    // with std::greater
+    // Start with removal of the largest index, therefore the set is ordered with std::greater
     for (const auto& index : indexes)
     {
       auto deleteIndex = vecCpy.begin() + index;
@@ -232,10 +233,12 @@ std::pair<CCorrelation::SSensorMeasurements, CCorrelation::SSensorMeasurements> 
 std::vector<double> CCorrelation::ConvertToRaw(const SSensorMeasurements& vec1)
 {
   std::vector<double> result;
-  for (const auto& e : vec1.rawMeasurements)
-  {
-    result.push_back(e.item.measuredValue);
-  }
+
+  std::transform(vec1.rawMeasurements.begin(),
+                 vec1.rawMeasurements.end(),
+                 std::back_inserter(result),
+                 [](const auto& e) { return e.item.measuredValue; });
+
   return result;
 }
 

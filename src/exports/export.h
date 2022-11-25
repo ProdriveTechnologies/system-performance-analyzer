@@ -46,7 +46,6 @@ public:
       obj->FinishLiveMeasurements();
     }
   }
-  // void Export(const ETypes exportType, const SExportData &exportData);
 
   void ExecuteExport(const Core::SExports& exportSettings, const SExportData& exportData, const Core::SConfig& config)
   {
@@ -55,8 +54,7 @@ public:
     auto res = exportObjects_.find(exportSettings.exportType);
     if (res != exportObjects_.end())
     {
-      // The visit construction is necessary because the object is contained
-      // within a std::variant
+      // The visit construction is necessary because the object is contained within a std::variant
       std::visit(
         Overload{
           [&](auto& exportObj) {
@@ -100,6 +98,7 @@ inline CExport::~CExport()
 inline void CExport::InitialiseLiveMeasurements(Measurements::SAllSensors* sensors, const Core::SConfig& settings)
 {
   SetLiveModeObjects();
+
   std::cout << "Initialize live measurements" << std::endl;
   for (auto& obj : liveTypes_)
   {

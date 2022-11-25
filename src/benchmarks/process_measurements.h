@@ -28,17 +28,15 @@ namespace Measurements
 class CProcessMeasurements
 {
 public:
-  CProcessMeasurements(const std::string& configFile);
+  explicit CProcessMeasurements(const std::string& configFile);
 
-  void Initialize(std::vector<Measurements::SMeasurementsData>* allData, std::vector<Linux::RunProcess*> processes);
+  void Initialize(std::vector<Measurements::SMeasurementsData>* allData,
+                  const std::vector<Linux::RunProcess*>& processes);
 
   Exports::SMeasurementItem GetConfig() const;
   std::vector<Measurements::SMeasurementGroup> GetMeasurements();
 
   std::vector<SAllSensors::SSensorGroups> GetSensors(const bool summarizeData = true) const;
-
-  // Should be removed
-  std::vector<PlatformConfig::SDatafields> GetDefinition() const { return measureFieldsDefinition_; }
 
 private:
   struct ProcessDef
@@ -64,7 +62,6 @@ private:
   std::vector<Exports::SMeasurementItem> GetMeasurementFields() const;
   std::vector<Exports::SMeasurementItem> GetDefinitionItems(const PlatformConfig::SDatafields& field,
                                                             const int processId) const;
-  void SetInactive(const int processId);
 
   std::vector<Linux::SDataHandlers> dataHandlers_;
 
@@ -108,7 +105,6 @@ private:
   MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields& dataField);
   MeasureCombo ParseArray(const PlatformConfig::SDatafields& data);
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields& data);
-  Linux::FileSystem::Stat GetProcStat(const int procId);
   void SetDataHandlers();
   int GetProcessDelay(const int processId) const;
 };

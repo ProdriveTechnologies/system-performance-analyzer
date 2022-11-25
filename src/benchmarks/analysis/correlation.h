@@ -25,6 +25,7 @@ public:
   static double GetCorrelationCoefficient(const std::vector<double>& u, const std::vector<double>& v);
 
 private:
+  // The struct used for the measurements
   struct SSensorMeasurements
   {
     struct SMeasurement

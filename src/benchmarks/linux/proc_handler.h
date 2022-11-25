@@ -6,6 +6,9 @@
 
 namespace Measurements
 {
+/**
+ * @brief Handler for parsing the /proc/stat and /proc/statm location
+ */
 class ProcHandler
 {
 public:

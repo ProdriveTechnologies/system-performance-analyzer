@@ -45,7 +45,7 @@ public:
   };
   CDataHandler() = default;
 
-  void Initialize(std::unordered_map<PlatformConfig::ETypes, Config> parsers,
+  void Initialize(const std::unordered_map<PlatformConfig::ETypes, Config>& parsers,
                   const std::vector<PlatformConfig::SDatafields>& datafields);
 
   /**

@@ -12,6 +12,7 @@ namespace Measurements
 {
 CProcessMeasurements::CProcessMeasurements(const std::string& configFile)
 : configFile_{ configFile }
+, allData_{ nullptr }
 {
 }
 
@@ -21,7 +22,7 @@ CProcessMeasurements::CProcessMeasurements(const std::string& configFile)
  * @param allData
  */
 void CProcessMeasurements::Initialize(std::vector<Measurements::SMeasurementsData>* allData,
-                                      std::vector<Linux::RunProcess*> processes)
+                                      const std::vector<Linux::RunProcess*>& processes)
 {
   SetDataHandlers();
   processes_ = processes;
@@ -196,21 +197,6 @@ std::vector<Measurements::SMeasurementGroup> CProcessMeasurements::GetMeasuremen
     measuredItems.push_back(processData);
   }
   return measuredItems;
-}
-
-Linux::FileSystem::Stat CProcessMeasurements::GetProcStat(const int procId)
-{
-  const std::string procStatPath = "/proc/" + std::to_string(procId) + "/stat";
-  auto stats = Linux::FileSystem::GetStats(procStatPath);
-  return stats;
-}
-void CProcessMeasurements::SetInactive(const int processId)
-{
-  for (auto& e : processIds_)
-  {
-    if (e.processId == processId)
-      e.active = false;
-  }
 }
 
 CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
