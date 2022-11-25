@@ -172,16 +172,6 @@ void CProcessMeasurements::SetProcesses()
  */
 std::vector<Exports::ProcessInfo> CProcessMeasurements::GetMeasurements()
 {
-  // auto CheckRmProcessInactive = [&](const bool isInactiveExpr, const int id)
-  // {
-  //   if (isInactiveExpr)
-  //   {
-  //     SetInactive(id);
-  //     return true;
-  //   }
-  //   return false;
-  // };
-
   std::vector<Exports::ProcessInfo> measuredItems;
   // 1. Loop through each PID
   for (auto &process : processIds_)
@@ -204,52 +194,8 @@ std::vector<Exports::ProcessInfo> CProcessMeasurements::GetMeasurements()
       continue;
     }
     measuredItems.push_back(processData);
-    // Loop through all the necessary fields
-    // for (const auto &e : measureFields_)
-    // {
-    //   try
-    //   {
-    //     Exports::MeasuredItem item;
-    //     switch (e.type)
-    //     {
-    //     case PlatformConfig::Types::DIRECT_PID:
-    //     {
-    //       auto fieldCpy = e;
-    //       Helpers::replaceStr(fieldCpy.path, "$PID$",
-    //                           std::to_string(process.processId));
-
-    //       item = CXavierSensors::ParseDirect(fieldCpy);
-    //       if (CheckRmProcessInactive(item.id == -1, e.id))
-    //         break;
-    //     }
-    //     break;
-    //     case PlatformConfig::Types::PID_STAT:
-    //     {
-    //       auto procstat = GetProcStat(process.processId);
-    //       if (CheckRmProcessInactive(!procstat.succesful, e.id))
-    //         break;
-    //     }
-    //     break;
-    //     case PlatformConfig::Types::PID_STATM:
-    //       break;
-    //     default:
-    //       throw std::runtime_error("Software Error! Incorrect type in the "
-    //                                "performance measurements!");
-    //     }
-    //     if (item.id != -1)
-    //       processData.measuredItems.push_back(item);
-    //   }
-    //   catch (const std::exception &error)
-    //   {
-    //     SetInactive(e.id);
-    //     break; // Break out of the for loop, process is inactive
-    //   }
-    // }
-    // measuredItems.push_back(processData);
   }
   return measuredItems;
-  // procHandler_.ParseMeminfo();
-  // return GetMeasurements(measureFields_);
 }
 
 Linux::FileSystem::Stat CProcessMeasurements::GetProcStat(const int procId)

@@ -58,6 +58,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/data_handler.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem/statm.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/analysis/correlation.cpp
 )
 message(" - Enabling static code analyser: clang-tidy")
 
@@ -115,6 +116,16 @@ if(NOT json_POPULATED)
   add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+# ##################### Boost ##############################
+find_package(Boost 1.70)
+
+if(Boost_FOUND)
+  message("Boost found!")
+else()
+  message(SEND_ERROR "Boost not installed! Please install boost (V1.70 or higher)"
+    " Minimum required Ubuntu package: libboost-dev")
+endif()
+
 # ################# Hardware info Library ##################
 # message(" -- Downloading hardware info library")
 # include(FetchContent)
@@ -154,7 +165,7 @@ find_package(Threads)
 find_library(LIBRT rt) # Note: LIBRT is not a Windows library. Therefore, for Windows this should be ignored
 
 if(LIBRT)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json Boost::boost ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
