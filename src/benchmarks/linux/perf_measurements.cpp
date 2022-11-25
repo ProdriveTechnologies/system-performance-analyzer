@@ -72,6 +72,8 @@ void CPerfMeasurements::Start(const Core::SConfig &config,
   threadSync_->WaitForProcess();
 
   // Finish the analysis
+  if (config_.settings.enableLiveMode)
+    exportObj_.FinishLiveMeasurements();
   AnalyzeData();
 }
 
@@ -85,15 +87,21 @@ void CPerfMeasurements::Initialize()
   OrganizeGstreamerPipelines();
   gstMeasurements_.setProctime(config_.settings.enableProcTime);
   gstMeasurements_.SetConfig(config_);
+  if (config_.settings.enableLiveMode)
+  {
+    exportObj_.InitialiseLiveMeasurements(&allSensors_, config_);
+  }
 
-  // pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
-
-  // Must happen after the creation of the pMeasurementsData_ memory block
   sensorMeasurements_.Initialize(&measurementsData_);
   gstMeasurements_.Initialize(&measurementsData_);
   std::vector<RunProcess *> linuxProcesses =
       GetProcessFromProcesses<RunProcess>();
   processMeasurements_.Initialize(&measurementsData_, linuxProcesses);
+
+  allSensors_.AddSensors(Measurements::Classification::SYSTEM,
+                         sensorMeasurements_.GetSensors());
+  allSensors_.AddSensors(Measurements::Classification::PROCESSES,
+                         processMeasurements_.GetSensors());
 
   cpuUtilizationTimer_.restart();
   while (!cpuUtilizationTimer_.elapsed())
@@ -144,6 +152,15 @@ void CPerfMeasurements::StartMeasurementsLoop()
 
     // Measure data on each GStreamer pipeline
     measurementsData_.push_back(measurementData);
+    // Send it to the live exports
+    if (config_.settings.enableLiveMode)
+    {
+      // Have to add the sensors of the pipeline each time as they are
+      // dynamically added (the old sensors are cleared when adding new ones)
+      allSensors_.AddSensors(Measurements::Classification::PIPELINE,
+                             gstMeasurements_.GetSensors());
+      exportObj_.AddMeasurements(measurementData);
+    }
 
     std::this_thread::sleep_for(
         std::chrono::milliseconds(config_.settings.measureLoopMs));

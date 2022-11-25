@@ -6,7 +6,6 @@
 #include "export_struct.h"
 #include "export_types.h"
 #include "exports_base.h"
-#include "file_writer.h"
 #include "src/benchmarks/analysis/correlation.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 
@@ -14,6 +13,7 @@
 #include "src/exports/export_types/export_graphs.h"
 #include "src/exports/export_types/export_json.h"
 #include "src/exports/export_types/summary_generator.h"
+#include "src/exports/export_types/terminal_ui.h"
 
 namespace Exports
 {
@@ -28,13 +28,27 @@ struct SExportData
 class CExport
 {
 public:
-  CExport(CBase *exportObj, const std::string &fileName,
-          const Core::SConfig &settings, const bool autoDeleteObj);
   CExport();
   ~CExport();
 
-  void SetApplicationName(const std::string &name);
+  void InitialiseLiveMeasurements(Measurements::AllSensors *sensors,
+                                  const Core::SConfig &config);
 
+  void AddMeasurements([
+      [maybe_unused]] const Measurements::SMeasurementsData data)
+  {
+    for (auto &obj : liveTypes_)
+    {
+      obj->AddMeasurements(data);
+    }
+  }
+  void FinishLiveMeasurements()
+  {
+    for (auto &obj : liveTypes_)
+    {
+      obj->FinishLiveMeasurements();
+    }
+  }
   // void Export(const ETypes exportType, const SExportData &exportData);
 
   void ExecuteExport(const Core::SExports &exportSettings,
@@ -42,65 +56,87 @@ public:
   {
     if (!exportSettings.exportEnabled)
       return;
-    if (exportSettings.exportType == ETypes::JSON)
-      Export<CJson>(exportSettings, exportData, config);
-    else if (exportSettings.exportType == ETypes::CSV)
-      Export<CCsv>(exportSettings, exportData, config);
-    else if (exportSettings.exportType == ETypes::TERMINAL_SUMMARY)
-      Export<CSummaryGenerator>(exportSettings, exportData, config);
-    else if (exportSettings.exportType == ETypes::GRAPHS)
-      Export<CGraphs>(exportSettings, exportData, config);
-  }
-
-  template <typename ExportType>
-  void Export(const Core::SExports &exportSettings,
-              const SExportData &exportData, const Core::SConfig &config)
-  {
-    try
+    auto res = exportObjects_.find(exportSettings.exportType);
+    if (res != exportObjects_.end())
     {
-      ExportType exportTypeClass{};
-      exportTypeClass.SetApplicationName(exportSettings.filename);
-      exportTypeClass.SetSettings(config);
-      exportTypeClass.FullExport(exportData.config, exportData.data,
-                                 exportData.allSensors,
-                                 exportData.correlations);
-    }
-    catch (const std::exception &err)
-    {
-      CLogger::Log(CLogger::Types::ERROR, "Export failed: ", err.what());
+      // The visit construction is necessary because the object is contained
+      // within a std::variant
+      std::visit(
+          Overload{
+              [&](auto &exportObj) {
+                exportObj.SetApplicationName(exportSettings.filename);
+                exportObj.SetSettings(config);
+                exportObj.FullExport(exportData.config, exportData.data,
+                                     exportData.allSensors,
+                                     exportData.correlations);
+              },
+          },
+          res->second);
     }
   }
 
 private:
-  FileWriter file_;
-  const std::string fileName_;
-  const bool autoDeleteObj_;
+  using ExportObjs =
+      std::variant<CJson, CCsv, CSummaryGenerator, CGraphs, CTerminalUI>;
+  std::unordered_map<ETypes, ExportObjs> exportObjects_;
 
-  CBase *pExportObj_;
+  std::vector<CBase *> liveTypes_;
+
+  void CreateObjects();
+  void SetLiveModeObjects();
 };
 
 inline CExport::CExport()
-    : file_{""}, fileName_{""}, autoDeleteObj_{false}, pExportObj_{nullptr}
 {
+  // Add all export objects and their types
+  exportObjects_.insert({ETypes::JSON, CJson{}});
+  exportObjects_.insert({ETypes::CSV, CCsv{}});
+  exportObjects_.insert({ETypes::TERMINAL_SUMMARY, CSummaryGenerator{}});
+  exportObjects_.insert({ETypes::GRAPHS, CGraphs{}});
+  exportObjects_.insert({ETypes::TERMINAL_UI, CTerminalUI{}});
 }
 
-inline CExport::CExport(CBase *exportObj, const std::string &fileName,
-                        const Core::SConfig &settings, const bool autoDeleteObj)
-    : file_{fileName}, fileName_{fileName}, autoDeleteObj_{autoDeleteObj},
-      pExportObj_{exportObj}
+inline CExport::~CExport() {}
+
+/**
+ * @brief
+ *
+ */
+inline void
+CExport::InitialiseLiveMeasurements(Measurements::AllSensors *sensors,
+                                    const Core::SConfig &settings)
 {
-  pExportObj_->SetApplicationName(fileName_);
-  pExportObj_->SetSettings(settings);
-}
-inline CExport::~CExport()
-{
-  if (autoDeleteObj_)
-    delete pExportObj_;
+  SetLiveModeObjects();
+  std::cout << "Initialize live measurements" << std::endl;
+  for (auto &obj : liveTypes_)
+  {
+    obj->SetSettings(settings);
+    obj->SetSensorConfig(sensors);
+    std::cout << "Start live measurements" << std::endl;
+    obj->StartLiveMeasurements();
+  }
 }
 
-inline void CExport::SetApplicationName(const std::string &name)
+/**
+ * @brief fills the liveTypes_ vector with all the objects where GetLiveMode() =
+ * true
+ *
+ */
+inline void CExport::SetLiveModeObjects()
 {
-  pExportObj_->SetApplicationName(name);
+  for (auto &e : exportObjects_)
+  {
+    std::visit(
+        Overload{
+            [this](auto &exportObj) {
+              if (exportObj.GetLiveMode())
+              {
+                liveTypes_.push_back(&exportObj);
+              }
+            },
+        },
+        e.second);
+  }
 }
 
 } // namespace Exports

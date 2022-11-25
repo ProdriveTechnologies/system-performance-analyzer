@@ -59,5 +59,18 @@ struct SMeasurementsData
       return {};
     return classData->second;
   }
+  SMeasuredItem GetWithId(const int id) const
+  {
+    for (const auto &c : allClasses)
+    {
+      const auto &items = GetItems(c);
+      for (const auto &e : items)
+      {
+        if (e.id == id)
+          return e;
+      }
+    }
+    throw std::runtime_error("Could not find ID!");
+  }
 };
 } // namespace Measurements

@@ -132,6 +132,10 @@ Exports::MeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
  * @brief Returns the sensors supported and measured by the pipeline
  *
  * @return Measurements::Sensors
+ * @note For the live mode, we need to assign one "fps" measurement to
+ * visualize. Because it is shown during runtime, we don't have access to the
+ * averages. Therefore, the "fps" of the first component will be marked for the
+ * live view (For each MeasureType, one component will be marked)
  */
 std::vector<Measurements::AllSensors::SensorGroups>
 CPipelineMeasurements::GetSensors() const
@@ -140,6 +144,7 @@ CPipelineMeasurements::GetSensors() const
 
   for (const auto &pipeline : uniqueIds_)
   {
+    std::unordered_set<GStreamer::MeasureType> livemodeTypes;
     Measurements::AllSensors::SensorGroups sensorGroup;
     sensorGroup.processId = pipeline.first;
     sensorGroup.processDelay = GetProcessDelay(pipeline.first);
@@ -156,6 +161,15 @@ CPipelineMeasurements::GetSensors() const
 
       sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
       sensor.SetDataInfo(GetMeasureType(e.first.type));
+      // TODO: remove magic numbers, ideally, make it configurable by the user
+      sensor.userData.minimumValue = 0;
+      sensor.userData.maximumValue = 250;
+      if (livemodeTypes.find(e.first.type) == livemodeTypes.end())
+      {
+        livemodeTypes.insert(e.first.type);
+        sensor.userData.showInLive = true;
+      }
+
       sensor.data = PerformanceHelpers::GetSummarizedData(
           Measurements::Classification::PIPELINE, allData_, e.second,
           sensor.multiplier, useSteadyState);

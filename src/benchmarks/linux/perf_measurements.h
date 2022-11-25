@@ -61,6 +61,8 @@ private:
   const std::string sensorConfigFile_;
   // CXavierSensors xavierSensors_;
   Timer<> cpuUtilizationTimer_;
+  Exports::CExport exportObj_;
+  Measurements::AllSensors allSensors_;
 
   // Measurements data
   std::vector<Measurements::SMeasurementsData> measurementsData_;

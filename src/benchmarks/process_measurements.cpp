@@ -92,6 +92,7 @@ CProcessMeasurements::GetMeasurementFields() const
 std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 {
   std::vector<AllSensors::SensorGroups> result;
+
   for (const auto &e : processIds_)
   {
     AllSensors::SensorGroups sensorGroup;
@@ -100,13 +101,20 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 
     for (const auto &datafield : measureFieldsDefinition_)
     {
-      Sensors sensor{datafield};
-      sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
-      sensor.data = PerformanceHelpers::GetSummarizedData(
-          Measurements::Classification::PROCESSES, allData_, sensor.uniqueId,
-          sensor.multiplier);
+      try
+      {
+        Sensors sensor{datafield};
+        sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
+        sensor.data = PerformanceHelpers::GetSummarizedData(
+            Measurements::Classification::PROCESSES, allData_, sensor.uniqueId,
+            sensor.multiplier);
 
-      sensorGroup.sensors.push_back(sensor);
+        sensorGroup.sensors.push_back(sensor);
+      }
+      catch (const std::exception &error)
+      {
+        ; // Ignore the error and don't add the sensor
+      }
     }
     result.push_back(sensorGroup);
   }

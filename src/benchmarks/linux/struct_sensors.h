@@ -52,6 +52,8 @@ struct Sensors
   bool performanceIndicator = false;
   bool measuredRaw = false;
 
+  PlatformConfig::SDatafields userData;
+
   // The summarized data, such as average, minimum found, maximum found
   SensorData data;
 
@@ -64,7 +66,8 @@ struct Sensors
   // Constructor with an SDataFields object
   Sensors(const PlatformConfig::SDatafields &fields)
       : userId{fields.name}, uniqueId{fields.id}, classType{fields.classType},
-        suffix{fields.suffix}, multiplier{fields.multiplier}, measuredRaw{true}
+        suffix{fields.suffix}, multiplier{fields.multiplier},
+        measuredRaw{true}, userData{fields}
   {
   }
   Sensors() = default;

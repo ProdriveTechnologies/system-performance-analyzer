@@ -20,8 +20,8 @@ namespace Exports
  * @return false
  */
 bool CSummaryGenerator::FullExport(
-    const std::vector<MeasurementItem> &config, const FullMeasurement data,
-    const AllSensors &allSensors,
+    [[maybe_unused]] const std::vector<MeasurementItem> &config,
+    const FullMeasurement data, const AllSensors &allSensors,
     const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
 {
   // Generic info, not specific to the measurements
@@ -224,8 +224,16 @@ void CSummaryGenerator::PrintValue(const std::string_view translation,
 {
   std::string valName{translation};
   valName += sensor.userId;
-  auto correctedValue = sensor.data.Get(valueType) * sensor.multiplier;
-  SummaryWriter::PrintValue(valName, correctedValue, sensor.suffix);
+  try
+  {
+    auto correctedValue = sensor.data.Get(valueType) * sensor.multiplier;
+    SummaryWriter::PrintValue(valName, correctedValue, sensor.suffix);
+  }
+  catch (const std::exception &e)
+  {
+    SummaryWriter::PrintValue(valName,
+                              std::string_view("No measurement found"));
+  }
 }
 
 #if 0

@@ -26,8 +26,8 @@ std::string CCsv::ParseData(const std::string &timeStr,
 }
 
 bool CCsv::FullExport(
-    const std::vector<MeasurementItem> &config, const FullMeasurement data,
-    const AllSensors &allSensors,
+    [[maybe_unused]] const std::vector<MeasurementItem> &config,
+    const FullMeasurement data, const AllSensors &allSensors,
     [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>
         &correlations)
 {

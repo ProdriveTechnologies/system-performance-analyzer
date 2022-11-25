@@ -80,6 +80,9 @@ inline void from_json(const nlohmann::json &j, SSettings &p)
   if (j.contains("exports"))
     j.at("exports").get_to(p.exports);
 
+  if (j.contains("enable_livemode"))
+    j.at("enable_livemode").get_to(p.enableLiveMode);
+
   j.at("enable_logs").get_to(p.enableLogs);
 }
 

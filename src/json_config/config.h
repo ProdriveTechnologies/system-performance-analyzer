@@ -67,6 +67,7 @@ struct SSettings
   int measureLoopMs;
   std::vector<SExports> exports;
   bool enableProcTime = false;
+  bool enableLiveMode = false;
 };
 struct SConfig
 {

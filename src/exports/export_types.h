@@ -10,7 +10,8 @@ enum class ETypes
   JSON,
   GRAPHS,
   CSV,
-  TERMINAL_SUMMARY
+  TERMINAL_SUMMARY,
+  TERMINAL_UI
 };
 
 const inline std::unordered_map<std::string, ETypes> stringToEtypes = {

@@ -9,8 +9,9 @@
 namespace Exports
 {
 bool CJson::FullExport(
-    const std::vector<MeasurementItem> &config, const FullMeasurement data,
-    const AllSensors &allSensors,
+    const std::vector<MeasurementItem> &config,
+    [[maybe_unused]] const FullMeasurement data,
+    [[maybe_unused]] const AllSensors &allSensors,
     const std::vector<Measurements::CCorrelation::SResult> &correlations)
 {
   std::string labels;

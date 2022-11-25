@@ -72,6 +72,7 @@ struct SDatafields
   double multiplier = 1.0;
   std::string enabledPath;
   std::string calculation;
+  bool showInLive = false;
 
   double maximumValue = -1.0;
   double minimumValue = -1.0;

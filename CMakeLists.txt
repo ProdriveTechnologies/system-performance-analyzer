@@ -52,6 +52,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/proc_handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/summary_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/summary_generator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/terminal_ui.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/performance_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/json_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/pipeline_measurements.cpp
@@ -141,6 +142,26 @@ endif()
 # add_subdirectory(${infoware_SOURCE_DIR} ${infoware_BINARY_DIR} EXCLUDE_FROM_ALL)
 # endif()
 
+# --- Fetch FTXUI --------------------------------------------------------------
+include(FetchContent)
+
+message("Going to download FTXUI")
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+FetchContent_Declare(ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+
+  # Important: Specify a GIT_TAG XXXXX here.
+)
+
+FetchContent_GetProperties(ftxui)
+
+if(NOT ftxui_POPULATED)
+  FetchContent_Populate(ftxui)
+  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+message("Downloaded FTXUI")
+
 # ################### GStreamer ########################
 find_package(PkgConfig) # finding pkg-config is a helper tool
 
@@ -165,7 +186,9 @@ find_package(Threads)
 find_library(LIBRT rt) # Note: LIBRT is not a Windows library. Therefore, for Windows this should be ignored
 
 if(LIBRT)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}
+    PRIVATE ftxui::screen
+    PRIVATE ftxui::dom)
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

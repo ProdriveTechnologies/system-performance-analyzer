@@ -51,6 +51,11 @@
             "type": "gstreamer",
             "command": "/usr/bin/stress -i 10 --timeout 15s"
         },
+        {
+            "id": 1,
+            "type": "gstreamer",
+            "command": "gst-launch-1.0 filesrc location=/home/mic-730ai/Videos/input4k.mp4  ! qtdemux ! queue ! h264parse ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink"
+        }
         // {
         //     "id": 2,
         //     "type": "linux_command",
@@ -71,7 +76,7 @@
         // {
         //     "id": 4,
         //     "type": "gstreamer",
-        //     "command": "gst-launch-1.0 filesrc location=testshort.mp4 ! decodebin ! autovideosink"
+        //     "command": "filesrc location=testshort.mp4 ! decodebin ! autovideosink"
         // }
     ]
 }

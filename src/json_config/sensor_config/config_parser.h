@@ -47,6 +47,8 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
     j.at("maximum").get_to(p.maximumValue);
   if (j.contains("minimum"))
     j.at("minimum").get_to(p.minimumValue);
+  if (j.contains("show_in_live"))
+    j.at("show_in_live").get_to(p.showInLive);
 }
 
 inline void from_json(const nlohmann::json &j, SConfig &p)

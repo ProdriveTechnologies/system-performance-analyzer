@@ -23,11 +23,24 @@ using AllSensors = Measurements::AllSensors;
 class CBase
 {
 public:
-  CBase() {}
+  CBase() : hasLiveMode_{false} {}
   virtual ~CBase() {}
 
   void SetApplicationName(const std::string &filename) { filename_ = filename; }
   void SetSettings(const Core::SConfig &settings) { settings_ = settings; }
+  bool GetLiveMode() const { return hasLiveMode_; }
+
+  void SetSensorConfig(Measurements::AllSensors *sensors)
+  {
+    liveSensors_ = sensors;
+  }
+
+  virtual void StartLiveMeasurements() {}
+  virtual void AddMeasurements([
+      [maybe_unused]] const Measurements::SMeasurementsData data)
+  {
+  }
+  virtual void FinishLiveMeasurements() {}
 
   virtual bool FullExport(
       const std::vector<MeasurementItem> &config, const FullMeasurement data,
@@ -37,6 +50,10 @@ public:
 protected:
   std::string filename_;
   Core::SConfig settings_;
+  bool hasLiveMode_;
+  Measurements::AllSensors *liveSensors_;
+
+  void enableLiveMode() { hasLiveMode_ = true; }
 };
 
 } // namespace Exports
