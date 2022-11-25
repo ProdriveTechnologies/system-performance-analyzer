@@ -5,39 +5,24 @@
     "version": "1.0",
     "thresholds": [
         {
+            "process_id": 1,
+            "name": "fps",
+            "type": "minimum",
+            "sign": ">",
+            "threshold": 30
+        },
+        {
             "process_id": 2,
             "name": "fps",
             "type": "minimum",
             "sign": ">",
-            "threshold": 40
+            "threshold": 30
         },
         {
-            "process_id": 2,
-            "name": "fps",
-            "type": "minimum",
-            "sign": "<",
-            "threshold": 40
-        },
-        {
-            "process_id": 3,
-            "name": "fps",
-            "type": "minimum",
-            "sign": ">",
-            "threshold": 40
-        },
-        {
-            "process_id": 3,
-            "name": "fps",
-            "type": "minimum",
-            "sign": "<=",
-            "threshold": 40
-        },
-        {
-            "process_id": 3,
-            "name": "fps",
+            "name": "CPU Utilization",
             "type": "average",
-            "sign": ">",
-            "threshold": 10
+            "sign": "<",
+            "threshold": 0.8
         }
     ],
     "settings": {
