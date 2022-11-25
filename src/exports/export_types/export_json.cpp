@@ -59,6 +59,18 @@ bool CJson::FullExport(
     //   }
     // }
   }
+  // for(const auto& e : allSensors.) {
+
+  // }
+
+  for (const auto &e : correlations)
+  {
+    nlohmann::json jsonCorr;
+    jsonCorr["sensor1"] = e.sensor1.userId;
+    jsonCorr["sensor2"] = e.sensor2.userId;
+    jsonCorr["value"] = e.correlation;
+    jsonObject["correlations"].push_back(jsonCorr);
+  }
   // std::string filename = filename_;
   // filename += EXTENSION;
   FileWriter fileWriter{filename_ + EXTENSION};
@@ -79,10 +91,10 @@ nlohmann::json CJson::ParseLabel(const MeasurementItem &item,
   // How do i know the difference between level deeper or same level? I dont
   // name with an array should be level deeper with values, if the values
   // contain something, it is again level
-  std::visit(Overload{[&](const auto &e) {
-                        result[item.name] = e;
-                      }, // for string, double, and int
-                      [&](const std::vector<MeasurementItem> &items) {
+  std::visit(Overload{[&](const auto &e)
+                      { result[item.name] = e; }, // for string, double, and int
+                      [&](const std::vector<MeasurementItem> &items)
+                      {
                         if (item.type == Type::ARRAY)
                         {
                           nlohmann::json newJson = nlohmann::json::array();
