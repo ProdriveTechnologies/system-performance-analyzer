@@ -21,11 +21,7 @@ struct Process
   std::string appName;
 };
 using MeasuredItem = Measurements::SMeasuredItem;
-// struct MeasuredItem
-// {
-//   int id = -1;
-//   double measuredValue = -1.0;
-// };
+
 static inline MeasuredItem
 FindMeasuredItem(const std::vector<MeasuredItem> &items, const int id)
 {
@@ -37,23 +33,6 @@ FindMeasuredItem(const std::vector<MeasuredItem> &items, const int id)
   return {};
 }
 
-struct PipelineInfo
-{
-  int pipelineId;
-  std::vector<MeasuredItem> measuredItems;
-};
-
-inline std::vector<MeasuredItem>
-GetMeasuredItems(const std::vector<PipelineInfo> &data)
-{
-  std::vector<MeasuredItem> resultVec;
-  for (const auto &e : data)
-  {
-    resultVec = Helpers::CombineVectors(resultVec, e.measuredItems);
-  }
-  return resultVec;
-}
-using ProcessInfo = PipelineInfo;
 struct PipelineConfig
 {
   size_t pipelineId;
@@ -74,32 +53,5 @@ struct MeasurementItem
   Type type;
   std::variant<MeasurementItems, std::string, int, double> value;
 };
-struct ExportConfig
-{
-  std::vector<PlatformConfig::SDatafields> measurementsConfig;
 
-  // Only available after a test
-  std::vector<PipelineConfig> pipelineConfig;
-};
-struct ExportData
-{
-  std::string time;
-
-  // Collected system-wide information
-  std::vector<MeasuredItem> systemInfo;
-
-  // Collected information per process
-  std::vector<ProcessInfo> processInfo;
-
-  // Collected information per GStreamer stream
-  std::vector<PipelineInfo> pipelineInfo;
-
-  std::vector<double> coreUtilization;
-  // std::vector<Process> runningProcessIds;
-  // std::vector<CXavierSensors::SCpuCoreInfo> cpuInfo;
-  // Linux::FileSystem::ProcStatData cpuUtilization;
-  std::vector<MeasuredItem> measuredItems;
-
-  std::vector<Measurements::Sensors> sensors;
-};
 } // namespace Exports

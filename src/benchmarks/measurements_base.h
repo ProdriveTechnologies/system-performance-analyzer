@@ -11,10 +11,10 @@ class CClassificationBase
 {
 public:
   std::vector<Sensors> GetSensors() const;
-  void Initialize(std::vector<Exports::ExportData> *allData);
+  void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
 private:
-  std::vector<Exports::ExportData> *allData_;
+  std::vector<Measurements::SMeasurementsData> *allData_;
 };
 
 } // namespace Measurements

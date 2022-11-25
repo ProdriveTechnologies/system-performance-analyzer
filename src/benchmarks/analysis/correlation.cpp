@@ -72,8 +72,6 @@ std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
  * This function performs the following tasks:
  * 1. Loop through all measurements
  * 2. Make a vector for each measurement
- *
- * @TODO Remove duplicate code by fixing the Exports::ExportData structure!
  */
 std::vector<CCorrelation::SSensorMeasurements>
 CCorrelation::CreateEqualSizedVectors(

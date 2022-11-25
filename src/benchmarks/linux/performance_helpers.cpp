@@ -87,55 +87,6 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
   }
 }
 
-/**
- * @brief Get the Summarized Data object
- */
-Measurements::SensorData
-GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
-                           const int uniqueId)
-{
-  Measurements::CSummarizeData summarizedData;
-  // This is the loop for each measurement
-  for (const auto &e : *data)
-  {
-    // This is the loop for the datapoints, only the uniqueId datapoint is used
-    for (const auto &e2 : e.processInfo)
-    {
-      for (const auto &e3 : e2.measuredItems)
-        if (e3.id == uniqueId)
-          summarizedData.AddDataPoint(e3);
-    }
-  }
-  return summarizedData.GetSensorData();
-}
-
-/**
- * @brief Get the Summarized Data object
- */
-Measurements::Sensors
-GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
-                           const std::unordered_set<int> uniqueIds,
-                           const std::string &name)
-{
-  Measurements::CSummarizeData summarizedData;
-  // This is the loop for each measurement
-  for (const auto &e : *data)
-  {
-    // This is the loop for the datapoints, only the uniqueId datapoint is used
-    for (const auto &e2 : e.processInfo)
-    {
-      for (const auto &e3 : e2.measuredItems)
-      {
-        if (uniqueIds.find(e3.id) != uniqueIds.end())
-          summarizedData.AddDataPoint(e3);
-      }
-    }
-  }
-  Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId()};
-  result.data = summarizedData.GetSensorData();
-  return result;
-}
-
 Measurements::SensorData
 GetSummarizedData(const Measurements::Classification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,

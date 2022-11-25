@@ -81,24 +81,6 @@ void CSummaryGenerator::PrintThresholds(const AllSensors &allSensors)
   }
 }
 
-// bool CSummaryGenerator::Generate(
-//     const std::vector<Exports::ExportData> &measurementsData,
-//     const std::vector<PlatformConfig::SDatafields> &measurementsDef)
-// {
-//   SummaryWriter::PrintTitle(SummaryTranslations::headerName);
-//   PrintApplicationInfo();
-//   // PrintSystemInfo();
-//   // PrintCacheInfo();
-
-//   // Second, summarize system wide data
-//   // PrintSystemSummary(measurementsData, measurementsDef);
-//   // Then, summarize each process the data
-//   // Finish with the data of each GStreamer pipeline (FPS, most delaying
-//   module,
-//   // CPU heavy module?)
-//   return true;
-// }
-
 void CSummaryGenerator::PrintApplicationInfo(const std::string &totalExecTime)
 {
   SummaryWriter::PrintValue(SummaryTranslations::version, Globals::version);
@@ -226,28 +208,6 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
     }
   }
   SummaryWriter::PrintRow();
-}
-
-double CSummaryGenerator::GetAverage(
-    const std::vector<Exports::ExportData> &measurementsData, const int id)
-{
-  auto getFieldById = [](const std::vector<Exports::MeasuredItem> &items,
-                         const int id) {
-    for (const auto &item : items)
-    {
-      if (item.id == id)
-        return item;
-    }
-    return Exports::MeasuredItem{0, 0};
-  };
-  double total = 0;
-
-  for (const auto &e : measurementsData)
-  {
-    total += getFieldById(e.measuredItems, id).measuredValue;
-  }
-  const size_t dataSize = measurementsData.size();
-  return dataSize > 0 ? (total / dataSize) : 0.0;
 }
 
 /**

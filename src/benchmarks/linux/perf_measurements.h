@@ -63,13 +63,9 @@ private:
   Timer<> cpuUtilizationTimer_;
 
   // Measurements data
-  // std::unique_ptr<std::vector<Exports::ExportData>> pMeasurementsData_;
   std::vector<Measurements::SMeasurementsData> measurementsData_;
 
-  // std::unique_ptr<Exports::CExport> pExportObj_;
-
   GStreamer::CPipelineMeasurements gstMeasurements_;
-  Exports::ExportConfig exportConfig_;
   Measurements::CSensors sensorMeasurements_;
   Measurements::CProcessMeasurements processMeasurements_;
   std::vector<Core::SThreshold> thresholds_;

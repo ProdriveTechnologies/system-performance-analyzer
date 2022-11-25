@@ -8,29 +8,6 @@
 
 namespace Exports
 {
-std::string CJson::ParseData(const ExportData &data) { return ""; }
-
-std::string CJson::ParseData(const std::string &time,
-                             const std::vector<PipelineInfo> &data)
-{
-  std::string row{time};
-  for (const auto &e : data)
-  {
-    row += ParseDataPipeline(e.measuredItems);
-  }
-  return row;
-}
-
-std::string CJson::ParseDataPipeline(const std::vector<MeasuredItem> &items)
-{
-  return "";
-}
-std::string CJson::ParseData(const std::string &timeStr,
-                             const std::vector<MeasuredItem> &items)
-{
-  return "";
-}
-
 bool CJson::FullExport(
     const std::vector<MeasurementItem> &config, const FullMeasurement data,
     const AllSensors &allSensors,
@@ -91,10 +68,10 @@ nlohmann::json CJson::ParseLabel(const MeasurementItem &item,
   // How do i know the difference between level deeper or same level? I dont
   // name with an array should be level deeper with values, if the values
   // contain something, it is again level
-  std::visit(Overload{[&](const auto &e)
-                      { result[item.name] = e; }, // for string, double, and int
-                      [&](const std::vector<MeasurementItem> &items)
-                      {
+  std::visit(Overload{[&](const auto &e) {
+                        result[item.name] = e;
+                      }, // for string, double, and int
+                      [&](const std::vector<MeasurementItem> &items) {
                         if (item.type == Type::ARRAY)
                         {
                           nlohmann::json newJson = nlohmann::json::array();

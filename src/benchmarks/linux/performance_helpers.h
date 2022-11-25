@@ -17,15 +17,6 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
                      Core::SThreshold threshold);
 
 Measurements::SensorData
-GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
-                           const int uniqueId);
-
-Measurements::Sensors
-GetSummarizedDataProcesses(const std::vector<Exports::ExportData> *data,
-                           const std::unordered_set<int> uniqueId,
-                           const std::string &name);
-
-Measurements::SensorData
 GetSummarizedData(const Measurements::Classification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
                   const int uniqueId, const bool useSteadyState = false);

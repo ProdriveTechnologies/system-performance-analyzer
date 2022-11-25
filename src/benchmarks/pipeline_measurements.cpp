@@ -57,7 +57,7 @@ std::vector<Measurements::SMeasurementGroup> CPipelineMeasurements::SortData(
  * @brief Processes the gstreamer live data (which is retrieved directly from
  * the streams)
  *
- * @return std::vector<Exports::PipelineInfo>
+ * @return std::vector<Measurements::SMeasurementGroup>
  */
 std::vector<Measurements::SMeasurementGroup>
 CPipelineMeasurements::ProcessGstreamer()

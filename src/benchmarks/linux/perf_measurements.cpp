@@ -129,16 +129,13 @@ void CPerfMeasurements::StartMeasurementsLoop()
     // // 2. Loop through threads and execute benchmarks on them
 
     // Filling the export data
-    // procHandler_.ParseMeminfo(); // Parse the /proc/meminfo struct
     Measurements::SMeasurementsData measurementData;
 
     measurementData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
 
-    // exportData.measuredItems = sensorMeasurements_.GetMeasurements();
     measurementData.AddMeasurements(Measurements::Classification::SYSTEM,
                                     sensorMeasurements_.GetMeasurements());
-    // exportData.processInfo = processMeasurements_.GetMeasurements();
     measurementData.AddMeasurements(Measurements::Classification::PROCESSES,
                                     processMeasurements_.GetMeasurements());
 
@@ -146,7 +143,6 @@ void CPerfMeasurements::StartMeasurementsLoop()
                                     gstMeasurements_.ProcessGstreamer());
 
     // Measure data on each GStreamer pipeline
-    // exportData.pipelineInfo = gstMeasurements_.ProcessGstreamer();
     measurementsData_.push_back(measurementData);
 
     std::this_thread::sleep_for(
@@ -159,7 +155,6 @@ void CPerfMeasurements::StartMeasurementsLoop()
         e.GetItemGroups(Measurements::Classification::PIPELINE));
     e.AddMeasurements(Measurements::Classification::PIPELINE, newGroups);
   }
-  exportConfig_.pipelineConfig = gstMeasurements_.GetPipelineConfig();
 }
 
 void CPerfMeasurements::ExportData(

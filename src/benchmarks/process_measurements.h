@@ -33,7 +33,6 @@ public:
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData,
                   std::vector<Linux::RunProcess *> processes);
 
-  std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
   std::vector<Measurements::SMeasurementGroup> GetMeasurements();
 

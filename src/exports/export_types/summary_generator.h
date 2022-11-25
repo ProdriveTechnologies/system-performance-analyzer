@@ -14,13 +14,6 @@ namespace Exports
 class CSummaryGenerator : public CBase
 {
 public:
-  // bool
-  // Generate(const std::vector<Exports::ExportData> &measurementsData,
-  //          const std::vector<PlatformConfig::SDatafields> &measurementsDef);
-  // bool GenerateProcesses(
-  //     const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
-  //         &measuredProcesses);
-
   bool FullExport(const std::vector<MeasurementItem> &config,
                   const FullMeasurement data, const AllSensors &allSensors,
                   const std::vector<Measurements::CCorrelation::SResult>
@@ -50,13 +43,7 @@ private:
     return result;
   }
 
-  double GetAverage(const std::vector<Exports::ExportData> &measurementsData,
-                    const int id);
-
   // Dynamic info based on the test which was executed
-  // void PrintSystemSummary(
-  //     const std::vector<Exports::ExportData> &measurementsData,
-  //     const std::vector<PlatformConfig::SDatafields> &measurementsDef);
   void PrintSystemSummary(const AllSensors &allSensors);
   void PrintValue(const std::string_view translation,
                   const Measurements::Sensors &sensor,

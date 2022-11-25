@@ -34,7 +34,6 @@ public:
 
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
-  std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
   // std::vector<Exports::MeasuredItem> GetMeasurements();
   std::vector<Measurements::SMeasuredItem> GetMeasurements();

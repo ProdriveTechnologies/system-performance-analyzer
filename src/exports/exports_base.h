@@ -28,10 +28,7 @@ public:
 
   void SetApplicationName(const std::string &filename) { filename_ = filename; }
   void SetSettings(const Core::SConfig &settings) { settings_ = settings; }
-  // virtual std::string
-  // InitExport(const std::vector<PlatformConfig::SDatafields> &config) = 0;
-  // virtual std::string ParseData(const ExportData &data) = 0;
-  // virtual std::string FinishExport() = 0;
+
   virtual bool FullExport(
       const std::vector<MeasurementItem> &config, const FullMeasurement data,
       const Measurements::AllSensors &allSensors,
