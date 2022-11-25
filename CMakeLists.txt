@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.7.2)
 
-set(PROJECT_NAME benchmarks)
+set(PROJECT_NAME spa)
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 
 # include(ExernalProject)
 message("Starting compilation of project: " ${PROJECT_NAME})
 
 # options
-option(EXECUTE_TESTS "Build the tests" OFF)
+option(BUILD_TESTS "Build the tests" OFF)
 
 # ### Getting Git hash for the application
 # Get the current working branch
@@ -131,7 +131,7 @@ else()
     " Minimum required Ubuntu package: libboost-dev")
 endif()
 
-if(EXECUTE_TESTS)
+if(BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
