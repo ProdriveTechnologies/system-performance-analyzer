@@ -4,6 +4,8 @@ The SPA tool tests the performance for Linux based systems. This tool contains r
 
 This tool can execute any Linux application as well as [GStreamer](https://gstreamer.freedesktop.org/) pipelines. For GStreamer pipelines, additional data is measured and extra thresholds can be configured.  
 
+![Tool Example Gif](docs/tool_example.gif)
+
 ## Installation and usage
 To create the executable, the following steps have to be executed:
 
