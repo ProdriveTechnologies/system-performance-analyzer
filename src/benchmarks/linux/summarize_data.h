@@ -29,6 +29,7 @@ public:
         SensorData::MeasureValue{ValueTypes::AVERAGE, average_.Get()});
     return sensorData;
   }
+  int GetSize() const { return average_.datapoints; }
 
 private:
   SensorData sensorData_;
