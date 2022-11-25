@@ -110,36 +110,37 @@ CCorrelation::CreateEqualSizedVectors(
     }
   }
 
-  CreateEqualSizedVector(allSensors.GetSensorGroups(Classification::SYSTEM),
-                         measuredData, isPerformanceMetric);
+  resultPipeline = CreateEqualSizedVector(
+      allSensors.GetSensorGroups(Classification::PIPELINE), measuredData,
+      isPerformanceMetric);
   // Loop through all the sensors and add all the values
-  for (auto &sensor : resultPipeline)
-  {
-    // Loop through all the raw measurements and add them to the correct sensor
-    for (auto &measurement : *measuredData)
-    {
-      SSensorMeasurements::SMeasurement resMeasurement;
-      // Loop through all the measured fields and find the one equal to
-      // sensor
-      for (const auto &pipeline : measurement.pipelineInfo)
-      {
-        for (const auto &field : pipeline.measuredItems)
-        {
-          if (field.id == sensor.sensor.uniqueId)
-            resMeasurement.AddItem(field);
-        }
-        // Stop checking the other pipelines if found
-        if (resMeasurement.isMeasured)
-          break;
-      }
-      if (!resMeasurement.isMeasured)
-      {
-        // TODO add the not started functionality here
-        // if (measurement.time < resultPipeline)
-      }
-      sensor.rawMeasurements.push_back(resMeasurement);
-    }
-  }
+  // for (auto &sensor : resultPipeline)
+  // {
+  //   // Loop through all the raw measurements and add them to the correct
+  //   sensor for (auto &measurement : *measuredData)
+  //   {
+  //     SSensorMeasurements::SMeasurement resMeasurement;
+  //     // Loop through all the measured fields and find the one equal to
+  //     // sensor
+  //     for (const auto &pipeline : measurement.pipelineInfo)
+  //     {
+  //       for (const auto &field : pipeline.measuredItems)
+  //       {
+  //         if (field.id == sensor.sensor.uniqueId)
+  //           resMeasurement.AddItem(field);
+  //       }
+  //       // Stop checking the other pipelines if found
+  //       if (resMeasurement.isMeasured)
+  //         break;
+  //     }
+  //     if (!resMeasurement.isMeasured)
+  //     {
+  //       // TODO add the not started functionality here
+  //       // if (measurement.time < resultPipeline)
+  //     }
+  //     sensor.rawMeasurements.push_back(resMeasurement);
+  //   }
+  // }
 
   // Loop through all the sensors and add all the values
   for (auto &sensor : resultProcess)
