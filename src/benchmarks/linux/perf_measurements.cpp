@@ -14,6 +14,7 @@
 
 #include "src/exports/export.h"
 #include "src/exports/export_types/export_csv.h"
+#include "src/exports/export_types/export_graphs.h"
 #include "src/exports/export_types/export_json.h"
 
 #include "proc_handler.h"
@@ -175,6 +176,8 @@ void CPerfMeasurements::ExportData(
   ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors,
                                             correlationResults);
   ExecuteExport<Exports::CCsv>("filename", items, sensors, correlationResults);
+  ExecuteExport<Exports::CGraphs>("filename", items, sensors,
+                                  correlationResults);
 }
 
 /**

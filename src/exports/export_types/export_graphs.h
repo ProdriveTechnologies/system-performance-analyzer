@@ -8,7 +8,7 @@
 
 namespace Exports
 {
-class CCsv : public CBase
+class CGraphs : public CBase
 {
 public:
   bool FullExport(
@@ -17,12 +17,8 @@ public:
       const std::vector<Measurements::CCorrelation::SResult> &correlations);
 
 private:
-  static constexpr char DELIMITER = ',';
-
-  std::string ParseData(const std::string &timeStr,
-                        const std::vector<Measurements::Sensors> &allSensors,
-                        const std::vector<MeasuredItem> &items);
-  std::string ParseLabel(const std::vector<Measurements::Sensors> &sensors);
+  void CreateGraph(const Measurements::Sensors &sensor1,
+                   const Measurements::Sensors &sensor2);
 };
 
 } // namespace Exports
