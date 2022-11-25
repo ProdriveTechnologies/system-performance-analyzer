@@ -32,7 +32,7 @@ public:
   //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CSensors(const std::string &configFile);
 
-  void Initialize(std::vector<Exports::ExportData> *allData);
+  void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
@@ -49,7 +49,7 @@ public:
 
 private:
   const std::string configFile_;
-  std::vector<Exports::ExportData> *allData_;
+  std::vector<Measurements::SMeasurementsData> *allData_;
   Linux::CDataHandler dataHandler_;
   std::vector<Linux::SDataHandlers> dataHandlers_;
 

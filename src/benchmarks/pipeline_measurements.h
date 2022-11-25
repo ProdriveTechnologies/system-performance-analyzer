@@ -8,6 +8,7 @@
 #include <string>
 
 #include "gstreamer_identifier.h"
+#include "src/benchmarks/linux/struct_measurements.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/gstreamer/measurement_types.h"
@@ -35,7 +36,7 @@ public:
 
   void AddPipelines(std::vector<CGstreamerHandler *> gstreamerStream);
 
-  void Initialize(std::vector<Exports::ExportData> *allData);
+  void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
   void ConcludeMeasurement();
 
   std::vector<Measurements::SMeasurementGroup> ProcessGstreamer();
@@ -47,8 +48,7 @@ public:
   std::vector<Exports::MeasurementItem>
   GetMeasurementLabels(const int pipelineNr) const;
   static std::vector<Measurements::SMeasurementGroup>
-  CPipelineMeasurements::SortData(
-      const std::vector<Measurements::SMeasurementGroup> &data);
+  SortData(const std::vector<Measurements::SMeasurementGroup> &data);
   std::vector<Measurements::AllSensors::SensorGroups> GetSensors() const;
   void setProctime(const bool proctime)
   {
@@ -59,7 +59,7 @@ public:
 
 private:
   using PipelineNr = int;
-  std::vector<Exports::ExportData> *allData_;
+  std::vector<Measurements::SMeasurementsData> *allData_;
   std::unordered_map<PipelineNr, CGstreamerHandler *> streams_;
   std::unordered_map<PipelineNr, std::unordered_map<Identifier, int>>
       uniqueIds_;

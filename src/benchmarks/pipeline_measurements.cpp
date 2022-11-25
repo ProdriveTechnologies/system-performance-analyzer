@@ -12,7 +12,7 @@ namespace GStreamer
 {
 CPipelineMeasurements::CPipelineMeasurements() : enableProctime_{false} {}
 void CPipelineMeasurements::Initialize(
-    std::vector<Exports::ExportData> *allData)
+    std::vector<Measurements::SMeasurementsData> *allData)
 {
   allData_ = allData;
   // Initialize the uniqueIds_ vector
@@ -40,10 +40,11 @@ void CPipelineMeasurements::AddPipelines(
 std::vector<Measurements::SMeasurementGroup> CPipelineMeasurements::SortData(
     const std::vector<Measurements::SMeasurementGroup> &data)
 {
-  std::vector<Measuremements::SMeasurementGroup> sorted;
-  auto sortFunction =
-      [](const Exports::MeasuredItem &lhs, const Exports::MeasuredItem &rhs)
-  { return lhs.id < rhs.id; };
+  std::vector<Measurements::SMeasurementGroup> sorted;
+  auto sortFunction = [](const Exports::MeasuredItem &lhs,
+                         const Exports::MeasuredItem &rhs) {
+    return lhs.id < rhs.id;
+  };
   for (auto e : data)
   {
     std::sort(e.measuredItems.begin(), e.measuredItems.end(), sortFunction);
@@ -155,15 +156,22 @@ CPipelineMeasurements::GetSensors() const
 
       sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
       sensor.SetDataInfo(GetMeasureType(e.first.type));
-      sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second,
-                                                          useSteadyState);
+      sensor.data = PerformanceHelpers::GetSummarizedData(
+          Measurements::Classification::PIPELINE, allData_, e.second,
+          useSteadyState);
       sensorGroup.sensors.push_back(sensor);
     }
     for (const auto &[type, _] : predefinedSensors)
     {
       auto uniqueIdsSet = GetUniqueIdsByType(type);
-      sensorGroup.sensors.push_back(PerformanceHelpers::GetGstCategoriesSummary(
-          allData_, uniqueIdsSet, type, pipeline.first, useSteadyState));
+      Measurements::Sensors sensorTemplate{
+          GStreamer::GetMeasureType(type), PerformanceHelpers::GetUniqueId(),
+          PlatformConfig::Class::PIPELINE_MEASUREMENTS};
+      sensorTemplate.suffix = GStreamer::GetMeasureType(type);
+
+      sensorGroup.sensors.push_back(PerformanceHelpers::GetSummarizedData(
+          Measurements::Classification::PIPELINE, allData_, uniqueIdsSet,
+          sensorTemplate, useSteadyState));
     }
     result.push_back(sensorGroup);
   }

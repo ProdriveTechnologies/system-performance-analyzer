@@ -12,7 +12,7 @@ namespace Measurements
 {
 CSensors::CSensors(const std::string &configFile) : configFile_{configFile} {}
 
-void CSensors::Initialize(std::vector<Exports::ExportData> *allData)
+void CSensors::Initialize(std::vector<Measurements::SMeasurementsData> *allData)
 {
   SetDataHandlers();
   allData_ = allData;
@@ -69,8 +69,8 @@ std::vector<Sensors> CSensors::GetSensors() const
   for (const auto &datafield : measureFieldsDefinition_)
   {
     Sensors sensor{datafield};
-    sensor.data =
-        PerformanceHelpers::GetSummarizedDataSensors(allData_, datafield.id);
+    sensor.data = PerformanceHelpers::GetSummarizedData(
+        Measurements::Classification::SYSTEM, allData_, datafield.id);
     result.push_back(sensor);
   }
   // Add the collective groups, such as the combined cpu's instead of the single
@@ -96,8 +96,10 @@ std::vector<Sensors> CSensors::GetSensors() const
   for (const auto &[className, classIds] : classes)
   {
     auto datafield = GetDatafield(className);
-    result.push_back(PerformanceHelpers::GetSummarizedDataSensors(
-        allData_, classIds, className, datafield));
+    datafield.name = className;
+    result.push_back(PerformanceHelpers::GetSummarizedData(
+        Measurements::Classification::SYSTEM, allData_, classIds,
+        Measurements::Sensors{datafield}));
   }
   return result;
 }
@@ -147,8 +149,9 @@ CSensors::MeasureCombo CSensors::GetFields(
   MeasureCombo result;
 
   std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField)
-                { result.Add(parserFunction(memberPtr, dataField)); });
+                [&](const PlatformConfig::SDatafields &dataField) {
+                  result.Add(parserFunction(memberPtr, dataField));
+                });
 
   return result;
 }

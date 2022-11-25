@@ -35,7 +35,7 @@ namespace Measurements
  */
 std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
     const Measurements::AllSensors &allSensors,
-    const std::vector<Exports::ExportData> *measuredData)
+    const std::vector<Measurements::SMeasurementsData> *measuredData)
 {
   auto equalVectorsPerf =
       CreateEqualSizedVectors(allSensors, measuredData, true);
@@ -78,41 +78,45 @@ std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
 std::vector<CCorrelation::SSensorMeasurements>
 CCorrelation::CreateEqualSizedVectors(
     const Measurements::AllSensors &allSensors,
-    const std::vector<Exports::ExportData> *measuredData,
+    const std::vector<Measurements::SMeasurementsData> *measuredData,
     const bool isPerformanceMetric)
 {
-  auto resultProcess = GetSensors(
-      allSensors, Measurements::Classification::PROCESSES, isPerformanceMetric);
-  auto resultPipeline = GetSensors(
-      allSensors, Measurements::Classification::PIPELINE, isPerformanceMetric);
-  auto resultSystem = GetSensors(
-      allSensors, Measurements::Classification::SYSTEM, isPerformanceMetric);
+  std::vector<CCorrelation::SSensorMeasurements> allCorrelations;
 
-  //  allSensors.GetSensorGroups(c)
-
-  //    for (const auto &sensorClass : allSensors.allClasses)
-
-  // Loop through all the sensors and add all the values
-  for (auto &sensor : resultSystem)
+  for (const auto &classification : allSensors.allClasses)
   {
-    // Loop through all the raw measurements and add them to the correct sensor
-    for (auto &measurement : *measuredData)
+    auto equalSizedVector =
+        GetSensors(allSensors, classification, isPerformanceMetric);
+
+    // Loop through all the sensors and add all the values
+    for (auto &sensor : equalSizedVector)
     {
-      SSensorMeasurements::SMeasurement resMeasurement;
-      // Loop through all the measured fields and find the one equal to
+      // Loop through all the raw measurements and add them to the correct
       // sensor
-      for (const auto &field : measurement.measuredItems)
+      for (auto &measurement : *measuredData)
       {
-        if (field.id == sensor.sensor.uniqueId)
-          resMeasurement.AddItem(field);
+        SSensorMeasurements::SMeasurement resMeasurement;
+        auto measurementGroup = measurement.GetItems(classification);
+        // Loop through all the measured fields and find the one equal to
+        // sensor
+        for (const auto &field : measurementGroup)
+        {
+          if (field.id == sensor.sensor.uniqueId)
+          {
+            resMeasurement.AddItem(field);
+            break;
+          }
+        }
+        sensor.rawMeasurements.push_back(resMeasurement);
       }
-      sensor.rawMeasurements.push_back(resMeasurement);
     }
+    allCorrelations =
+        Helpers::CombineVectors(allCorrelations, equalSizedVector);
   }
 
-  resultPipeline = CreateEqualSizedVector(
-      allSensors.GetSensorGroups(Classification::PIPELINE), measuredData,
-      isPerformanceMetric);
+  // resultPipeline = CreateEqualSizedVector(
+  //     allSensors.GetSensorGroups(Classification::PIPELINE), measuredData,
+  //     isPerformanceMetric);
   // Loop through all the sensors and add all the values
   // for (auto &sensor : resultPipeline)
   // {
@@ -141,34 +145,7 @@ CCorrelation::CreateEqualSizedVectors(
   //     sensor.rawMeasurements.push_back(resMeasurement);
   //   }
   // }
-
-  // Loop through all the sensors and add all the values
-  for (auto &sensor : resultProcess)
-  {
-    // Loop through all the raw measurements and add them to the correct sensor
-    for (auto &measurement : *measuredData)
-    {
-      SSensorMeasurements::SMeasurement resMeasurement;
-      // Loop through all the measured fields and find the one equal to
-      // sensor
-      for (const auto &pipeline : measurement.processInfo)
-      {
-        for (const auto &field : pipeline.measuredItems)
-        {
-          if (field.id == sensor.sensor.uniqueId)
-            resMeasurement.AddItem(field);
-        }
-        // Stop checking the other pipelines if found
-        if (resMeasurement.isMeasured)
-          break;
-      }
-      sensor.rawMeasurements.push_back(resMeasurement);
-    }
-  }
-  // Combine the different vectors into one
-  auto result = Helpers::CombineVectors(resultProcess, resultPipeline);
-  result = Helpers::CombineVectors(result, resultSystem);
-  return result;
+  return allCorrelations;
 }
 
 std::vector<CCorrelation::SSensorMeasurements>
@@ -197,54 +174,54 @@ CCorrelation::GetSensors(const std::vector<Sensors> &sensors,
   return result;
 }
 
-std::vector<CCorrelation::SSensorMeasurements>
-CCorrelation::CreateEqualSizedVector(
-    const std::vector<Measurements::AllSensors::SensorGroups> &sensorGroups,
-    const std::vector<Exports::ExportData> *measuredData,
-    const bool isPerformanceMetric)
-{
-  std::vector<CCorrelation::SSensorMeasurements> result;
-  // Loop through all the sensors and add all the values
-  for (auto &sensorGroup : sensorGroups)
-  {
-    std::vector<CCorrelation::SSensorMeasurements> sensors =
-        GetSensors(sensorGroup.sensors, isPerformanceMetric);
-    // Loop through all the raw measurements and add them to the correct
-    // sensor
-    for (auto &sensor : sensors)
-    {
-      for (auto &measurement : *measuredData)
-      {
-        SSensorMeasurements::SMeasurement resMeasurement;
-        // Loop through all the measured fields and find the one equal to
-        // sensor
-        for (const auto &pipeline : measurement.pipelineInfo)
-        {
-          for (const auto &field : pipeline.measuredItems)
-          {
-            if (field.id == sensor.sensor.uniqueId)
-              resMeasurement.AddItem(field);
-          }
-          // Stop checking the other pipelines if found
-          if (resMeasurement.isMeasured)
-            break;
-        }
-        // if (!resMeasurement.isMeasured)
-        // {
-        //   // TODO add the not started functionality here
-        //   if (std::stoll(measurement.time) < sensorGroup.processDelay)
-        //   {
-        //     resMeasurement.isMeasured = true;
-        //     resMeasurement.item.measuredValue = 0;
-        //   }
-        // }
-        sensor.rawMeasurements.push_back(resMeasurement);
-      }
-    }
-    result = Helpers::CombineVectors(result, sensors);
-  }
-  return result;
-}
+// std::vector<CCorrelation::SSensorMeasurements>
+// CCorrelation::CreateEqualSizedVector(
+//     const std::vector<Measurements::AllSensors::SensorGroups> &sensorGroups,
+//     const std::vector<Measurements::SMeasurementsData> *measuredData,
+//     const bool isPerformanceMetric)
+// {
+//   std::vector<CCorrelation::SSensorMeasurements> result;
+//   // Loop through all the sensors and add all the values
+//   for (auto &sensorGroup : sensorGroups)
+//   {
+//     std::vector<CCorrelation::SSensorMeasurements> sensors =
+//         GetSensors(sensorGroup.sensors, isPerformanceMetric);
+//     // Loop through all the raw measurements and add them to the correct
+//     // sensor
+//     for (auto &sensor : sensors)
+//     {
+//       for (auto &measurement : *measuredData)
+//       {
+//         SSensorMeasurements::SMeasurement resMeasurement;
+//         // Loop through all the measured fields and find the one equal to
+//         // sensor
+//         for (const auto &pipeline : measurement.pipelineInfo)
+//         {
+//           for (const auto &field : pipeline.measuredItems)
+//           {
+//             if (field.id == sensor.sensor.uniqueId)
+//               resMeasurement.AddItem(field);
+//           }
+//           // Stop checking the other pipelines if found
+//           if (resMeasurement.isMeasured)
+//             break;
+//         }
+//         // if (!resMeasurement.isMeasured)
+//         // {
+//         //   // TODO add the not started functionality here
+//         //   if (std::stoll(measurement.time) < sensorGroup.processDelay)
+//         //   {
+//         //     resMeasurement.isMeasured = true;
+//         //     resMeasurement.item.measuredValue = 0;
+//         //   }
+//         // }
+//         sensor.rawMeasurements.push_back(resMeasurement);
+//       }
+//     }
+//     result = Helpers::CombineVectors(result, sensors);
+//   }
+//   return result;
+// }
 
 /**
  * @brief Calculates the Pearson correlation coefficient

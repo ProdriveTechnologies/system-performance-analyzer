@@ -33,37 +33,19 @@ bool CCsv::FullExport(
 {
   std::string labels;
 
-  for (size_t i = 0; i < config.size(); ++i)
+  for (const auto &classification : allSensors.allClasses)
   {
-    const auto &item = config.at(i);
-    FileWriter systemFile{item.name + ".csv"};
-    Measurements::Classification classification;
-    if (i == 0)
-      classification = Measurements::Classification::SYSTEM;
-    else if (i == 1)
-      classification = Measurements::Classification::PIPELINE;
-    else
-      classification = Measurements::Classification::PROCESSES;
+    const auto name = Measurements::GetClassificationStr(classification);
+    FileWriter systemFile{name + ".csv"};
+
     labels = "time" + ParseLabel(allSensors.GetSensors(classification));
     systemFile.AddRow(labels);
 
     for (const auto &e : *data)
     {
-      if (i == 0)
-        systemFile.AddRow(ParseData(e.time,
-                                    allSensors.GetSensors(classification),
-                                    e.measuredItems),
-                          false);
-      else if (i == 1)
-        systemFile.AddRow(ParseData(e.time,
-                                    allSensors.GetSensors(classification),
-                                    Exports::GetMeasuredItems(e.pipelineInfo)),
-                          false);
-      else
-        systemFile.AddRow(ParseData(e.time,
-                                    allSensors.GetSensors(classification),
-                                    Exports::GetMeasuredItems(e.processInfo)),
-                          false);
+      systemFile.AddRow(ParseData(e.time, allSensors.GetSensors(classification),
+                                  e.GetItems(classification)),
+                        false);
     }
   }
 

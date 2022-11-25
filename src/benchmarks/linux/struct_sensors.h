@@ -82,6 +82,28 @@ enum class Classification
   PROCESSES,
   SYSTEM
 };
+inline std::unordered_map<Classification, std::string> classificationToString =
+    {{Classification::PIPELINE, "PipelineMeasurements"},
+     {Classification::PROCESSES, "ProcessMeasurements"},
+     {Classification::SYSTEM, "SystemResources"}};
+
+inline std::string GetClassificationStr(const Classification c)
+{
+  auto res = classificationToString.find(c);
+  if (res != classificationToString.end())
+    return res->second;
+  throw std::runtime_error("Could not find translation for Classification!");
+}
+
+inline void SetClassificationStr(const Classification c,
+                                 const std::string &newText)
+{
+  auto res = classificationToString.find(c);
+  if (res != classificationToString.end())
+    res->second = newText;
+  else
+    classificationToString.insert(std::make_pair(c, newText));
+}
 
 using SensorName = std::string;
 using SensorProcessId = int;

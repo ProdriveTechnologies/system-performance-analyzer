@@ -46,14 +46,18 @@ struct SMeasurementsData
   std::vector<SMeasuredItem> GetItems(const Classification c) const
   {
     std::vector<SMeasuredItem> items;
+    auto measurementGroups = GetItemGroups(c);
 
+    for (const auto &e : measurementGroups)
+      items = Helpers::CombineVectors(items, e.measuredItems);
+    return items;
+  }
+  std::vector<SMeasurementGroup> GetItemGroups(const Classification c) const
+  {
     auto classData = data.find(c);
     if (classData == data.end())
       return {};
-
-    for (const auto &e : classData->second)
-      items = Helpers::CombineVectors(items, e.measuredItems);
-    return items;
+    return classData->second;
   }
 };
 } // namespace Measurements

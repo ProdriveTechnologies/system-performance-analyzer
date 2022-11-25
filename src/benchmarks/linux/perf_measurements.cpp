@@ -89,11 +89,11 @@ void CPerfMeasurements::Initialize()
   // pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
 
   // Must happen after the creation of the pMeasurementsData_ memory block
-  sensorMeasurements_.Initialize(pMeasurementsData_.get());
-  gstMeasurements_.Initialize(pMeasurementsData_.get());
+  sensorMeasurements_.Initialize(&measurementsData_);
+  gstMeasurements_.Initialize(&measurementsData_);
   std::vector<RunProcess *> linuxProcesses =
       GetProcessFromProcesses<RunProcess>();
-  processMeasurements_.Initialize(pMeasurementsData_.get(), linuxProcesses);
+  processMeasurements_.Initialize(&measurementsData_, linuxProcesses);
 
   cpuUtilizationTimer_.restart();
   while (!cpuUtilizationTimer_.elapsed())
@@ -134,8 +134,6 @@ void CPerfMeasurements::StartMeasurementsLoop()
 
     measurementData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
-    exportData.time = std::to_string(
-        testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
 
     // exportData.measuredItems = sensorMeasurements_.GetMeasurements();
     measurementData.AddMeasurements(Measurements::Classification::SYSTEM,
@@ -155,10 +153,10 @@ void CPerfMeasurements::StartMeasurementsLoop()
         std::chrono::milliseconds(config_.settings.measureLoopMs));
   }
   // Sort the pipeline measurements correctly
-  for (auto &e : *measurementsData_)
+  for (auto &e : measurementsData_)
   {
-    auto newGroups = gstMeasurements_.SortData(processMeasurements_.GetSensors(
-        Measurements::Classification::PIPELINE));
+    auto newGroups = gstMeasurements_.SortData(
+        e.GetItemGroups(Measurements::Classification::PIPELINE));
     e.AddMeasurements(Measurements::Classification::PIPELINE, newGroups);
   }
   exportConfig_.pipelineConfig = gstMeasurements_.GetPipelineConfig();
@@ -174,7 +172,7 @@ void CPerfMeasurements::ExportData(
   items.push_back(processMeasurements_.GetConfig());
 
   Exports::CExport exportGenericClass;
-  Exports::SExportData expData{items, pMeasurementsData_.get(), sensors,
+  Exports::SExportData expData{items, &measurementsData_, sensors,
                                correlationResults};
   for (const auto &e : config_.settings.exports)
     exportGenericClass.ExecuteExport(e, expData, config_);
@@ -228,7 +226,7 @@ void CPerfMeasurements::AnalyzeData()
 
   // Execute the correlation check here
   auto corrResults = Measurements::CCorrelation::GetCorrelation(
-      allSensors, pMeasurementsData_.get());
+      allSensors, &measurementsData_);
 
   // Check thresholds
   SetThresholdResults(allSensors);

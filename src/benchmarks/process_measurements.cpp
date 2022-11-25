@@ -23,7 +23,7 @@ CProcessMeasurements::CProcessMeasurements(const std::string &configFile)
  * @param allData
  */
 void CProcessMeasurements::Initialize(
-    std::vector<Exports::ExportData> *allData,
+    std::vector<Measurements::SMeasurementsData> *allData,
     std::vector<Linux::RunProcess *> processes)
 {
   SetDataHandlers();
@@ -102,8 +102,8 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
     {
       Sensors sensor{datafield};
       sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
-      sensor.data = PerformanceHelpers::GetSummarizedDataProcesses(
-          allData_, sensor.uniqueId);
+      sensor.data = PerformanceHelpers::GetSummarizedData(
+          Measurements::Classification::PROCESSES, allData_, sensor.uniqueId);
 
       sensorGroup.sensors.push_back(sensor);
     }
@@ -223,8 +223,9 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
   MeasureCombo result;
 
   std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField)
-                { result.Add(parserFunction(memberPtr, dataField)); });
+                [&](const PlatformConfig::SDatafields &dataField) {
+                  result.Add(parserFunction(memberPtr, dataField));
+                });
 
   return result;
 }

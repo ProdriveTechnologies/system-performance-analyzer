@@ -30,7 +30,7 @@ class CProcessMeasurements
 public:
   CProcessMeasurements(const std::string &configFile);
 
-  void Initialize(std::vector<Exports::ExportData> *allData,
+  void Initialize(std::vector<Measurements::SMeasurementsData> *allData,
                   std::vector<Linux::RunProcess *> processes);
 
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
@@ -58,7 +58,7 @@ private:
   std::vector<ProcessDef> processIds_;
   Measurements::ProcHandler procHandler_;
   Linux::CDataHandler dataHandler_;
-  std::vector<Exports::ExportData> *allData_;
+  std::vector<Measurements::SMeasurementsData> *allData_;
 
   using MeasureFieldsDefType = std::vector<PlatformConfig::SDatafields>;
   MeasureFieldsDefType measureFieldsDefinition_;

@@ -63,7 +63,7 @@ private:
   Timer<> cpuUtilizationTimer_;
 
   // Measurements data
-  std::unique_ptr<std::vector<Exports::ExportData>> pMeasurementsData_;
+  // std::unique_ptr<std::vector<Exports::ExportData>> pMeasurementsData_;
   std::vector<Measurements::SMeasurementsData> measurementsData_;
 
   // std::unique_ptr<Exports::CExport> pExportObj_;

@@ -11,7 +11,7 @@
 
 namespace Exports
 {
-using FullMeasurement = std::vector<Exports::ExportData> *;
+using FullMeasurement = std::vector<Measurements::SMeasurementsData> *;
 using AllSensors = Measurements::AllSensors;
 /**
  * @brief CBase the base class for the exports,
