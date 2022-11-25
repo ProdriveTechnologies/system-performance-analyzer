@@ -34,7 +34,8 @@ CPerfMeasurements::CPerfMeasurements(
     const std::vector<Core::SThreshold> &thresholds)
     : threadSync_{synchronizer}, sensorConfigFile_{sensorConfig},
       cpuUtilizationTimer_{std::chrono::milliseconds{1000}},
-      sensorMeasurements_{sensorConfig}, thresholds_{thresholds} //,
+      sensorMeasurements_{sensorConfig}, processMeasurements_{sensorConfig},
+      thresholds_{thresholds} //,
 // liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
 {
 }
@@ -90,9 +91,7 @@ void CPerfMeasurements::Initialize()
   // processFieldsDef_ = processFields.definition;
   InitExports(sensorMeasurements_.GetDefinition());
 
-  GetProcessPids();
   OrganizeGstreamerPipelines();
-  OrganizeLinuxProcesses();
 
   pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
   pCpuData_ = std::make_unique<std::vector<Linux::FileSystem::ProcStatData>>();
@@ -101,6 +100,10 @@ void CPerfMeasurements::Initialize()
   // Must happen after the creation of the pMeasurementsData_ memory block
   sensorMeasurements_.Initialize(pMeasurementsData_.get());
   gstMeasurements_.Initialize(pMeasurementsData_.get());
+  std::vector<RunProcess *> linuxProcesses =
+      GetProcessFromProcesses<RunProcess>();
+  processMeasurements_.Initialize(pMeasurementsData_.get(), linuxProcesses);
+
   // Thread exists now, store threads that already exist for the monitoring. The
   // newly added ones are from gstreamer and need to be monitored
   // std::cerr << "Monitoring thread: " << threadSync_->getThreadId();
@@ -121,31 +124,14 @@ void CPerfMeasurements::Initialize()
   // liveFilesystemData_.Init();
 }
 
+/**
+ * @brief Organizes the pipelines and configures the gstMeasurements_
+ * accordingly
+ */
 void CPerfMeasurements::OrganizeGstreamerPipelines()
 {
   auto gstPipelines = GetProcessFromProcesses<CGstreamerHandler>();
   gstMeasurements_.AddPipelines(gstPipelines);
-}
-
-void CPerfMeasurements::OrganizeLinuxProcesses()
-{
-  auto linuxProcesses = GetProcessFromProcesses<RunProcess>();
-  gstMeasurements_.AddPipelines(linuxProcesses);
-}
-
-/**
- * @brief Stores the process IDs from the RunProcess processes in the
- * processPids_ private variable
- *
- */
-void CPerfMeasurements::GetProcessPids()
-{
-  for (const auto &e : *processes_)
-  {
-    if (auto process = std::get_if<Linux::RunProcess>(&e.processes))
-      processPids_.push_back(process->GetThreadPid(),
-                             process->GetProcessName());
-  }
 }
 
 /**
@@ -172,6 +158,7 @@ void CPerfMeasurements::StartMeasurementsLoop()
     exportData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
     exportData.measuredItems = sensorMeasurements_.GetMeasurements();
+    exportData.processInfo = processMeasurements_.GetMeasurements();
     // GetMeasuredItems(measureFields_);
 
     // exportData.processInfo
@@ -236,6 +223,7 @@ void CPerfMeasurements::ExportData()
   std::vector<Exports::MeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
   items.push_back(gstMeasurements_.GetPipelineConfig2());
+  items.push_back(processMeasurements_.GetConfig());
   pExportObj_->FullExport(items, pMeasurementsData_.get(),
                           Measurements::AllSensors{});
 }
@@ -246,28 +234,29 @@ void CPerfMeasurements::ExportData()
  *
  * @param processIds
  */
-void CPerfMeasurements::MeasureProcesses(const std::vector<int> processIds)
-{
-  ProcessesMeasure measurements;
-  for (const auto &e : processIds)
-  {
-    try
-    {
-      ProcessMeasurements processMeasurement;
-      processMeasurement.pid = e;
-      processMeasurement.stats =
-          Linux::FileSystem::GetStats("/proc/" + std::to_string(e) + "/stat");
-      measurements.processes.push_back(processMeasurement);
-    }
-    catch (const std::exception &error)
-    {
-      CLogger::Log(CLogger::Types::INFO, "Process: ", e,
-                   " ended, removing from measurements");
-      RemoveProcessId(e); // Process apparently stopped already
-    }
-  }
-  pProcessesData_->push_back(measurements);
-}
+// void CPerfMeasurements::MeasureProcesses(const std::vector<int> processIds)
+// {
+//   ProcessesMeasure measurements;
+//   for (const auto &e : processIds)
+//   {
+//     try
+//     {
+//       ProcessMeasurements processMeasurement;
+//       processMeasurement.pid = e;
+//       processMeasurement.stats =
+//           Linux::FileSystem::GetStats("/proc/" + std::to_string(e) +
+//           "/stat");
+//       measurements.processes.push_back(processMeasurement);
+//     }
+//     catch (const std::exception &error)
+//     {
+//       CLogger::Log(CLogger::Types::INFO, "Process: ", e,
+//                    " ended, removing from measurements");
+//       RemoveProcessId(e); // Process apparently stopped already
+//     }
+//   }
+//   pProcessesData_->push_back(measurements);
+// }
 
 /**
  * @brief Remove process id from the processPids_ vector
@@ -300,9 +289,12 @@ void CPerfMeasurements::AnalyzeData()
   // Collect all sensors
   auto gstSensors = gstMeasurements_.GetSensors();
   auto sysSensors = sensorMeasurements_.GetSensors();
+  auto processSensors = processMeasurements_.GetSensors();
   Exports::AllSensors allSensors;
   allSensors.AddSensors(Measurements::Classification::PIPELINE, gstSensors);
   allSensors.AddSensors(Measurements::Classification::SYSTEM, sysSensors);
+  allSensors.AddSensors(Measurements::Classification::PROCESSES,
+                        processSensors);
 
   // Check thresholds
   SetThresholdResults(allSensors);
@@ -317,6 +309,7 @@ void CPerfMeasurements::AnalyzeData()
   std::vector<Exports::MeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
   items.push_back(gstMeasurements_.GetPipelineConfig2());
+  items.push_back(processMeasurements_.GetConfig());
   generator.FullExport(items, pMeasurementsData_.get(), allSensors);
 }
 

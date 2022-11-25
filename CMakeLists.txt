@@ -55,6 +55,9 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_json.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/process_measurements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/data_handler.cpp
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem/statm.cpp
 )
 message(" - Enabling static code analyser: clang-tidy")
 

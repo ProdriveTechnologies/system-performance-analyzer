@@ -23,16 +23,12 @@ struct MeasuredItem
   int id;
   double measuredValue;
 };
-struct ProcessInfo
-{
-  unsigned int processId;
-  MeasuredItem measuredItem;
-};
 struct PipelineInfo
 {
   int pipelineId;
   std::vector<MeasuredItem> measuredItems;
 };
+using ProcessInfo = PipelineInfo;
 struct PipelineConfig
 {
   size_t pipelineId;

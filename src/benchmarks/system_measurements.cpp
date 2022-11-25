@@ -162,8 +162,14 @@ CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
   switch (dataField.type)
   {
   case PlatformConfig::Types::ARRAY:
-    result.Add(ParseArray(dataField));
-    break;
+  {
+    // Check if it contains measurements for the system measurements (or if it's
+    // empty or for specific processes)
+    auto datafields = ParseArray(dataField);
+    if (!datafields.definition.empty())
+      result.Add(ParseArray(dataField));
+  }
+  break;
   case PlatformConfig::Types::DIRECT:
   case PlatformConfig::Types::PROC_STAT:
   case PlatformConfig::Types::PROC_MEM:

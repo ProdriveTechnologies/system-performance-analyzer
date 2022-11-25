@@ -19,7 +19,7 @@ Stat GetStats(const std::string &statLocation)
   std::ifstream statFile{statLocation, std::ios_base::in};
   if (!statFile.good())
   {
-    throw std::runtime_error("Linux::FileSystem: stat file not existent!");
+    return Stat{};
   }
   std::vector<std::string> statElements;
   for (std::string val; std::getline(statFile, val, ' ');)

@@ -17,6 +17,7 @@
 // #include "xavier_sensors_live.h"
 #include "src/benchmarks/Linux/struct_sensors.h"
 #include "src/benchmarks/pipeline_measurements.h"
+#include "src/benchmarks/process_measurements.h"
 #include "src/benchmarks/system_measurements.h"
 #include "src/processes_struct.h"
 
@@ -85,6 +86,7 @@ private:
   GStreamer::CPipelineMeasurements gstMeasurements_;
   Exports::ExportConfig exportConfig_;
   Measurements::CSensors sensorMeasurements_;
+  Measurements::CProcessMeasurements processMeasurements_;
   std::vector<Core::SThreshold> thresholds_;
   // PlatformConfig::SDatafields GetFieldDef(const int id)
   // {
@@ -130,11 +132,10 @@ private:
 
   void CheckTresholds();
 
-  void GetProcessPids();
   void RemoveProcessId(const int pid);
 
   void OrganizeGstreamerPipelines();
-  void OrganizeLinuxProcesses();
+
   template <typename T> std::vector<T *> GetProcessFromProcesses() const
   {
     std::vector<T *> result;
@@ -147,7 +148,7 @@ private:
   }
 
   void MeasureThread(const std::string &threadProcLoc);
-  void MeasureProcesses(const std::vector<int> processIds);
+  // void MeasureProcesses(const std::vector<int> processIds);
 
   void InitExports(const MeasureFieldsDefType &config);
   // void SendExportsData(const Exports::ExportData &data);

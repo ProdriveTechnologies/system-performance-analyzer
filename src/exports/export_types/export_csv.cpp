@@ -118,6 +118,10 @@ bool CCsv::FullExport(const std::vector<MeasurementItem> &config,
       {
         systemFile.AddRow(ParseData(e.time, e.pipelineInfo), false);
       }
+      else if (i == 2)
+      {
+        systemFile.AddRow(ParseData(e.time, e.processInfo), false);
+      }
     }
   }
 

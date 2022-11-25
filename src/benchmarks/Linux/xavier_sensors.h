@@ -49,6 +49,10 @@ public:
 
   // SCpuCoreInfo GetCoreInfo(const unsigned int coreID);
   // std::vector<SCpuCoreInfo> GetCoresInfo();
+  // static Exports::MeasuredItem
+  // ParseDirect(const PlatformConfig::SMeasureField &datafield);
+  // static std::string ReadLocation(const std::string &path);
+
   static Exports::MeasuredItem
   ParseDirect(const PlatformConfig::SMeasureField &datafield);
   static std::string ReadLocation(const std::string &path);

@@ -4,6 +4,12 @@
 #include "src/benchmarks/Linux/performance_helpers.h"
 #include "src/json_config/sensor_config/config_parser.h"
 
+#include "src/benchmarks/linux/struct_sensors.h"
+
+#include "src/linux/datahandlers/direct_handler.h"
+#include "src/linux/datahandlers/pidstat_handler.h"
+#include "src/linux/datahandlers/pidstatm_handler.h"
+
 namespace Measurements
 {
 CProcessMeasurements::CProcessMeasurements(const std::string &configFile)
@@ -11,25 +17,72 @@ CProcessMeasurements::CProcessMeasurements(const std::string &configFile)
 {
 }
 
-void CProcessMeasurements::Initialize(std::vector<Exports::ExportData> *allData,
-                                      const std::unordered_set<int> processIds)
+/**
+ * @brief Initializes everything for measuring the processes
+ *
+ * @param allData
+ */
+void CProcessMeasurements::Initialize(
+    std::vector<Exports::ExportData> *allData,
+    std::vector<Linux::RunProcess *> processes)
 {
+  SetDataHandlers();
+  processes_ = processes;
   allData_ = allData;
-  processIds_ = processIds;
   auto parsed = PlatformConfig::Parse(configFile_);
 
   auto measureFields =
       GetFields(parsed.sensors, &CProcessMeasurements::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
   measureFieldsDefinition_ = measureFields.definition;
+  SetProcesses(); // Get the PIDs of the applications so they can be checked
   // Reset the proc-stat variables because they accumulate over-time
-  procHandler_.ParseProcStat();
+  // procHandler_.ParseProcStat();
+  auto datahandlerMap = GetDatahandlerMap();
+  dataHandler_.Initialize(datahandlerMap, measureFieldsDefinition_);
+}
+
+/**
+ * @brief creates a map with the format necessary for initializing the
+ * CDataHandler class
+ */
+std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
+CProcessMeasurements::GetDatahandlerMap()
+{
+  std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config> result;
+  for (auto &e : dataHandlers_)
+  {
+    Linux::CDataHandler::Config config;
+
+    // Get the pointer to the correct object in the variant
+    std::visit(
+        Overload{
+            [&config](auto &handler) { config.parserObj = handler.get(); },
+        },
+        e.datahandler);
+    config.replacementTag = "$PID$";
+    result.insert(std::make_pair(e.type, config));
+  }
+  return result;
+}
+
+void CProcessMeasurements::SetDataHandlers()
+{
+  dataHandlers_.push_back(DataHandler{
+      PlatformConfig::Types::DIRECT_PID,
+      std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
+  dataHandlers_.push_back(DataHandler{
+      PlatformConfig::Types::PID_STAT,
+      std::make_unique<Linux::CPidStatHandler>(Linux::CPidStatHandler())});
+  dataHandlers_.push_back(DataHandler{
+      PlatformConfig::Types::PID_STATM,
+      std::make_unique<Linux::CPidStatmHandler>(Linux::CPidStatmHandler())});
 }
 
 Exports::MeasurementItem CProcessMeasurements::GetConfig() const
 {
   Exports::MeasurementItem config;
-  config.name = "Measurement fields";
+  config.name = "Process config";
   config.type = Exports::Type::INFO;
   config.value = GetMeasurementFields();
   return config;
@@ -39,61 +92,54 @@ std::vector<Exports::MeasurementItem>
 CProcessMeasurements::GetMeasurementFields() const
 {
   std::vector<Exports::MeasurementItem> result;
-  for (const auto &e : measureFieldsDefinition_)
+  for (const auto &process : processIds_)
   {
-    Exports::MeasurementItem config;
-    config.name = e.name;
-    config.type = Exports::Type::INFO;
-    config.value = GetDefinitionItems(e);
-    result.push_back(config);
+    Exports::MeasurementItem processInfo;
+    processInfo.name = std::to_string(process.processId);
+    processInfo.type = Exports::Type::ARRAY;
+    std::vector<Exports::MeasurementItem> datapoints;
+    for (const auto &e : measureFieldsDefinition_)
+    {
+      Exports::MeasurementItem config;
+      config.name = e.name;
+      config.type = Exports::Type::INFO;
+      config.value = GetDefinitionItems(e, process.processId);
+      datapoints.push_back(config);
+    }
+    processInfo.value = datapoints;
+    result.push_back(processInfo);
   }
+
   return result;
 }
 
 std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 {
   std::vector<AllSensors::SensorGroups> result;
-  // for (const auto &e : measureFieldsDefinition_)
-  // {
-  //   Sensors sensor{e.name, e.id};
-  //   sensor.data = PerformanceHelpers::GetSummarizedDataSensors(allData_,
-  //   e.id); result.push_back(sensor);
-  // }
-  // // Add the collective groups, such as the combined cpu's instead of the
-  // single
-  // // cores
-  // std::unordered_map<std::string, std::unordered_set<int>> classes;
-  // for (const auto &e : measureFieldsDefinition_)
-  // {
-  //   // Check if it is within an array, then these values are non-equal
-  //   if (e.name != e.nameClass)
-  //   {
-  //     auto nameClass = classes.find(e.nameClass);
-  //     if (nameClass != classes.end())
-  //     {
-  //       nameClass->second.insert(e.id);
-  //     }
-  //     else
-  //     {
-  //       classes.insert(
-  //           std::make_pair(e.nameClass, std::unordered_set<int>{e.id}));
-  //     }
-  //   }
-  // }
-  // for (const auto &e : classes)
-  // {
-  //   result.push_back(PerformanceHelpers::GetSummarizedDataSensors(
-  //       allData_, e.second, e.first));
-  // }
-  // return result;
+
+  for (const auto &e : processIds_)
+  {
+    AllSensors::SensorGroups sensorGroup;
+    sensorGroup.processId = e.processId;
+
+    for (const auto &datafield : measureFieldsDefinition_)
+    {
+      Sensors sensor{datafield.name, datafield.id};
+      sensor.data = PerformanceHelpers::GetSummarizedDataProcesses(
+          allData_, datafield.id);
+      sensorGroup.sensors.push_back(sensor);
+    }
+  }
+  return result;
 }
 
 std::vector<Exports::MeasurementItem> CProcessMeasurements::GetDefinitionItems(
-    const PlatformConfig::SDatafields &field) const
+    const PlatformConfig::SDatafields &field, const int processId) const
 {
   std::vector<Exports::MeasurementItem> result;
   auto item1 =
-      Exports::MeasurementItem{"Label", Exports::Type::LABEL, field.name};
+      Exports::MeasurementItem{"Label", Exports::Type::LABEL,
+                               std::to_string(processId) + "." + field.name};
   result.push_back(item1);
   auto item2 =
       Exports::MeasurementItem{"Unique ID", Exports::Type::INFO, field.id};
@@ -107,14 +153,12 @@ std::vector<Exports::MeasurementItem> CProcessMeasurements::GetDefinitionItems(
   return result;
 }
 
-void CProcessMeasurements::AddProcesses(
-    std::vector<Linux::RunProcess *> processes)
+void CProcessMeasurements::SetProcesses()
 {
-  processes_ = processes;
   for (const auto &process : processes_)
   {
-    processIds_.insert(
-        ProcessDef{process->GetThreadPid(), process->GetProcessName()});
+    processIds_.push_back(
+        ProcessDef{process->GetThreadPid(), process->GetProcessName(), true});
   }
 }
 
@@ -126,43 +170,101 @@ void CProcessMeasurements::AddProcesses(
  *
  * @return std::vector<Exports::MeasuredItem>
  */
-std::vector<Exports::MeasuredItem> CProcessMeasurements::GetMeasurements()
+std::vector<Exports::ProcessInfo> CProcessMeasurements::GetMeasurements()
 {
-  procHandler_.ParseMeminfo();
-  return GetMeasurements(measureFields_);
-}
+  // auto CheckRmProcessInactive = [&](const bool isInactiveExpr, const int id)
+  // {
+  //   if (isInactiveExpr)
+  //   {
+  //     SetInactive(id);
+  //     return true;
+  //   }
+  //   return false;
+  // };
 
-std::vector<Exports::MeasuredItem>
-CProcessMeasurements::GetMeasurements(const MeasureFieldsType &measureFields)
-{
-  procHandler_.ParseProcStat();
-  std::vector<Exports::MeasuredItem> measuredItems;
-  for (const auto &e : measureFields)
+  std::vector<Exports::ProcessInfo> measuredItems;
+  // 1. Loop through each PID
+  for (auto &process : processIds_)
   {
-    switch (e.type)
+    if (!process.active)
+      continue;
+    Exports::ProcessInfo processData;
+    processData.pipelineId = process.processId;
+    auto pidReplacement = std::to_string(process.processId);
+    auto returnSuccess = dataHandler_.ParseMeasurements(pidReplacement);
+    if (returnSuccess)
     {
-    case PlatformConfig::Types::DIRECT:
-      measuredItems.push_back(
-          CXavierSensors::ParseDirect(e)); // ParseDirect(e);
-      break;
-    case PlatformConfig::Types::PROC_STAT:
+      processData.measuredItems = dataHandler_.GetMeasurements();
+    }
+    else
     {
-      auto definition = GetFieldDef(e.id);
-      measuredItems.push_back(procHandler_.ParseProcField(definition, e.path));
+      // Set process on inactive so it is not checked anymore, and continue with
+      // next PID
+      process.active = false;
+      continue;
     }
-    break;
-    case PlatformConfig::Types::PROC_MEM:
-    {
-      auto definition = GetFieldDef(e.id);
-      measuredItems.push_back(procHandler_.ParseMemField(definition));
-    }
-    break;
-    default:
-      throw std::runtime_error(
-          "Software Error! Incorrect type in the performance measurements!");
-    }
+    measuredItems.push_back(processData);
+    // Loop through all the necessary fields
+    // for (const auto &e : measureFields_)
+    // {
+    //   try
+    //   {
+    //     Exports::MeasuredItem item;
+    //     switch (e.type)
+    //     {
+    //     case PlatformConfig::Types::DIRECT_PID:
+    //     {
+    //       auto fieldCpy = e;
+    //       Helpers::replaceStr(fieldCpy.path, "$PID$",
+    //                           std::to_string(process.processId));
+
+    //       item = CXavierSensors::ParseDirect(fieldCpy);
+    //       if (CheckRmProcessInactive(item.id == -1, e.id))
+    //         break;
+    //     }
+    //     break;
+    //     case PlatformConfig::Types::PID_STAT:
+    //     {
+    //       auto procstat = GetProcStat(process.processId);
+    //       if (CheckRmProcessInactive(!procstat.succesful, e.id))
+    //         break;
+    //     }
+    //     break;
+    //     case PlatformConfig::Types::PID_STATM:
+    //       break;
+    //     default:
+    //       throw std::runtime_error("Software Error! Incorrect type in the "
+    //                                "performance measurements!");
+    //     }
+    //     if (item.id != -1)
+    //       processData.measuredItems.push_back(item);
+    //   }
+    //   catch (const std::exception &error)
+    //   {
+    //     SetInactive(e.id);
+    //     break; // Break out of the for loop, process is inactive
+    //   }
+    // }
+    // measuredItems.push_back(processData);
   }
   return measuredItems;
+  // procHandler_.ParseMeminfo();
+  // return GetMeasurements(measureFields_);
+}
+
+Linux::FileSystem::Stat CProcessMeasurements::GetProcStat(const int procId)
+{
+  const std::string procStatPath = "/proc/" + std::to_string(procId) + "/stat";
+  auto stats = Linux::FileSystem::GetStats(procStatPath);
+  return stats;
+}
+void CProcessMeasurements::SetInactive(const int processId)
+{
+  for (auto &e : processIds_)
+  {
+    if (e.processId == processId)
+      e.active = false;
+  }
 }
 
 CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
@@ -175,8 +277,9 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
   MeasureCombo result;
 
   std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField)
-                { result.Add(parserFunction(memberPtr, dataField)); });
+                [&](const PlatformConfig::SDatafields &dataField) {
+                  result.Add(parserFunction(memberPtr, dataField));
+                });
 
   return result;
 }
@@ -188,13 +291,23 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(
   switch (dataField.type)
   {
   case PlatformConfig::Types::ARRAY:
-    result.Add(ParseArray(dataField));
-    break;
-  case PlatformConfig::Types::DIRECT:
-  case PlatformConfig::Types::PROC_STAT:
-  case PlatformConfig::Types::PROC_MEM:
+  {
+    // If it doesn't contain any PID measurements (and is therefore empty), dont
+    // add them at all
+    auto datafields = ParseArray(dataField);
+    if (!datafields.definition.empty())
+      result.Add(datafields);
+  }
+  break;
+  case PlatformConfig::Types::PID_STAT:
+  case PlatformConfig::Types::DIRECT_PID:
+  case PlatformConfig::Types::PID_STATM:
     result.Add(ParseField(dataField));
     break;
+  case PlatformConfig::Types::PROC_STAT:
+  case PlatformConfig::Types::PROC_MEM:
+  case PlatformConfig::Types::DIRECT:
+    // Do nothing, pass through to "default", these are system-wide measurements
   default:;
   }
   return result;

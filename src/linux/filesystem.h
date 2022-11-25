@@ -8,6 +8,9 @@
 
 #include "src/helpers/helper_functions.h"
 #include <iostream>
+
+#include "filesystem/statm.h"
+
 namespace Linux
 {
 namespace FileSystem
@@ -41,6 +44,7 @@ std::vector<std::string> GetFiles(const std::string &path);
 
 struct Stat
 {
+  bool succesful = false; // Variable to check if the retrieval was succesful
   int pid;
   std::string exeName;
   char state;
@@ -123,8 +127,55 @@ struct Stat
         argEnd{std::stoul(stats_[48])}, envStart{std::stoul(stats_[49])},
         envEnd{std::stoul(stats_[50])}, exitCode{std::stoi(stats_[51])}
   {
+    succesful = true;
+  }
+  Stat(const Stat &stats)
+      : succesful{stats.succesful}, pid{stats.pid}, exeName{stats.exeName},
+        state{stats.state}, ppid{stats.ppid}, pgrp{stats.pgrp},
+        session{stats.session}, ttyNr{stats.ttyNr}, tpgid{stats.tpgid},
+        flags{stats.flags}, minFaults{stats.minFaults},
+        cminFaults{stats.cminFaults}, majorFaults{stats.majorFaults},
+        cmajorFaults{stats.cmajorFaults}, utime{stats.utime},
+        stime{stats.stime}, cutime{stats.cutime}, cstime{stats.cstime},
+        priority{stats.priority}, nice{stats.nice},
+        numThreads{stats.numThreads},
+        itrealvalue{stats.itrealvalue}, starttime{stats.starttime},
+        vsize{stats.vsize}, rss{stats.rss}, rsslim{stats.rsslim},
+        startcode{stats.startcode}, endcode{stats.endcode},
+        startstack{stats.startstack}, kstkesp{stats.kstkesp},
+        kstkeip{stats.kstkeip}, signal{stats.signal}, blocked{stats.blocked},
+        sigignore{stats.sigignore}, sigcatch{stats.sigcatch},
+        wchan{stats.wchan}, nswap{stats.nswap}, cnswap{stats.cnswap},
+        exitSignal{stats.exitSignal}, processor{stats.processor},
+        rtPriority{stats.rtPriority}, policy{stats.policy},
+        delayAcctBlkioTicks{stats.delayAcctBlkioTicks},
+        guestTime{stats.guestTime},
+        cguestTime{stats.cguestTime}, startData{stats.startData},
+        endData{stats.endData}, startBrk{stats.startBrk},
+        argStart{stats.argStart}, argEnd{stats.argEnd},
+        envStart{stats.envStart}, envEnd{stats.envEnd}, exitCode{stats.exitCode}
+  {
   }
   Stat() = default;
+  template <typename RetType> RetType GetValue(const std::string &value)
+  {
+    auto procStat = nameToValue.find(value);
+    if (procStat == nameToValue.end())
+      throw std::runtime_error("Linux Filesystem: /proc/<PID>/stat field " +
+                               value + " not found");
+    auto resultVariant = procStat->second;
+
+    // Get the pointer to the correct object in the variant
+    RetType result;
+    std::visit(
+        Overload{
+            [&result](auto &value) { result = static_cast<RetType>(*value); },
+        },
+        resultVariant);
+
+    return result;
+  }
+
   std::unordered_map<std::string,
                      std::variant<int *, long unsigned *, long int *,
                                   long long unsigned *, char *>>

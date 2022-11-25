@@ -14,7 +14,9 @@ enum class Types
   DIRECT,
   ARRAY,
   PROC_MEM,
-  PID_STAT
+  PID_STAT,
+  PID_STATM,
+  DIRECT_PID
 };
 enum class Class : int
 {
@@ -36,6 +38,10 @@ inline Types GetType(const std::string &typeStr)
     return Types::PROC_MEM;
   case Helpers::hash("PIDSTAT"):
     return Types::PID_STAT;
+  case Helpers::hash("PIDSTATM"):
+    return Types::PID_STATM;
+  case Helpers::hash("DIRECT_PID"):
+    return Types::DIRECT_PID;
   default:
     throw std::runtime_error("Platform Config: Type unknown! Type: " + typeStr);
   }

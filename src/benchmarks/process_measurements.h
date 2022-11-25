@@ -9,7 +9,12 @@
 #include "src/exports/export_struct.h"
 #include "src/helpers/helper_functions.h"
 #include "src/json_config/sensor_config/config.h"
+#include "src/linux/data_handler.h"
 #include "src/linux/run_process.h"
+
+#include "src/linux/datahandlers/direct_handler.h"
+#include "src/linux/datahandlers/pidstat_handler.h"
+#include "src/linux/datahandlers/pidstatm_handler.h"
 
 namespace Measurements
 {
@@ -30,13 +35,12 @@ public:
   //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CProcessMeasurements(const std::string &configFile);
 
-  void AddProcesses(std::vector<Linux::RunProcess *> processes);
-
-  void Initialize(std::vector<Exports::ExportData> *allData);
+  void Initialize(std::vector<Exports::ExportData> *allData,
+                  std::vector<Linux::RunProcess *> processes);
 
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
-  std::vector<Exports::MeasuredItem> GetMeasurements();
+  std::vector<Exports::ProcessInfo> GetMeasurements();
 
   std::vector<AllSensors::SensorGroups> GetSensors() const;
 
@@ -51,11 +55,13 @@ private:
   {
     int processId;
     std::string name;
+    bool active = false;
   };
   std::vector<Linux::RunProcess *> processes_;
   std::string configFile_;
-  std::unordered_set<ProcessDef> processIds_;
+  std::vector<ProcessDef> processIds_;
   Measurements::ProcHandler procHandler_;
+  Linux::CDataHandler dataHandler_;
   std::vector<Exports::ExportData> *allData_;
 
   using MeasureFieldsDefType = std::vector<PlatformConfig::SDatafields>;
@@ -63,9 +69,23 @@ private:
   using MeasureFieldsType = std::vector<PlatformConfig::SMeasureField>;
   MeasureFieldsType measureFields_;
 
+  void SetProcesses();
   std::vector<Exports::MeasurementItem> GetMeasurementFields() const;
   std::vector<Exports::MeasurementItem>
-  GetDefinitionItems(const PlatformConfig::SDatafields &field) const;
+  GetDefinitionItems(const PlatformConfig::SDatafields &field,
+                     const int processId) const;
+  void SetInactive(const int processId);
+
+  struct DataHandler
+  {
+    PlatformConfig::Types type;
+    std::variant<std::unique_ptr<Linux::CPidStatHandler>,
+                 std::unique_ptr<Linux::CDirectHandler>,
+                 std::unique_ptr<Linux::CPidStatmHandler>>
+        datahandler;
+  };
+  std::vector<DataHandler> dataHandlers_;
+
   /**
    * @brief Necessary for parsing the configuration file for the sensors
    */
@@ -108,7 +128,9 @@ private:
   MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields &dataField);
   MeasureCombo ParseArray(const PlatformConfig::SDatafields &data);
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
-  std::vector<Exports::MeasuredItem>
-  GetMeasurements(const MeasureFieldsType &measureFields);
+  Linux::FileSystem::Stat GetProcStat(const int procId);
+  void SetDataHandlers();
+  std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
+  GetDatahandlerMap();
 };
 } // namespace Measurements
