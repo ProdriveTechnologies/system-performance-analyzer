@@ -70,6 +70,8 @@ void CSummaryGenerator::PrintApplicationInfo()
   created += " ";
   created += Globals::compilationTime;
   SummaryWriter::PrintValue(SummaryTranslations::created, created);
+  SummaryWriter::PrintValue(SummaryTranslations::gitHash,
+                            std::string(GIT_COMMIT_HASH));
   SummaryWriter::PrintRow();
 }
 void CSummaryGenerator::PrintSystemInfo()

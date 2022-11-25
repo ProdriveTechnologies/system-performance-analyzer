@@ -6,8 +6,24 @@ set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 # include(ExernalProject)
 message("Starting compilation of project: " ${PROJECT_NAME})
 
-# set the project name
+# ### Getting Git hash for the application
+# Get the current working branch
+execute_process(
+  COMMAND git rev-parse --abbrev-ref HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_BRANCH
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# Get the latest commit hash
+execute_process(
+  COMMAND git rev-parse HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# #### set the project name
 project(${PROJECT_NAME} LANGUAGES CXX)
+
 include(FetchContent) # To be able to download Git repos with the FetchContent_Declare function
 include(ExternalProject) # To be able to download Git repos with the FetchContent_Declare function
 
@@ -45,6 +61,9 @@ message(" - Enabling static code analyser: clang-tidy")
 
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp ${SOURCES})
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+  "-DGIT_COMMIT_HASH=\"${GIT_COMMIT_HASH}\"")
 
 # Add compile options
 if(MSVC)
