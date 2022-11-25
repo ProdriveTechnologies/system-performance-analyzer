@@ -19,7 +19,8 @@ enum class ThresholdType
 {
   MIN,
   MAX,
-  AVERAGE
+  AVERAGE,
+  MEAN
 };
 enum class Sign
 {
@@ -80,6 +81,8 @@ inline ThresholdType GetThresholdType(const std::string &thresholdGroup)
     return ThresholdType::MAX;
   case Helpers::hash("average"):
     return ThresholdType::AVERAGE;
+  case Helpers::hash("mean"):
+    return ThresholdType::MEAN;
   default:
     CLogger::Log(CLogger::Types::ERROR, "Threshold group not recognised!");
     throw std::runtime_error("Threshold group not recognised!");

@@ -131,6 +131,10 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
     return parseSign(threshold.value,
                      sensor->data.Get(Measurements::ValueTypes::AVERAGE),
                      threshold.sign);
+  case Core::ThresholdType::MEAN:
+    return parseSign(threshold.value,
+                     sensor->data.Get(Measurements::ValueTypes::MEAN),
+                     threshold.sign);
   }
 }
 

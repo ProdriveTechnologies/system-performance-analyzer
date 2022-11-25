@@ -17,16 +17,23 @@ public:
       CheckMinMax(item);
 
     average_.Add(item);
+    allMeasurements_.push_back(item.measuredValue);
   }
   SensorData GetSensorData() const
   {
     SensorData sensorData;
-    sensorData.summarizedValues.push_back(
-        SensorData::MeasureValue{ValueTypes::MIN, minFound_});
-    sensorData.summarizedValues.push_back(
-        SensorData::MeasureValue{ValueTypes::MAX, maxFound_});
-    sensorData.summarizedValues.push_back(
-        SensorData::MeasureValue{ValueTypes::AVERAGE, average_.Get()});
+    // There must be a datapoint to add sensible data
+    if (average_.datapoints != 0)
+    {
+      sensorData.summarizedValues.push_back(
+          SensorData::MeasureValue{ValueTypes::MIN, minFound_});
+      sensorData.summarizedValues.push_back(
+          SensorData::MeasureValue{ValueTypes::MAX, maxFound_});
+      sensorData.summarizedValues.push_back(
+          SensorData::MeasureValue{ValueTypes::AVERAGE, average_.Get()});
+      sensorData.summarizedValues.push_back(
+          SensorData::MeasureValue{ValueTypes::MEAN, GetMean()});
+    }
     return sensorData;
   }
   int GetSize() const { return average_.datapoints; }
@@ -51,6 +58,17 @@ private:
     }
   };
   Average average_;
+  std::vector<double> allMeasurements_;
+
+  double GetMean() const
+  {
+    if (!allMeasurements_.empty())
+    {
+      const size_t loc = allMeasurements_.size() / 2;
+      return allMeasurements_.at(loc);
+    }
+    return 0.0;
+  }
 
   void AddInitial(const Exports::MeasuredItem &item)
   {

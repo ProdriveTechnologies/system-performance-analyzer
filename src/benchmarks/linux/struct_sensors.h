@@ -15,7 +15,8 @@ enum class ValueTypes
 {
   MIN,
   MAX,
-  AVERAGE
+  AVERAGE,
+  MEAN
 };
 inline std::string ToString(const ValueTypes t)
 {
@@ -27,6 +28,8 @@ inline std::string ToString(const ValueTypes t)
     return "max";
   case ValueTypes::AVERAGE:
     return "average";
+  case ValueTypes::MEAN:
+    return "mean";
   default:
     throw std::runtime_error(
         "ValueTypes not recognised in Measurements::ValueTypes!");
