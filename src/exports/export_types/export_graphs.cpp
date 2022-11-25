@@ -51,6 +51,7 @@ void CGraphs::CreateGraph(const Measurements::Sensors &sensor1,
                         "' using 'time':'" + plot2 +
                         "' "
                         "with lines axis x1y2 \n";
+
   fputs(plotStr.c_str(), pipe_gp);
   pclose(pipe_gp);
 }

@@ -41,8 +41,11 @@ private:
 
   std::string GetFileName(const Measurements::Classification c);
   ftxui::Element GetElement(const Measurements::Sensors &sensor,
-                            const double &measuredValue);
+                            const double &measuredValue, const int processId);
   ftxui::Elements GetElements(const Measurements::SMeasurementsData data);
+  ftxui::Elements GetElementsSensorGroups(
+      const std::vector<Measurements::AllSensors::SensorGroups> &groups,
+      const Measurements::SMeasurementsData data);
   double GetPercentage(const PlatformConfig::SDatafields &datafield,
                        const double &measuredValue);
   ftxui::Color GetColor(const int id);

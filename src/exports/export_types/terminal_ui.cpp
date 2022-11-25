@@ -69,8 +69,21 @@ CTerminalUI::GetElements(const Measurements::SMeasurementsData data)
   ftxui::Elements elements;
   for (const auto &c : liveSensors_->allClasses)
   {
-    const auto sensors = liveSensors_->GetSensors(c);
-    for (const auto &e : sensors)
+    const auto sensorGroups = liveSensors_->GetSensorGroups(c);
+    elements = Helpers::CombineVectors(
+        elements, GetElementsSensorGroups(sensorGroups, data));
+  }
+  return elements;
+}
+
+ftxui::Elements CTerminalUI::GetElementsSensorGroups(
+    const std::vector<Measurements::AllSensors::SensorGroups> &sensorGroups,
+    const Measurements::SMeasurementsData data)
+{
+  ftxui::Elements elements;
+  for (const auto &group : sensorGroups)
+  {
+    for (const auto &e : group.sensors)
     {
       if (e.userData.showInLive)
       {
@@ -78,15 +91,17 @@ CTerminalUI::GetElements(const Measurements::SMeasurementsData data)
         {
           auto measurement = data.GetWithId(e.uniqueId);
           lastMeasurement_[e.uniqueId] = measurement.measuredValue;
-          elements.push_back(GetElement(e, measurement.measuredValue));
+          elements.push_back(
+              GetElement(e, measurement.measuredValue, group.processId));
         }
         catch (const std::exception &err)
         {
           auto res = lastMeasurement_.find(e.uniqueId);
           if (res != lastMeasurement_.end())
-            elements.push_back(GetElement(e, res->second));
+            elements.push_back(GetElement(e, res->second, group.processId));
           else
-            elements.push_back(GetElement(e, e.userData.minimumValue));
+            elements.push_back(
+                GetElement(e, e.userData.minimumValue, group.processId));
         }
       }
     }
@@ -95,12 +110,12 @@ CTerminalUI::GetElements(const Measurements::SMeasurementsData data)
 }
 
 ftxui::Element CTerminalUI::GetElement(const Measurements::Sensors &sensor,
-                                       const double &item)
+                                       const double &item, const int processId)
 {
   double value = GetPercentage(sensor.userData, item);
-
   return ftxui::hbox(
-      {ftxui::text(sensor.userId) | ftxui::border,
+      {ftxui::text(std::to_string(processId) + "." + sensor.userId) |
+           ftxui::border,
        ftxui::color(GetColor(sensor.uniqueId), ftxui::gauge(value)) |
            ftxui::border | ftxui::flex,
        ftxui::text(std::to_string(item)) | ftxui::border});
