@@ -3,17 +3,26 @@
 #include <chrono>
 #include <sys/wait.h>
 #include <thread>
+#include <variant>
 
-#include "modules/filestream/filestream.h"
-#include "src/benchmarks/Linux/Monitoring.h"
+// #include "modules/filestream/filestream.h"
+#include "src/benchmarks/Linux/perf_measurements.h"
 #include "src/benchmarks/Linux/xavier_sensors.h"
 #include "src/gstreamer/handler.h"
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/stopwatch.h"
 #include "src/helpers/synchronizer.h"
 #include "src/json_config/config_parser.h"
+#include "src/linux/run_process.h"
 #include "src/linux/shared_memory.h"
-#include "src/modules/unit_handler.h"
+// #include "src/modules/unit_handler.h"
+
+template <typename... Ts> // (7)
+struct Overload : Ts...
+{
+  using Ts::operator()...;
+};
+template <class... Ts> Overload(Ts...) -> Overload<Ts...>; // (2)
 
 void print_func() { std::cout << "Printing the world" << std::endl; }
 
@@ -27,12 +36,6 @@ void print_info()
       << std::endl;
 }
 
-struct CommPipes
-{
-  int pipes[2];
-  Module::Config childInfo;
-};
-
 int main()
 {
   if (!Helpers::FileExists("json_example.json"))
@@ -42,12 +45,55 @@ int main()
   }
 
   auto config = Core::ConfigParser::Parse("json_example.json");
-  Synchronizer synchronizer;
-  CGstreamerHandler gstreamer{&synchronizer}; //{config.gstreamerPipeline};
-  Linux::CMonitoring measurements{&synchronizer};
+  Synchronizer synchronizer{config.processes.size() +
+                            1}; // + 1 because of monitoring thread
+  // CGstreamerHandler gstreamer{&synchronizer}; //{config.gstreamerPipeline};
+  Linux::CPerfMeasurements measurements{&synchronizer};
+  // std::vector<std::variant<CGstreamerHandler>> processes;
 
-  gstreamer.runPipelineThread(config.gstreamerPipeline);
-  measurements.start(gstreamer.getThreadPid(), gstreamer.getRunningPtr());
+  // Struct to store the info for the processes. The variant is used to store
+  // the object type in
+  struct ProcessInfo
+  {
+    std::string type;
+    std::string command;
+    std::variant<CGstreamerHandler, Linux::RunProcess> processes; // int
+    ProcessInfo(const Core::SProcess &process, CGstreamerHandler streamHandler)
+        : type{process.type}, command{process.command}, processes{streamHandler}
+    {
+    }
+    ProcessInfo(const Core::SProcess &process, Linux::RunProcess processHandler)
+        : type{process.type}, command{process.command}, processes{
+                                                            processHandler}
+    {
+    }
+    ~ProcessInfo() = default;
+  };
+  std::vector<ProcessInfo> processes;
+
+  for (const auto &e : config.processes)
+  {
+    if (e.type == "linux_command")
+    {
+      processes.push_back(ProcessInfo{e, Linux::RunProcess{&synchronizer}});
+    }
+    else if (e.type == "gstreamer")
+    {
+      processes.push_back(ProcessInfo{e, CGstreamerHandler{&synchronizer}});
+    }
+  }
+  // Start the threads
+  for (auto &e : processes)
+  {
+    std::visit(
+        Overload{
+            [&e](auto &handler) { handler.StartThread(e.command); },
+        },
+        e.processes);
+  }
+
+  // gstreamer.RunPipelineThread(config.gstreamerPipeline);
+  measurements.Start(config);
 
   CXavierSensors xavierSensors{8};
   auto result = xavierSensors.GetCoreInfo(1);

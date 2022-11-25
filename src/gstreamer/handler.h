@@ -5,21 +5,24 @@
 #include <string>
 #include <thread>
 
+#include "src/process_runner/run_process_base.h"
+
 class Synchronizer;
 
-class CGstreamerHandler
+class CGstreamerHandler : public ProcessRunner::Base
 {
 public:
   CGstreamerHandler(Synchronizer *synchronizer);
+  CGstreamerHandler(const CGstreamerHandler &gstreamer);
   ~CGstreamerHandler();
 
-  void runPipelineThread(const std::string &pipelineStr);
+  void StartThread(const std::string &command);
+  void RunPipelineThread(const std::string &pipelineStr);
 
-  void runPipeline(const std::string &pipelineStr);
+  void RunPipeline(const std::string &pipelineStr);
 
-  int getThreadPid() const { return threadPid_; }
-  bool isRunning() const { return running_; }
-  bool *getRunningPtr() { return &running_; }
+  int GetThreadPid() const { return threadPid_; }
+  bool IsRunning() const { return running_; }
 
 private:
   Synchronizer *threadSync_;
@@ -30,7 +33,7 @@ private:
   GstBus *gstBus_;
   GstMessage *gstMsg_;
   GError *gstErrorMsg_;
-  std::thread pipelineThread_;
+  // std::thread pipelineThread_;
 
-  void freeMemory();
+  void FreeMemory();
 };

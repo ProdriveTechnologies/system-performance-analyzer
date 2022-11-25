@@ -3,15 +3,14 @@
 
 namespace Linux
 {
-
 /**
- * @brief getParameter gets a parameter from a configuration file
+ * @brief GetParameter gets a parameter from a configuration file
  *
  * @param location the file location that needs to be parsed
  * @param parameterName the name of the parameter of which the value is returned
  * @return int the found value of the parameter
  */
-int getParameter(const std::string &location, const std::string &parameterName)
+int GetParameter(const std::string &location, const std::string &parameterName)
 {
   std::fstream file(location, std::fstream::in);
 
@@ -25,7 +24,7 @@ int getParameter(const std::string &location, const std::string &parameterName)
       break;
     }
   }
-  return parseLine(line);
+  return ParseLine(line);
 }
 
 /**
@@ -34,7 +33,7 @@ int getParameter(const std::string &location, const std::string &parameterName)
  * @param line the line that needs to be parsed
  * @return int the number that is read on the parsed line
  */
-int parseLine(const std::string &line)
+int ParseLine(const std::string &line)
 {
   std::string result;
   for (auto e : line)

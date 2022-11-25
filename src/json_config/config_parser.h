@@ -53,6 +53,19 @@ inline void from_json(const nlohmann::json &j, STask &p)
   j.at("measurements").get_to(p.benchmarks);
 }
 
+inline void from_json(const nlohmann::json &j, SProcess &p)
+{
+  j.at("type").get_to(p.type);
+  j.at("command").get_to(p.command);
+}
+
+inline void from_json(const nlohmann::json &j, SSettings &p)
+{
+  j.at("measure_loop_ms").get_to(p.measureLoopMs);
+  j.at("verbose").get_to(p.verbose);
+  j.at("enable_logs").get_to(p.enableLogs);
+}
+
 inline void from_json(const nlohmann::json &j, SConfig &p)
 {
   j.at("name").get_to(p.name);
@@ -60,7 +73,8 @@ inline void from_json(const nlohmann::json &j, SConfig &p)
   j.at("id").get_to(p.id);
   j.at("version").get_to(p.version);
   j.at("tasks").get_to(p.tasks);
-  j.at("gstreamer_pipeline").get_to(p.gstreamerPipeline);
+  j.at("processes").get_to(p.processes);
+  j.at("settings").get_to(p.settings);
 }
 
 } // namespace Core

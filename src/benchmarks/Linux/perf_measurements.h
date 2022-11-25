@@ -2,14 +2,19 @@
 
 // #include "src/benchmarks/Monitoring.h"
 
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "src/exports/export.h"
+#include "src/json_config/config.h"
+#include "xavier_sensors.h"
 
 class Synchronizer; // pre-definition
 
 namespace Linux
 {
-class CMonitoring
+class CPerfMeasurements
 {
 public:
   struct SCoreTemperature
@@ -18,22 +23,30 @@ public:
     double temperature;
   };
 
-  CMonitoring(Synchronizer *synchronizer);
-  void start(const int threadId, const bool *runningPtr);
+  CPerfMeasurements(Synchronizer *synchronizer);
+  void Start(const Core::SConfig &config);
 
   // SCpuInfo GetCPUInfo();
   // SMemoryInfo GetMemoryInfo();
   // SBandwidth GetMemoryBandwidth();
   // SCoreTemperature GetTemperatures();
 
-  static std::string readLocation(const std::string &path);
+  static std::string ReadLocation(const std::string &path);
 
 private:
   Synchronizer *threadSync_;
+  Core::SConfig config_;
+  CXavierSensors xavierSensors_;
+  static constexpr int XAVIER_CORES = 8;
 
   std::vector<std::string> excludedThreads_;
+  std::unique_ptr<Exports::CExport> pExportObj_;
 
-  void measureThread(const std::string &threadProcLoc);
+  void MeasureThread(const std::string &threadProcLoc);
+  void MeasureSystem();
+
+  void InitExports();
+  void SendExportsData(const Exports::ExportData &data);
 
   // static constexpr double tempNotAvailable_ = -1.0;
   // static constexpr double tempUnreadable = -2.0;

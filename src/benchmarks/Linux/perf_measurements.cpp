@@ -1,4 +1,4 @@
-#include "Monitoring.h"
+#include "perf_measurements.h"
 
 #include <iostream>
 #include <regex>       // std::regex_replace
@@ -7,49 +7,102 @@
 #include <unistd.h> // getpid()
 
 #include "Helpers.h"
+#include "src/benchmarks/Linux/xavier_sensors.h"
 #include "src/helpers/synchronizer.h"
 #include "src/linux/filesystem.h"
 
+#include "src/exports/export.h"
+#include "src/exports/export_types/export_csv.h"
+
+#include "src/helpers/stopwatch.h"
 namespace Linux
 {
-CMonitoring::CMonitoring(Synchronizer *synchronizer) : threadSync_{synchronizer}
+CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer)
+    : threadSync_{synchronizer}, xavierSensors_{XAVIER_CORES}
 {
 }
 
-void CMonitoring::start(const int threadId, const bool *runningPtr)
+void CPerfMeasurements::Start(const Core::SConfig &config)
 {
   using Path = Linux::FileSystem::Path;
-  threadSync_->waitForProcess();
+  threadSync_->WaitForProcess();
+  config_ = config;
+  Stopwatch stopwatch;
+
+  InitExports();
+
   // Thread exists now, store threads that already exist for the monitoring. The
   // newly added ones are from gstreamer and need to be monitored
   std::cerr << "Monitoring thread: " << threadSync_->getThreadId();
 
   Path processPath;
   processPath.AddItems("proc", getpid(), "task");
-  excludedThreads_ = Linux::FileSystem::GetFiles(processPath.GetPath());
+  excludedThreads_ = FileSystem::GetFiles(processPath.GetPath());
 
-  threadSync_
-      ->waitForProcess(); // Sync before start, when synced, will start directly
   std::vector<std::string> monitoredThreads;
-  while (*runningPtr)
+  // Sync before start, when synced, will start
+  //    directly
+  threadSync_->WaitForProcess();
+  stopwatch.Start();
+  while (!threadSync_->AllCompleted())
   {
     // 1. get all threads that will be monitored
-    monitoredThreads = Linux::FileSystem::GetFiles(processPath.GetPath());
+    monitoredThreads = FileSystem::GetFiles(processPath.GetPath());
     Helpers::RemoveIntersection(monitoredThreads, excludedThreads_);
-
     // 2. Loop through threads and execute benchmarks on them
     for (const auto &e : monitoredThreads)
     {
-      measureThread(e);
+      MeasureThread(e);
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    // Filling the export data
+    Exports::ExportData exportData;
+    exportData.time =
+        std::to_string(stopwatch.GetTime<std::milli>()); // Millisecond accuracy
+    exportData.cpuInfo = xavierSensors_.GetCoresInfo();
+    SendExportsData(exportData);
+
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(config_.settings.measureLoopMs));
+  }
+  // And synchronize the stop, so all threads stop at the same time
+  threadSync_->WaitForProcess();
+}
+
+/**
+ * @brief initializes the resources used for the measurements
+ */
+void CPerfMeasurements::InitExports()
+{
+  if (config_.settings.enableLogs)
+  {
+    pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CCsv{},
+                                                     "csvfile.csv", true);
+    pExportObj_->InitExport();
   }
 }
 
-void CMonitoring::measureThread(const std::string &threadProcLoc)
+/**
+ * @brief sends the exports data to the export objects
+ *
+ * @param data the measurements data
+ */
+void CPerfMeasurements::SendExportsData(const Exports::ExportData &data)
+{
+  pExportObj_->DataExport(data);
+}
+
+void CPerfMeasurements::MeasureThread(const std::string &threadProcLoc)
 {
   auto stats = Linux::FileSystem::GetStats(threadProcLoc + "/stat");
-  std::cout << "CPU usage: ";
+  std::cout << "CPU usage: " << stats.cutime << std::endl;
+  std::cout << "Minor Faults: " << stats.minFaults << std::endl;
+}
+
+void CPerfMeasurements::MeasureSystem()
+{
+  CXavierSensors xavierSensors{8};
+  auto coresStats = xavierSensors.GetCoresInfo();
+  // std::cout << "Some sensor info: " << coresStats.at(0)()
 }
 
 /*
@@ -114,12 +167,12 @@ std::vector<CMonitoring::SCoreTemperature> CMonitoring::GetCpuTemperatures()
 } */
 
 /**
- * @brief readLocation reads the data at a certain path location on Linux
+ * @brief ReadLocation reads the data at a certain path location on Linux
  *
  * @param path the path of the file
  * @return std::string the content of the file
  */
-std::string CMonitoring::readLocation(const std::string &path)
+std::string CPerfMeasurements::ReadLocation(const std::string &path)
 {
   std::string dataBuffer;
   std::ifstream fileObj(path);

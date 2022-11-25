@@ -3,8 +3,7 @@
 
 namespace Linux
 {
-
-int getParameter(const std::string &location, const std::string &parameterName);
-int parseLine(const std::string &line);
+int GetParameter(const std::string &location, const std::string &parameterName);
+int ParseLine(const std::string &line);
 
 } // namespace Linux

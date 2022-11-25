@@ -8,7 +8,7 @@ class CXavierSensors
 {
 public:
   CXavierSensors(const int maxCores);
-  struct CpuCoreInfo
+  struct SCpuCoreInfo
   {
     double temperature;
     int frequency;
@@ -40,11 +40,12 @@ public:
     std::string prefixLocation;
     ECoreIdentifiers id;
     std::string path;
-    std::function<void(CpuCoreInfo *, const std::string &)> storeResultFunction;
+    std::function<void(SCpuCoreInfo *, const std::string &)>
+        storeResultFunction;
   };
 
-  CpuCoreInfo GetCoreInfo(const unsigned int coreID);
-  std::vector<CpuCoreInfo> GetCoresInfo();
+  SCpuCoreInfo GetCoreInfo(const unsigned int coreID);
+  std::vector<SCpuCoreInfo> GetCoresInfo();
 
 private:
   std::vector<CoreSensor> coreSensors_;

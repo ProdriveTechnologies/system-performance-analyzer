@@ -5,7 +5,7 @@
 namespace JsonHelpers
 {
 template <typename VariantType, typename Variant>
-nlohmann::json getSingleVariantValue(const Variant value)
+nlohmann::json GetSingleVariantValue(const Variant value)
 {
   if (const auto *val = std::get_if<VariantType>(&value))
     return nlohmann::json{*val};
@@ -13,10 +13,10 @@ nlohmann::json getSingleVariantValue(const Variant value)
 }
 
 template <typename... VariantTypes, typename VariantType>
-nlohmann::json getVariantValue(const VariantType variantType)
+nlohmann::json GetVariantValue(const VariantType variantType)
 {
   std::vector<nlohmann::json> jsonRes = {
-      nlohmann::json{}, (getSingleVariantValue<VariantTypes>(variantType))...};
+      nlohmann::json{}, (GetSingleVariantValue<VariantTypes>(variantType))...};
 
   for (const auto &e : jsonRes)
   {

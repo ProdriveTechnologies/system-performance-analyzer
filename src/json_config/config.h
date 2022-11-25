@@ -50,6 +50,17 @@ struct STask
     return false;
   }
 };
+struct SProcess
+{
+  std::string type;
+  std::string command;
+};
+struct SSettings
+{
+  bool verbose;
+  bool enableLogs;
+  int measureLoopMs;
+};
 struct SConfig
 {
   std::string getStr()
@@ -61,8 +72,9 @@ struct SConfig
   std::string description;
   int id;
   std::string version;
-  std::string gstreamerPipeline;
+  std::vector<SProcess> processes;
   std::vector<STask> tasks;
+  SSettings settings;
 };
 
 } // namespace Core

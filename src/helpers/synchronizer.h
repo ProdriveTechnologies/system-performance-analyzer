@@ -7,19 +7,22 @@
 class Synchronizer
 {
 public:
-  Synchronizer();
+  Synchronizer(const size_t threadNr);
 
-  void waitForProcess();
+  void WaitForProcess();
   void setRunning(const bool runningState) { processRunning_ = runningState; }
   bool isRunning() const { return processRunning_; }
   void setThreadId(const int threadId) { threadId_ = threadId; }
   int getThreadId() const { return threadId_; }
+  bool AllCompleted();
 
 private:
   std::atomic_bool processRunning_;
   std::atomic<int> threadId_;
+  const size_t threadNr_;
+  std::atomic<int> waitForProcessId_;
 
-  std::atomic_bool processReady_;
+  std::atomic<size_t> threadReadyCount_;
   std::mutex processReadyMtx_;
   std::condition_variable conditionVar_;
 };

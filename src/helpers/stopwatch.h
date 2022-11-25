@@ -15,10 +15,10 @@ public:
   Stopwatch();
   ~Stopwatch() = default;
 
-  void start();
-  void stop();
-  void restart() { start(); };
-  template <typename TimeType = std::milli> uint64_t getTime() const;
+  void Start();
+  void Stop();
+  void Restart() { Start(); };
+  template <typename TimeType = std::milli> uint64_t GetTime() const;
 
 private:
   std::chrono::system_clock::time_point startTime_;
@@ -29,7 +29,7 @@ inline Stopwatch::Stopwatch() : stopped_{false} {}
 /**
  * @brief starts the stopwatch
  */
-inline void Stopwatch::start()
+inline void Stopwatch::Start()
 {
   startTime_ = std::chrono::system_clock::now();
   stopped_ = false;
@@ -38,7 +38,7 @@ inline void Stopwatch::start()
 /**
  * @brief stops the stopwatch
  */
-inline void Stopwatch::stop()
+inline void Stopwatch::Stop()
 {
   stopTime_ = std::chrono::system_clock::now();
   stopped_ = true;
@@ -50,7 +50,7 @@ inline void Stopwatch::stop()
  * @return true the timer has elapsed
  * @return false the timer has not been elapsed yet
  */
-template <typename TimeType> uint64_t Stopwatch::getTime() const
+template <typename TimeType> uint64_t Stopwatch::GetTime() const
 {
   auto endTime = stopped_ ? stopTime_ : std::chrono::system_clock::now();
   return std::chrono::duration_cast<std::chrono::duration<uint64_t, TimeType>>(

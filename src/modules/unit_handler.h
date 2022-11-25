@@ -23,6 +23,7 @@ public:
     }
     else if (applicationPid == 0)
     {
+      pipe_.SetChild();
       // Child process
       ModuleType moduleObj{moduleConfig};
       moduleObj.Run();
@@ -34,6 +35,7 @@ public:
     }
     else
     {
+      pipe_.SetParent();
       // Parent process
       return applicationPid;
     }

@@ -15,9 +15,9 @@ include(ExternalProject) # To be able to download Git repos with the FetchConten
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Set the sources
-set(SOURCES  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/Monitoring.cpp
+set(SOURCES  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.cpp
     #        ${CMAKE_CURRENT_SOURCE_DIR}/src/Benchmarking/Linux/Monitoring.cpp
-    #        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/pipe_comm.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/pipe_comm.cpp
     #        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/shared_memory.cpp
     #        ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/base_class.cpp
     #        ${CMAKE_CURRENT_SOURCE_DIR}/modules/filestream/filestream.cpp
@@ -27,6 +27,10 @@ set(SOURCES  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/Monitoring.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/xavier_sensors.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/synchronizer.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/process_runner/run_process_base.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/run_process.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/file_writer.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_csv.cpp
         )
 
 # add the executable
