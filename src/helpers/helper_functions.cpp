@@ -55,4 +55,24 @@ void replaceStr(std::string &data, const std::string &toReplace,
     pos = data.find(toReplace, pos + replacementStr.size());
   }
 }
+
+/**
+ * @brief Converts decimals, like 1591 (standing for 1591 milliseconds) to an
+ * int with only the largest numbers defined by "decimals"
+ *
+ * @NOTE: For proper working, data.size() >= decimals
+ * @param data
+ * @param decimals
+ * @return int
+ */
+int DecimalsToInt(const std::string &data, const unsigned int decimals)
+{
+  if (data.size() == 0)
+    return 0;
+
+  size_t largestIndex = data.size() - 1 < decimals ? data.size() - 1 : decimals;
+
+  return std::stoi(data.substr(0, largestIndex));
+}
+
 } // namespace Helpers

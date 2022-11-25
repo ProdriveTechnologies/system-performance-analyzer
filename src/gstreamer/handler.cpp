@@ -225,5 +225,5 @@ void CGstreamerHandler::SetTracingEnvironmentVars()
 {
   setenv("GST_DEBUG", "GST_TRACER:7", true);
   // setenv("GST_TRACERS", "rusage;latency;framerate", true);
-  setenv("GST_TRACERS", "framerate", true);
+  setenv("GST_TRACERS", "framerate;proctime", true);
 }

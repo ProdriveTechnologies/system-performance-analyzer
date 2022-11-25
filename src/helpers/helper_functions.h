@@ -103,4 +103,6 @@ std::vector<VectorType> CombineVectors(const std::vector<VectorType> &a,
 void replaceStr(std::string &data, const std::string &toReplace,
                 const std::string &replacementStr);
 
+int DecimalsToInt(const std::string &data, const unsigned int decimals);
+
 } // namespace Helpers

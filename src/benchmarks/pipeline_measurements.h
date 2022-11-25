@@ -88,7 +88,8 @@ private:
   }
   using PerformanceIndicator = bool;
   static inline std::vector<std::pair<MeasureType, PerformanceIndicator>>
-      predefinedSensors = {
-          std::make_pair(MeasureType::FPS, true) /* MeasureType::LATENCY */};
+      predefinedSensors = {std::make_pair(MeasureType::FPS, true),
+                           std::make_pair(MeasureType::PROCESSING_TIME, false)
+                           /* MeasureType::LATENCY */};
 };
 } // namespace GStreamer

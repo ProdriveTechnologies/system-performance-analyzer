@@ -56,5 +56,7 @@ private:
   Helpers::AtomicQueue<Measurement> fifoMeasurements;
   Linux::PipeCommunicator *pipe_;
   // static std::unordered_map()
+
+  int TimeToInt(const std::string &time);
 };
 } // namespace GStreamer

@@ -51,13 +51,25 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
   case Helpers::hash("proc-rusage"):
     // std::cout << "P";
     break;
+  case Helpers::hash("proctime"):
+  {
+    trace.type = MeasureType::PROCESSING_TIME;
+    trace.pluginName = gst_structure_get_string(gstStructure, "element");
+    std::string time = gst_structure_get_string(gstStructure, "time");
+    trace.valueInt = TimeToInt(time);
+  }
+  break;
   case Helpers::hash("latency"):
     // std::cout << "Received latency: " <<
     // gst_structure_to_string(gstStructure)
     //          << std::endl;
-    trace.type = MeasureType::LATENCY;
-    trace.pluginName = gst_structure_get_string(gstStructure, "src-element");
-    gst_structure_get_uint(gstStructure, "time", &trace.valueInt);
+    {
+      //   trace.type = MeasureType::LATENCY;
+      //   trace.pluginName = gst_structure_get_string(gstStructure,
+      //   "src-element");
+      // gst_structure_get_uint(gstStructure, "fps", &trace.valueInt);
+      // Todo: Better implement this time
+    }
     break;
   case Helpers::hash("framerate"):
   {
@@ -76,6 +88,27 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     // Send the "trace" measurement towards the Measurements class
     fifoMeasurements.push(trace);
   }
+}
+
+/**
+ * @brief Converts time to a milliseconds,
+ *
+ * @param time format: 0:00:00.000000000
+ * @return int
+ */
+int TraceHandler::TimeToInt(const std::string &time)
+{
+  std::string timeCpy = time;
+  Helpers::replaceStr(timeCpy, ".", ":");
+  auto separateElements = Helpers::Split(timeCpy, ':');
+  if (separateElements.size() != 4)
+    throw std::runtime_error("Incorrect format! Should have 4 elements!");
+  int result = 0;
+  result += Helpers::DecimalsToInt(separateElements.at(3), 4); // Millis
+  result += std::stoi(separateElements.at(2)) * 1000;
+  result += std::stoi(separateElements.at(1)) * 1000 * 60;
+  result += std::stoi(separateElements.at(0)) * 1000 * 60 * 60;
+  return result;
 }
 
 } // namespace GStreamer

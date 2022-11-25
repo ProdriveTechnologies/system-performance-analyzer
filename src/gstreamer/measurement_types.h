@@ -9,6 +9,7 @@ enum class MeasureType : int
   NONE = 0,
   FPS = 1,
   LATENCY = 2,
+  PROCESSING_TIME = 3
 };
 inline std::string GetMeasureType(const MeasureType t)
 {
@@ -18,6 +19,8 @@ inline std::string GetMeasureType(const MeasureType t)
     return "fps";
   case MeasureType::LATENCY:
     return "latency";
+  case MeasureType::PROCESSING_TIME:
+    return "processing time";
   case MeasureType::NONE:
   default:
     return "";

@@ -273,11 +273,4 @@ private:
   }
 };
 
-// std::unordered_map<std::string, Sensors> sensors_;
-
-// THIS FUNCTION MUST BE MOVED< ONLY AN EXAMPLE
-// void AddGstreamerSensors()
-// {
-//   std::vector<Sensors> sensors = {Sensors{"fps"}, Sensors{"latency"}};
-
 } // namespace Measurements
