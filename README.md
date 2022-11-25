@@ -1,41 +1,42 @@
 # System Performance Analyser (SPA)
 
-The SPA tool tests the performance for Linux based systems. This tool contains resource usage measurements and analysis to find bottlenecks in a system. These systems can relate to anything, but the SPA tool's main focus is on data pipelines such as video streaming pipelines. Also, thresholds can be configured to test whether a system is sufficient based on the system's requirements. These thresholds can be based on actual requirements of a project.
+The SPA tool tests the performance for Linux based systems. This tool contains resource usage measurements and analysis to find bottlenecks in a system. These systems can relate to anything, but the SPA tool's main focus is on data pipelines such as video streaming pipelines. Additionally, thresholds can be configured to test whether a system is sufficient based on the system's requirements. These thresholds can be based on actual requirements of a project.
 
 This tool can execute any Linux application as well as [GStreamer](https://gstreamer.freedesktop.org/) pipelines. For GStreamer pipelines, additional data is measured and extra thresholds can be configured.  
 
-## Installation
+## Installation and usage
+To create the executable, the following steps have to be executed:
 
 1. Clone the Git repository: `git clone <repo link>`
 2. Create a build folder and enter it (`mkdir build && cd build`)
 3. Execute the CMake build script: `cmake ..` (this downloads necessary packages automatically)
-4. Build the sources with: `make` (this can be sped up by asigning an X amount of cores: `make -jX`)
-5. The executable `spa` has been built! :)
+4. Build the sources with: `make` 
+5. If no errors occur, the executable `spa` has been built! :)
 
-## Tests
-To build and execute the tests, execute the following steps:
-
-1. Go to the build folder created in the [Installation](#installation) process
-2. Re-execute the CMake command with the parameter `BUILD_TESTS` as follows: `cmake -D BUILD_TESTS=ON ..`
-3. Rebuild the `spa` application including the tests with: `make` (exactly the same as step 4 of the [Installation](#installation)) process
-4. Execute the tests by executing: `./tests/tests`, this will run all tests
-5. The tests should all pass
-
-## Execution
-
+### Usage
 To execute the tool, two configuration files are necessary. One is the configuration of the metrics that are measured, the other contains the configuration of the test. Examples of these files can be found in `example_configs/`. The sensor configuration `example_configs/sensor_configs/linux_config.json` can be used on most systems for a default metrics configuration. The `example_configs/test_configs/minimal.json` can be used as a simple test. 
 
 To execute a test with these files, execute the following steps:
 
 1. Enter the build folder: `cd build`
 2. If the sources are not build yet, execute the [Installation steps](#Installation)
-3. Execute a test: `./spa -c ../example_configs/minimal.json -s ../example_configs/minimal_linux.json` 
+3. Execute the test: `./spa -c ../example_configs/minimal.json -s ../example_configs/minimal_linux.json` 
 
-In [Section Configuration](#configuration)), the test and metrics files are described how they can be configured for custom systems. 
+In [Section Configuration](#configuration), the test and metrics files are described how they can be configured for custom systems. 
 
-## Output
 
-The tool supports multiple output methods, being: `JSON`, `CSV`, `Terminal summary`, `Graphs`. 
+## Tests
+To build and execute the tests, execute the following steps:
+
+1. Go to the build folder created in the [Installation](#Installation) process
+2. Re-execute the CMake command with the parameter `BUILD_TESTS` as follows: `cmake -D BUILD_TESTS=ON ..`
+3. Rebuild the `spa` application including the tests with: `make` (exactly the same as step 4 of the [Installation](#Installation)) process
+4. Execute the tests by executing: `./tests/tests`, this will run all tests
+5. The tests should all pass
+
+## Tool's Output
+
+The tool supports multiple output methods, being: `JSON`, `CSV`, `a summary in the terminal`, or `Graphs generated with Gnuplot`. 
 
 | **Output method** | **Description** | **Config name, see [Export settings](#export-settings)** |
 | --- | --- | --- | 
@@ -132,3 +133,9 @@ JSON Field | Field type | Description | Optional
 name | String | The name of the group | false
 size | Integer | The number of cores to count to, it will count from 0-size | false
 data | Array[[JSON object](#sensors)] | The sensors that will be measured, the `$INDEX$` tag will be replaced by the number of the core | false
+
+## License
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
+
+## Contact
+Feel free to open an issue with your questions or ideas. If there's something that cannot be disclosed through an issue, or example, a vulnerability, then send an email to: [opensource@prodrive-technologies.com](mailto:opensource@prodrive-technologies.com).
