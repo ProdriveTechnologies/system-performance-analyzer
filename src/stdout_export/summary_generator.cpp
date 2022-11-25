@@ -4,7 +4,7 @@
 
 #include "summary_writer.h"
 #include "translations.h"
-#include <infoware/cpu.hpp>
+// #include <infoware/cpu.hpp>
 #include <iostream>
 
 namespace Exports
@@ -15,8 +15,8 @@ bool CSummaryGenerator::Generate(
 {
   SummaryWriter::PrintTitle(SummaryTranslations::headerName);
   PrintApplicationInfo();
-  PrintSystemInfo();
-  PrintCacheInfo();
+  // PrintSystemInfo();
+  // PrintCacheInfo();
 
   // Second, summarize system wide data
   PrintSystemSummary(measurementsData, measurementsDef);
@@ -37,20 +37,21 @@ void CSummaryGenerator::PrintApplicationInfo()
 }
 void CSummaryGenerator::PrintSystemInfo()
 {
-  const auto quantities = iware::cpu::quantities();
+  // const auto quantities = iware::cpu::quantities();
   SummaryWriter::PrintSection(SummaryTranslations::systemInfo);
-  SummaryWriter::PrintValue(SummaryTranslations::logicalCores,
-                            quantities.logical);
-  SummaryWriter::PrintValue(SummaryTranslations::physicalCores,
-                            quantities.physical);
-  SummaryWriter::PrintValue(SummaryTranslations::modelName,
-                            iware::cpu::model_name());
-  SummaryWriter::PrintValue(SummaryTranslations::architecture,
-                            GetArchitecture(iware::cpu::architecture()));
+  // SummaryWriter::PrintValue(SummaryTranslations::logicalCores,
+  //                           quantities.logical);
+  // SummaryWriter::PrintValue(SummaryTranslations::physicalCores,
+  //                           quantities.physical);
+  // SummaryWriter::PrintValue(SummaryTranslations::modelName,
+  //                           iware::cpu::model_name());
+  // SummaryWriter::PrintValue(SummaryTranslations::architecture,
+  //                           GetArchitecture(iware::cpu::architecture()));
   SummaryWriter::PrintRow();
 }
 void CSummaryGenerator::PrintCacheInfo()
 {
+#if 0
   SummaryWriter::PrintSection(SummaryTranslations::cacheTitle);
   for (unsigned i = lowestCacheNr; i <= highestCacheNr; ++i)
   {
@@ -71,6 +72,7 @@ void CSummaryGenerator::PrintCacheInfo()
                               GetCacheType(cache.type));
     SummaryWriter::PrintRow();
   }
+#endif
 }
 
 void CSummaryGenerator::PrintSystemSummary(
@@ -114,6 +116,7 @@ double CSummaryGenerator::GetAverage(
   return dataSize > 0 ? (total / dataSize) : 0.0;
 }
 
+#if 0
 std::string
 CSummaryGenerator::GetCacheType(const iware::cpu::cache_type_t cache)
 {
@@ -149,5 +152,6 @@ std::string CSummaryGenerator::GetArchitecture(
     return "Unknown";
   }
 }
+#endif
 
 } // namespace Exports

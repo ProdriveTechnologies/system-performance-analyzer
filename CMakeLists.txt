@@ -89,19 +89,19 @@ if(NOT json_POPULATED)
 endif()
 
 # ################# Hardware info Library ##################
-message(" -- Downloading hardware info library")
-include(FetchContent)
+# message(" -- Downloading hardware info library")
+# include(FetchContent)
 
-FetchContent_Declare(infoware
-  GIT_REPOSITORY https://github.com/ThePhD/infoware.git
-  GIT_TAG v0.6.0)
+# FetchContent_Declare(infoware
+# GIT_REPOSITORY https://github.com/ThePhD/infoware.git
+# GIT_TAG v0.6.0)
 
-FetchContent_GetProperties(infoware)
+# FetchContent_GetProperties(infoware)
 
-if(NOT infoware_POPULATED)
-  FetchContent_Populate(infoware)
-  add_subdirectory(${infoware_SOURCE_DIR} ${infoware_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+# if(NOT infoware_POPULATED)
+# FetchContent_Populate(infoware)
+# add_subdirectory(${infoware_SOURCE_DIR} ${infoware_BINARY_DIR} EXCLUDE_FROM_ALL)
+# endif()
 
 # ################### GStreamer ########################
 find_package(PkgConfig) # finding pkg-config is a helper tool
@@ -127,7 +127,7 @@ find_package(Threads)
 find_library(LIBRT rt) # Note: LIBRT is not a Windows library. Therefore, for Windows this should be ignored
 
 if(LIBRT)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json infoware ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBRT} nlohmann_json::nlohmann_json ${GSTREAMER_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

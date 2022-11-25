@@ -1,11 +1,11 @@
 #pragma once
 
-#include <infoware/cpu.hpp>
+// #include <infoware/cpu.hpp>
 #include <string>
 
 #include "src/exports/export_struct.h"
 #include "src/json_config/sensor_config/config.h"
-#include "src/linux/filesystem.h"
+// #include "src/linux/filesystem.h"
 
 namespace Exports
 {
@@ -31,9 +31,9 @@ private:
       const std::vector<Exports::ExportData> &measurementsData,
       const std::vector<PlatformConfig::SDatafields> &measurementsDef);
 
-  static std::string GetCacheType(const iware::cpu::cache_type_t cache);
-  static std::string
-  GetArchitecture(const iware::cpu::architecture_t architecture);
+  // static std::string GetCacheType(const iware::cpu::cache_type_t cache);
+  // static std::string
+  // GetArchitecture(const iware::cpu::architecture_t architecture);
   static constexpr int lowestCacheNr = 0;
   static constexpr int highestCacheNr = 10;
 };
