@@ -101,12 +101,35 @@ System resource usage values: 1
             "suffix": "%",
             "multiplier": 100
         },
-        // {
-        //     "name": "Memory usage",
-        //     "class": 1,
-        //     "type": "PROCMEM",
-        //     "path": "/proc/$PID$/statm"
-        // }
+        /*******************************************/
+        /**
+         * @brief Generic process measurements
+         */
+        {
+            "name": "Size",
+            "class": 1,
+            "type": "PIDSTATM",
+            "path": "/proc/$PID$/stat",
+            "value": "size",
+            "multiplier": 4096, // Page size is often 4k, retrievable by "getconf PAGE_SIZE"
+            "suffix": "KB"
+        },
+        {
+            "name": "usertime",
+            //"class": 1,
+            "type": "PIDSTAT",
+            "path": "/proc/$PID$/stat",
+            "value": "utime",
+            "suffix": "clock ticks"
+        },
+        {
+            "name": "kerneltime",
+            //"class": 1,
+            "type": "PIDSTAT",
+            "path": "/proc/$PID$/stat",
+            "value": "stime",
+            "suffix": "clock ticks"
+        },
         /*******************************************/
         /**
         * @brief Temperature sensors on the Xavier

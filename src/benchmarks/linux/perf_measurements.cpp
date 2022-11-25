@@ -177,6 +177,7 @@ void CPerfMeasurements::ExportData(
 
   ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors,
                                             correlationResults);
+  ExecuteExport<Exports::CJson>("filename", items, sensors, correlationResults);
   ExecuteExport<Exports::CCsv>("filename", items, sensors, correlationResults);
   ExecuteExport<Exports::CGraphs>("filename", items, sensors,
                                   correlationResults);

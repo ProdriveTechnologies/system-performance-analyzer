@@ -52,7 +52,7 @@ std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
 
       const auto &rawRscVec = ConvertToRaw(rscVectorCorrected);
       const auto &rawPerfVec = ConvertToRaw(perfVectorCorrected);
-      if (rawRscVec.size() >= 2)
+      if (rawRscVec.size() >= 10)
       {
         SResult correlationResult;
         correlationResult.sensor1 = perfVectorCorrected.sensor;
@@ -229,15 +229,15 @@ CCorrelation::CreateEqualSizedVector(
           if (resMeasurement.isMeasured)
             break;
         }
-        if (!resMeasurement.isMeasured)
-        {
-          // TODO add the not started functionality here
-          if (std::stoll(measurement.time) < sensorGroup.processDelay)
-          {
-            resMeasurement.isMeasured = true;
-            resMeasurement.item.measuredValue = 0;
-          }
-        }
+        // if (!resMeasurement.isMeasured)
+        // {
+        //   // TODO add the not started functionality here
+        //   if (std::stoll(measurement.time) < sensorGroup.processDelay)
+        //   {
+        //     resMeasurement.isMeasured = true;
+        //     resMeasurement.item.measuredValue = 0;
+        //   }
+        // }
         sensor.rawMeasurements.push_back(resMeasurement);
       }
     }
