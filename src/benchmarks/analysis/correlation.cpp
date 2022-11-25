@@ -78,33 +78,45 @@ CCorrelation::CreateEqualSizedVectors(
 
   for (const auto &classification : allSensors.allClasses)
   {
-    auto equalSizedVector =
-        GetSensors(allSensors, classification, isPerformanceMetric);
-
-    // Loop through all the sensors and add all the values
-    for (auto &sensor : equalSizedVector)
+    for (const auto &sensorGroup : allSensors.GetSensorGroups(classification))
     {
-      // Loop through all the raw measurements and add them to the correct
-      // sensor
-      for (auto &measurement : *measuredData)
+      auto equalSizedVector =
+          GetSensors(sensorGroup.sensors, isPerformanceMetric);
+
+      // Loop through all the sensors and add all the values
+      for (auto &sensor : equalSizedVector)
       {
-        SSensorMeasurements::SMeasurement resMeasurement;
-        auto measurementGroup = measurement.GetItems(classification);
-        // Loop through all the measured fields and find the one equal to
+        // Loop through all the raw measurements and add them to the correct
         // sensor
-        for (const auto &field : measurementGroup)
+        for (auto &measurement : *measuredData)
         {
-          if (field.id == sensor.sensor.uniqueId)
+          SSensorMeasurements::SMeasurement resMeasurement;
+          auto measurementGroup = measurement.GetItems(classification);
+          // Loop through all the measured fields and find the one equal to
+          // sensor
+          for (const auto &field : measurementGroup)
           {
-            resMeasurement.AddItem(field);
-            break;
+            if (field.id == sensor.sensor.uniqueId)
+            {
+              resMeasurement.AddItem(field);
+              break;
+            }
           }
+          if (!resMeasurement.isMeasured)
+          {
+            if (std::stoll(measurement.time) < sensorGroup.processDelay)
+            {
+              resMeasurement.isMeasured = true;
+              resMeasurement.item.measuredValue = 0;
+            }
+          }
+          sensor.rawMeasurements.push_back(resMeasurement);
         }
-        sensor.rawMeasurements.push_back(resMeasurement);
       }
+
+      allCorrelations =
+          Helpers::CombineVectors(allCorrelations, equalSizedVector);
     }
-    allCorrelations =
-        Helpers::CombineVectors(allCorrelations, equalSizedVector);
   }
 
   // resultPipeline = CreateEqualSizedVector(

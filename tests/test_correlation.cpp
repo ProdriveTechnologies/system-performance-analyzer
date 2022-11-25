@@ -93,6 +93,7 @@ void AddPoints(std::vector<Measurements::SMeasurementsData> *alldata,
 {
   using _Item = Measurements::SMeasuredItem;
   Measurements::SMeasurementsData data;
+  data.time = "3000";
   if (item2.id != -1)
     data.AddMeasurements(Measurements::Classification::PIPELINE,
                          {item1, item2});

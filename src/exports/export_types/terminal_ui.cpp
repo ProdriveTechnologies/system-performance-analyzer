@@ -119,12 +119,14 @@ ftxui::Element CTerminalUI::GetElement(const Measurements::Sensors &sensor,
   else
     name = std::to_string(processId) + "." + sensor.userId;
 
+  std::string fullValue =
+      std::to_string(item * sensor.multiplier) + " " + sensor.suffix;
+
   return ftxui::hbox(
       {ftxui::text(name) | ftxui::border,
        ftxui::color(GetColor(sensor.uniqueId), ftxui::gauge(value)) |
            ftxui::border | ftxui::flex,
-       ftxui::text(std::to_string(item * sensor.multiplier) + sensor.suffix) |
-           ftxui::border});
+       ftxui::text(fullValue) | ftxui::border});
 }
 void CTerminalUI::FinishLiveMeasurements() {}
 
