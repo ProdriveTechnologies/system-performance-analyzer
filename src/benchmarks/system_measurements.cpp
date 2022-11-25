@@ -15,20 +15,24 @@ namespace Measurements
  *
  * @param configFile
  */
-CSensors::CSensors(const std::string &configFile) : configFile_{configFile} {}
+CSystemSensors::CSystemSensors(const std::string &configFile)
+    : configFile_{configFile}
+{
+}
 
 /**
  * @brief Initializes the System measurements class
  *
  * @param allData
  */
-void CSensors::Initialize(std::vector<Measurements::SMeasurementsData> *allData)
+void CSystemSensors::Initialize(
+    std::vector<Measurements::SMeasurementsData> *allData)
 {
   SetDataHandlers();
   allData_ = allData;
   auto parsed = PlatformConfig::Parse(configFile_);
   auto measureFields =
-      GetFields(parsed.sensors, &CSensors::GetMeasureFields, this);
+      GetFields(parsed.sensors, &CSystemSensors::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
   measureFieldsDefinition_ = measureFields.definition;
 
@@ -41,7 +45,7 @@ void CSensors::Initialize(std::vector<Measurements::SMeasurementsData> *allData)
  * system sensors that are configured in the JSON
  * @note This function should be called before the dataHandlers_ are being used
  */
-void CSensors::SetDataHandlers()
+void CSystemSensors::SetDataHandlers()
 {
   dataHandlers_.push_back(Linux::SDataHandlers{
       PlatformConfig::ETypes::DIRECT,
@@ -65,7 +69,7 @@ void CSensors::SetDataHandlers()
  * "data" field in the SSensors struct will be empty
  * @return std::vector<SSensors>
  */
-std::vector<SSensors> CSensors::GetSensors(const bool summarizeData) const
+std::vector<SSensors> CSystemSensors::GetSensors(const bool summarizeData) const
 {
   std::vector<SSensors> result;
   for (const auto &datafield : measureFieldsDefinition_)
@@ -119,7 +123,7 @@ std::vector<SSensors> CSensors::GetSensors(const bool summarizeData) const
  *
  * @return std::vector<SMeasuredItem>
  */
-std::vector<SMeasuredItem> CSensors::GetMeasurements()
+std::vector<SMeasuredItem> CSystemSensors::GetMeasurements()
 {
   std::vector<SMeasuredItem> items;
   auto returnSuccess = dataHandler_.ParseMeasurements();
@@ -140,7 +144,7 @@ std::vector<SMeasuredItem> CSensors::GetMeasurements()
  *
  * @return Exports::SMeasurementItem
  */
-Exports::SMeasurementItem CSensors::GetConfig() const
+Exports::SMeasurementItem CSystemSensors::GetConfig() const
 {
   Exports::SMeasurementItem config;
   config.name = "SystemResources";
@@ -149,7 +153,8 @@ Exports::SMeasurementItem CSensors::GetConfig() const
   return config;
 }
 
-std::vector<Exports::SMeasurementItem> CSensors::GetMeasurementFields() const
+std::vector<Exports::SMeasurementItem>
+CSystemSensors::GetMeasurementFields() const
 {
   std::vector<Exports::SMeasurementItem> result;
   for (const auto &e : measureFieldsDefinition_)
@@ -163,8 +168,8 @@ std::vector<Exports::SMeasurementItem> CSensors::GetMeasurementFields() const
   return result;
 }
 
-std::vector<Exports::SMeasurementItem>
-CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
+std::vector<Exports::SMeasurementItem> CSystemSensors::GetDefinitionItems(
+    const PlatformConfig::SDatafields &field) const
 {
   std::vector<Exports::SMeasurementItem> result;
   auto item1 =
@@ -182,12 +187,12 @@ CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
   return result;
 }
 
-CSensors::MeasureCombo CSensors::GetFields(
+CSystemSensors::MeasureCombo CSystemSensors::GetFields(
     std::vector<PlatformConfig::SDatafields> &sensorConfig,
-    const std::function<MeasureCombo(CSensors *,
+    const std::function<MeasureCombo(CSystemSensors *,
                                      const PlatformConfig::SDatafields &)>
         parserFunction,
-    CSensors *memberPtr)
+    CSystemSensors *memberPtr)
 {
   MeasureCombo result;
 
@@ -198,8 +203,8 @@ CSensors::MeasureCombo CSensors::GetFields(
 
   return result;
 }
-CSensors::MeasureCombo
-CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
+CSystemSensors::MeasureCombo
+CSystemSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
 {
   MeasureCombo result;
 
@@ -224,8 +229,8 @@ CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
   return result;
 }
 
-CSensors::MeasureCombo
-CSensors::ParseArray(const PlatformConfig::SDatafields &data)
+CSystemSensors::MeasureCombo
+CSystemSensors::ParseArray(const PlatformConfig::SDatafields &data)
 {
   MeasureCombo result;
   // Loop through the defined array
@@ -244,8 +249,8 @@ CSensors::ParseArray(const PlatformConfig::SDatafields &data)
   return result;
 }
 
-CSensors::MeasureComboSingular
-CSensors::ParseField(const PlatformConfig::SDatafields &data)
+CSystemSensors::MeasureComboSingular
+CSystemSensors::ParseField(const PlatformConfig::SDatafields &data)
 {
   MeasureComboSingular result;
   result.field.path = data.path;

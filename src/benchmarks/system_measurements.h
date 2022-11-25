@@ -26,10 +26,10 @@ namespace Measurements
  * 4. Support exports and analysis
  * 5. Detect performance decreases
  */
-class CSensors
+class CSystemSensors
 {
 public:
-  CSensors(const std::string &configFile);
+  CSystemSensors(const std::string &configFile);
 
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
@@ -86,11 +86,12 @@ private:
     }
     throw std::runtime_error("ID not found!");
   }
-  MeasureCombo GetFields(std::vector<PlatformConfig::SDatafields> &sensorConfig,
-                         const std::function<MeasureCombo(
-                             CSensors *, const PlatformConfig::SDatafields &)>
-                             parserFunction,
-                         CSensors *memberPtr);
+  MeasureCombo GetFields(
+      std::vector<PlatformConfig::SDatafields> &sensorConfig,
+      const std::function<MeasureCombo(CSystemSensors *,
+                                       const PlatformConfig::SDatafields &)>
+          parserFunction,
+      CSystemSensors *memberPtr);
   MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields &dataField);
   MeasureCombo ParseArray(const PlatformConfig::SDatafields &data);
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);

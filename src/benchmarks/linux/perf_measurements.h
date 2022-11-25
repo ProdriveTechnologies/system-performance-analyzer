@@ -68,7 +68,7 @@ private:
   std::vector<Measurements::SMeasurementsData> measurementsData_;
 
   GStreamer::CPipelineMeasurements gstMeasurements_;
-  Measurements::CSensors sensorMeasurements_;
+  Measurements::CSystemSensors sensorMeasurements_;
   Measurements::CProcessMeasurements processMeasurements_;
   std::vector<Core::SThreshold> thresholds_;
 
