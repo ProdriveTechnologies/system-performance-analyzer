@@ -198,6 +198,8 @@ struct ProcStatData
 };
 
 ProcStatData GetProcStat();
+long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
+                           const std::string &groupName);
 
 } // namespace FileSystem
 } // namespace Linux

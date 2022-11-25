@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "proc_handler.h"
 #include "src/exports/export.h"
 #include "src/exports/export_struct.h"
 #include "src/helpers/timer.h"
@@ -52,6 +53,8 @@ private:
 
   using MeasureFieldsType = std::vector<PlatformConfig::SDatafields>;
   MeasureFieldsType measureFields_;
+
+  Measurements::ProcHandler procHandler_;
 
   void MeasureThread(const std::string &threadProcLoc);
   void MeasureSystem();

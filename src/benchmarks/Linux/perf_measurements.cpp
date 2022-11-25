@@ -52,13 +52,15 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
 
   std::vector<std::string> monitoredThreads;
 
-  // cpuUtilizationTimer_.restart();
+  // Initialise proc stat
+  procHandler_.ParseProcStat();
+  cpuUtilizationTimer_.restart();
   // lastCpuDataAggregated_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
-  // while (!cpuUtilizationTimer_.elapsed())
-  // {
-  //   std::this_thread::sleep_for(
-  //       std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
-  // }
+  while (!cpuUtilizationTimer_.elapsed())
+  {
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
+  }
   liveFilesystemData_.Init();
 
   // Sync before start, when synced, will start directly
@@ -236,12 +238,12 @@ CPerfMeasurements::GetMeasureFields(const PlatformConfig::SConfig &configFile)
       measureFields = Helpers::CombineVectors(measureFields, ParseArray(e));
       break;
     case Helpers::hash("PROC"):
-      // measureFields = Helpers::CombineVectors(measureFields, ParseProc(e));
-      std::cout << "Warning: need to be supported" << std::endl;
+      measureFields = Helpers::CombineVectors(
+          measureFields, Measurements::ProcHandler::ParseProcField(e));
       break;
-    default:
-      throw std::runtime_error(
-          "Monitoring: unknown type in the configuration file!");
+    default: // Just add the field as-is, for example for the PROC field
+      throw std::runtime_error("NOT FOUND IN PERF MEAS");
+      // measureFields.push_back(e);
     }
   }
   return measureFields;
@@ -267,6 +269,7 @@ CPerfMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
 std::vector<Exports::MeasuredItem>
 CPerfMeasurements::GetMeasuredItems(const MeasureFieldsType &measureFields)
 {
+  procHandler_.ParseProcStat();
   std::vector<Exports::MeasuredItem> measuredItems;
   for (const auto &e : measureFields)
   {
@@ -276,6 +279,8 @@ CPerfMeasurements::GetMeasuredItems(const MeasureFieldsType &measureFields)
       measuredItems.push_back(
           CXavierSensors::ParseDirect(e)); // ParseDirect(e);
       break;
+    case Helpers::hash("PROC"):
+      measuredItems.push_back(procHandler_.ParseProcField(e, e.pathStr));
     }
   }
   return measuredItems;

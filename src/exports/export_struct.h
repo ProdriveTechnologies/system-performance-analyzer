@@ -16,7 +16,7 @@ struct Process
 struct MeasuredItem
 {
   int id;
-  int measuredValue;
+  double measuredValue;
 };
 struct ExportData
 {

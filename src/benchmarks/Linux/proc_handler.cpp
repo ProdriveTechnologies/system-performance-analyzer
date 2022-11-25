@@ -5,22 +5,27 @@ namespace Measurements
 {
 void ProcHandler::ParseProcStat()
 {
-  procStat_ = Linux::FileSystem::GetProcStat();
+  auto currentProcStat = Linux::FileSystem::GetProcStat();
+  if (procStat_.cpus.size() != 0)
+  {
+    procStatCorrected_ = currentProcStat - procStat_;
+  }
+  procStat_ = currentProcStat;
 }
 
-std::vector<Exports::MeasuredItem>
+std::vector<PlatformConfig::SDatafields>
 ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo)
 {
   if (procInfo.size == 0)
-    return {ParseProcField(procInfo, procInfo.field)};
+    return {procInfo};
   else
   {
-    std::vector<Exports::MeasuredItem> items;
+    std::vector<PlatformConfig::SDatafields> items;
     for (size_t i = 0; i < procInfo.size; i++)
     {
-      std::string fieldName = procInfo.field;
-      Helpers::replaceStr(fieldName, "$INDEX$", std::to_string(i));
-      items.push_back(ParseProcField(procInfo, fieldName));
+      PlatformConfig::SDatafields dataFields{procInfo};
+      Helpers::replaceStr(dataFields.path, "$INDEX$", std::to_string(i));
+      items.push_back(dataFields);
     }
     return items;
   }
@@ -30,8 +35,8 @@ Exports::MeasuredItem
 ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
                             const std::string &fieldName)
 {
-  auto cpuField = procStat_.cpus.find(fieldName);
-  if (cpuField == procStat_.cpus.end())
+  auto cpuField = procStatCorrected_.cpus.find(fieldName);
+  if (cpuField == procStatCorrected_.cpus.end())
   {
     throw std::runtime_error("Couldn't find field \"" + fieldName +
                              "\" for /proc/stat");
@@ -40,6 +45,11 @@ ProcHandler::ParseProcField(const PlatformConfig::SDatafields &procInfo,
   Exports::MeasuredItem measuredItem;
   measuredItem.id = 340;
   measuredItem.measuredValue = cpuField->second.jiffiesIdle;
+  long long comparedTo = Linux::FileSystem::GetProcStatGroup(
+      cpuField->second, procInfo.comparedTo);
+  long long value =
+      Linux::FileSystem::GetProcStatGroup(cpuField->second, procInfo.value);
+  measuredItem.measuredValue = static_cast<double>(value) / comparedTo;
   return measuredItem;
 }
 

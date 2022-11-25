@@ -18,11 +18,12 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
   if (j.contains("id"))
     j.at("id").get_to(p.id);
   if (j.contains("path"))
+  {
     j.at("path").get_to(p.path);
+    p.pathStr = p.path;
+  }
   if (j.contains("size"))
     j.at("size").get_to(p.size);
-  if (j.contains("field"))
-    j.at("field").get_to(p.field);
   if (j.contains("value"))
     j.at("value").get_to(p.value);
   if (j.contains("compared_to"))

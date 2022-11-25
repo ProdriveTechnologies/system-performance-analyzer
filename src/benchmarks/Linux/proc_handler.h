@@ -9,18 +9,19 @@ namespace Measurements
 class ProcHandler
 {
 public:
-  ProcHandler();
+  ProcHandler() = default;
 
   void ParseProcStat();
 
-  std::vector<Exports::MeasuredItem>
+  static std::vector<PlatformConfig::SDatafields>
   ParseProcField(const PlatformConfig::SDatafields &procInfo);
-
-private:
-  Linux::FileSystem::ProcStatData procStat_;
 
   Exports::MeasuredItem
   ParseProcField(const PlatformConfig::SDatafields &procInfo,
                  const std::string &fieldName);
+
+private:
+  Linux::FileSystem::ProcStatData procStat_;
+  Linux::FileSystem::ProcStatData procStatCorrected_;
 };
 } // namespace Measurements

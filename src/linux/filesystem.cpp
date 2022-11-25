@@ -47,15 +47,59 @@ ProcStatData GetProcStat()
     statElements.push_back(row);
   }
 
-  const auto &procStatRow = statElements.at(0);
+  // const auto &procStatRow = statElements.at(0);
   ProcStatData procStatData;
-  procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
+  // procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
 
-  auto row = std::make_pair(procStatRow.rowElements.at(0),
-                            ProcStatData::Cpu{procStatRow});
-  procStatData.cpus.insert(row);
-
+  for (const auto &procStatRow : statElements)
+  {
+    try
+    {
+      auto row = std::make_pair(procStatRow.rowElements.at(0),
+                                ProcStatData::Cpu{procStatRow});
+      procStatData.cpus.insert(row);
+    }
+    catch (const std::exception &e)
+    {
+      return procStatData;
+    }
+  }
   return procStatData;
+}
+
+long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
+                           const std::string &groupName)
+{
+  switch (Helpers::hash(groupName))
+  {
+  case Helpers::hash("all"):
+    return cpuField.jiffiesIdle + cpuField.jiffiesIoWait + cpuField.jiffiesIrq +
+           cpuField.jiffiesNice + cpuField.jiffiesSoftIrq +
+           cpuField.jiffiesSystem + cpuField.jiffiesUser;
+  case Helpers::hash("all_excl_idle"):
+    return cpuField.jiffiesIoWait + cpuField.jiffiesIrq + cpuField.jiffiesNice +
+           cpuField.jiffiesSoftIrq + cpuField.jiffiesSystem +
+           cpuField.jiffiesUser;
+  case Helpers::hash("user"):
+    return cpuField.jiffiesUser;
+  case Helpers::hash("nice"):
+    return cpuField.jiffiesNice;
+  case Helpers::hash("system"):
+    return cpuField.jiffiesSystem;
+  case Helpers::hash("idle"):
+    return cpuField.jiffiesIdle;
+  case Helpers::hash("iowait"):
+    return cpuField.jiffiesIoWait;
+  case Helpers::hash("irq"):
+    return cpuField.jiffiesIrq;
+  case Helpers::hash("softirq"):
+    return cpuField.jiffiesSoftIrq;
+
+    // case Helpers::hash("steal"):
+    // case Helpers::hash("guest"):
+    // case Helpers::hash("guest_nice"):
+  }
+  throw std::runtime_error("Name: " + groupName + "not recognised!");
 }
 } // namespace FileSystem
 } // namespace Linux
