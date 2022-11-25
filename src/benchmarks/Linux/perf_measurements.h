@@ -55,6 +55,7 @@ public:
 
 private:
   std::vector<ProcessInfo> *processes_;
+
   std::vector<int> processPids_;
   Synchronizer *threadSync_;
   Core::SConfig config_;
@@ -133,6 +134,17 @@ private:
   void RemoveProcessId(const int pid);
 
   void OrganizeGstreamerPipelines();
+  void OrganizeLinuxProcesses();
+  template <typename T> std::vector<T *> GetProcessFromProcesses() const
+  {
+    std::vector<T *> result;
+    for (auto &e : *processes_)
+    {
+      if (auto process = std::get_if<T>(&e.processes))
+        result.push_back(process);
+    }
+    return result;
+  }
 
   void MeasureThread(const std::string &threadProcLoc);
   void MeasureProcesses(const std::vector<int> processIds);

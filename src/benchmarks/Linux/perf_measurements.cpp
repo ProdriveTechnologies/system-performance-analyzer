@@ -92,6 +92,7 @@ void CPerfMeasurements::Initialize()
 
   GetProcessPids();
   OrganizeGstreamerPipelines();
+  OrganizeLinuxProcesses();
 
   pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
   pCpuData_ = std::make_unique<std::vector<Linux::FileSystem::ProcStatData>>();
@@ -122,13 +123,14 @@ void CPerfMeasurements::Initialize()
 
 void CPerfMeasurements::OrganizeGstreamerPipelines()
 {
-  std::vector<CGstreamerHandler *> gstreamerPipelines;
-  for (auto &e : *processes_)
-  {
-    if (auto process = std::get_if<CGstreamerHandler>(&e.processes))
-      gstreamerPipelines.push_back(process);
-  }
-  gstMeasurements_.AddPipelines(gstreamerPipelines);
+  auto gstPipelines = GetProcessFromProcesses<CGstreamerHandler>();
+  gstMeasurements_.AddPipelines(gstPipelines);
+}
+
+void CPerfMeasurements::OrganizeLinuxProcesses()
+{
+  auto linuxProcesses = GetProcessFromProcesses<RunProcess>();
+  gstMeasurements_.AddPipelines(linuxProcesses);
 }
 
 /**
@@ -141,7 +143,8 @@ void CPerfMeasurements::GetProcessPids()
   for (const auto &e : *processes_)
   {
     if (auto process = std::get_if<Linux::RunProcess>(&e.processes))
-      processPids_.push_back(process->GetThreadPid());
+      processPids_.push_back(process->GetThreadPid(),
+                             process->GetProcessName());
   }
 }
 

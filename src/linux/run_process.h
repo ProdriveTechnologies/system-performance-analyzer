@@ -21,10 +21,12 @@ public:
 
   int GetThreadPid() const { return applicationPid_; }
   bool IsRunning() const { return running_; }
+  std::string GetProcessName() const { return processName_; }
 
 private:
   pid_t applicationPid_;
   bool running_;
+  std::string processName_;
 
   Linux::PipeCommunicator pipe_;
 

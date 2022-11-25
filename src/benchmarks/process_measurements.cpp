@@ -17,6 +17,7 @@ void CProcessMeasurements::Initialize(std::vector<Exports::ExportData> *allData,
   allData_ = allData;
   processIds_ = processIds;
   auto parsed = PlatformConfig::Parse(configFile_);
+
   auto measureFields =
       GetFields(parsed.sensors, &CProcessMeasurements::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
@@ -106,6 +107,25 @@ std::vector<Exports::MeasurementItem> CProcessMeasurements::GetDefinitionItems(
   return result;
 }
 
+void CProcessMeasurements::AddProcesses(
+    std::vector<Linux::RunProcess *> processes)
+{
+  processes_ = processes;
+  for (const auto &process : processes_)
+  {
+    processIds_.insert(
+        ProcessDef{process->GetThreadPid(), process->GetProcessName()});
+  }
+}
+
+/**
+ * @brief Gets the measurements
+ * 1. loops through each PID of each process and measures the content from the
+ * SDatafields. It replaces the $PID$ tag with the pid of the processes
+ * 2.
+ *
+ * @return std::vector<Exports::MeasuredItem>
+ */
 std::vector<Exports::MeasuredItem> CProcessMeasurements::GetMeasurements()
 {
   procHandler_.ParseMeminfo();
@@ -155,9 +175,8 @@ CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
   MeasureCombo result;
 
   std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField) {
-                  result.Add(parserFunction(memberPtr, dataField));
-                });
+                [&](const PlatformConfig::SDatafields &dataField)
+                { result.Add(parserFunction(memberPtr, dataField)); });
 
   return result;
 }

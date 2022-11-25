@@ -58,6 +58,7 @@ void RunProcess::ChildExecProcess(const std::string &command)
 {
   CLogger::Log(CLogger::Types::INFO, "Child writing into pipe");
   ChildWaitProcess();
+  processName_ = command;
   CLogger::Log(CLogger::Types::INFO, "Child writing into pipe 2");
   ChildWaitProcess();
   // auto execvArgs{parameters};

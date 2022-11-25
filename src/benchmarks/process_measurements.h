@@ -9,15 +9,18 @@
 #include "src/exports/export_struct.h"
 #include "src/helpers/helper_functions.h"
 #include "src/json_config/sensor_config/config.h"
+#include "src/linux/run_process.h"
 
 namespace Measurements
 {
 /**
- * @brief This class manages the measurements from the processes. It manages the
+ * @brief This class manages the measurements for the processes. It manages the
  * following tasks:
- * 1. Parse the JSON file for the sensor configuration
+ * 1. Parse the JSON file for the sensor configuration, it only takes the
+ * configurations related to specific processes
  * 2. Parse the measurements
- * 3. Check for the thresholds
+ * 3. Check for the thresholds (not done in this class but the preparation is
+ * done by this class)
  * 4. Support exports and analysis
  * 5. Detect performance decreases
  */
@@ -27,8 +30,9 @@ public:
   //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CProcessMeasurements(const std::string &configFile);
 
-  void Initialize(std::vector<Exports::ExportData> *allData,
-                  const std::unordered_set<int> processIds);
+  void AddProcesses(std::vector<Linux::RunProcess *> processes);
+
+  void Initialize(std::vector<Exports::ExportData> *allData);
 
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
@@ -43,8 +47,14 @@ public:
   }
 
 private:
+  struct ProcessDef
+  {
+    int processId;
+    std::string name;
+  };
+  std::vector<Linux::RunProcess *> processes_;
   std::string configFile_;
-  std::unordered_set<int> processIds_;
+  std::unordered_set<ProcessDef> processIds_;
   Measurements::ProcHandler procHandler_;
   std::vector<Exports::ExportData> *allData_;
 
