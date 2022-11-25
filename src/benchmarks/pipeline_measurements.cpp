@@ -144,6 +144,7 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
 
   for (const auto &pipeline : uniqueIds_)
   {
+    std::cout << "Unique ID execution: " << pipeline.first << std::endl;
     std::unordered_set<GStreamer::MeasureType> livemodeTypes;
     Measurements::AllSensors::SensorGroups sensorGroup;
     sensorGroup.processId = pipeline.first;
@@ -175,6 +176,10 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
         sensor.data = PerformanceHelpers::GetSummarizedData(
             Measurements::Classification::PIPELINE, allData_, e.second,
             sensor.multiplier, useSteadyState);
+        // TODO: remove
+        std::cout << std::to_string(sensorGroup.processId) + ": "
+                  << sensor.userId << ":" << sensor.data.Printable()
+                  << std::endl;
       }
       sensorGroup.sensors.push_back(sensor);
     }
@@ -183,7 +188,7 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
     {
       for (const auto &[type, _] : predefinedSensors)
       {
-        auto uniqueIdsSet = GetUniqueIdsByType(type);
+        auto uniqueIdsSet = GetUniqueIdsByType(type, pipeline.first);
         Measurements::Sensors sensorTemplate{
             GStreamer::GetMeasureType(type), PerformanceHelpers::GetUniqueId(),
             PlatformConfig::EClass::PIPELINE_MEASUREMENTS};

@@ -99,18 +99,15 @@ GetSummarizedData(const Measurements::Classification classification,
   {
     auto datapoints = e.GetItems(classification);
     // This is the loop for the datapoints, only the uniqueId datapoint is used
-    std::cout << "I";
     for (const auto &e2 : datapoints)
     {
       if (e2.id == uniqueId)
       {
-        std::cout << "+";
         summarizedData.AddDataPoint(e2);
         //  break; // May leave the (inner) loop for the datapoints, go to next
         // datapoint
       }
     }
-    std::cout << "O" << std::endl;
   }
   summarizedData.SetMultiplier(multiplication);
   return summarizedData.GetSensorData();
@@ -139,6 +136,8 @@ GetSummarizedData(const Measurements::Classification classification,
   result.uniqueId = PerformanceHelpers::GetUniqueId();
   summarizedData.SetMultiplier(sensorTemplate.multiplier);
   result.data = summarizedData.GetSensorData();
+  // TODO: remove
+  std::cout << result.userId << ":" << result.data.Printable() << std::endl;
   return result;
 }
 

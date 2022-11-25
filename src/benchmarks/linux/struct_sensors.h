@@ -37,6 +37,14 @@ struct SensorData
     }
     throw std::runtime_error("Didn't find valuetype!");
   }
+  std::string Printable() const
+  {
+    std::string result;
+    for (const auto &e : summarizedValues)
+      result += ToString(e.type) + ": " + std::to_string(e.value) + " ; ";
+
+    return result;
+  }
 };
 struct Sensors
 {

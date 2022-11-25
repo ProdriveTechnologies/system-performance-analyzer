@@ -31,7 +31,6 @@ namespace GStreamer
 class CPipelineMeasurements
 {
 public:
-  //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CPipelineMeasurements();
 
   void AddPipelines(std::vector<CGstreamerHandler *> gstreamerStream);
@@ -84,12 +83,14 @@ private:
     }
     return false;
   }
-  inline std::unordered_set<int>
-  GetUniqueIdsByType(const MeasureType type) const
+  inline std::unordered_set<int> GetUniqueIdsByType(const MeasureType type,
+                                                    const int pipelineNr) const
   {
     std::unordered_set<int> result;
     for (const auto &e : uniqueIds_)
     {
+      if (e.first != pipelineNr)
+        continue;
       for (const auto &e2 : e.second)
       {
         if (e2.first.type == type)
