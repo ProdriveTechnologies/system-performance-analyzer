@@ -17,6 +17,7 @@ add_executable(
     tests
     test_correlation.cpp
     test_helpers.cpp
+    test_summarize_data.cpp
     ../src/benchmarks/analysis/correlation.cpp
     ../src/helpers/helper_functions.cpp
     ../src/benchmarks/linux/struct_sensors.cpp

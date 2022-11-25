@@ -3,24 +3,22 @@
 #include "src/exports/export_struct.h"
 #include "struct_sensors.h"
 
+#include <algorithm>
+#include <cmath>
+
 namespace Measurements
 {
 class CSummarizeData
 {
 public:
-  CSummarizeData() : firstDataPoint_{true}, useSteadyState_{false} {}
+  CSummarizeData() : useSteadyState_{false}, multiplier_{1.0} {}
   CSummarizeData(const bool useSteadyState)
-      : firstDataPoint_{true}, useSteadyState_{useSteadyState}
+      : useSteadyState_{useSteadyState}, multiplier_{1.0}
   {
   }
   void SetMultiplier(const double multiplier) { multiplier_ = multiplier; }
   void AddDataPoint(const Exports::MeasuredItem item)
   {
-    if (firstDataPoint_)
-      AddInitial(item);
-    else
-      CheckMinMax(item);
-
     average_.Add(item);
     allMeasurements_.push_back(item.measuredValue);
   }
@@ -45,11 +43,8 @@ public:
 
 private:
   SensorData sensorData_;
-  bool firstDataPoint_;
   bool useSteadyState_;
   double multiplier_;
-  double minFound_;
-  double maxFound_;
   struct Average
   {
     double aggregatedData = 0.0;
@@ -87,29 +82,24 @@ private:
     }
     return *std::max_element(localVector.begin(), localVector.end());
   }
-
+  inline bool IsEven(int value) const { return (value % 2) == 0; }
   double GetMedian() const
   {
+    auto sortFunction = [](const double &lhs, const double &rhs) {
+      return lhs < rhs;
+    };
     if (!allMeasurements_.empty())
     {
-      const size_t loc = allMeasurements_.size() / 2;
-      return allMeasurements_.at(loc);
+      std::vector<double> sorted = allMeasurements_;
+      std::sort(sorted.begin(), sorted.end(), sortFunction);
+
+      const size_t loc = std::floor(sorted.size() / 2.0);
+      // If it's average, calculate the arithmetic mean of the two middle points
+      if (IsEven(sorted.size()))
+        return (sorted.at(loc) + sorted.at(loc - 1)) / 2.0;
+      return sorted.at(loc);
     }
     return 0.0;
-  }
-
-  void AddInitial(const Exports::MeasuredItem &item)
-  {
-    firstDataPoint_ = false;
-    minFound_ = item.measuredValue;
-    maxFound_ = item.measuredValue;
-  }
-  void CheckMinMax(const Exports::MeasuredItem &item)
-  {
-    if (item.measuredValue < minFound_)
-      minFound_ = item.measuredValue;
-    if (item.measuredValue > maxFound_)
-      maxFound_ = item.measuredValue;
   }
 };
 } // namespace Measurements
