@@ -4,6 +4,7 @@
 #include <string>
 
 #include "config.h"
+#include <iostream>
 
 namespace PlatformConfig
 {
@@ -16,13 +17,12 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
   j.at("type").get_to(typeStr);
   p.type = GetType(typeStr);
   if (j.contains("id"))
-    j.at("id").get_to(p.id);
+    j.at("id").get_to(p.userId);
   if (j.contains("size"))
     j.at("size").get_to(p.size);
   if (j.contains("path"))
-  {
     j.at("path").get_to(p.path);
-  }
+
   if (j.contains("class"))
   {
     int classNr;

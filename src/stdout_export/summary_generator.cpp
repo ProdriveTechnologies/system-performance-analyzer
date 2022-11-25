@@ -49,6 +49,13 @@ void CSummaryGenerator::PrintSystemInfo()
   //                           GetArchitecture(iware::cpu::architecture()));
   SummaryWriter::PrintRow();
 }
+bool CSummaryGenerator::GenerateProcesses(
+    const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
+        &measuredProcesses)
+{
+  return true;
+}
+
 void CSummaryGenerator::PrintCacheInfo()
 {
 #if 0

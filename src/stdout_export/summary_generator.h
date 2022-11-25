@@ -3,6 +3,7 @@
 // #include <infoware/cpu.hpp>
 #include <string>
 
+#include "src/benchmarks/Linux/perf_measurements.h"
 #include "src/exports/export_struct.h"
 #include "src/json_config/sensor_config/config.h"
 // #include "src/linux/filesystem.h"
@@ -15,6 +16,9 @@ public:
   bool
   Generate(const std::vector<Exports::ExportData> &measurementsData,
            const std::vector<PlatformConfig::SDatafields> &measurementsDef);
+  bool GenerateProcesses(
+      const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
+          &measuredProcesses);
 
 private:
   // Static info based on the host system

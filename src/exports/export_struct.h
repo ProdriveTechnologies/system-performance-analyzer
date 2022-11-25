@@ -1,8 +1,12 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <variant>
 #include <vector>
 
+#include "src/benchmarks/gstreamer_identifier.h"
+#include "src/json_config/sensor_config/config.h"
 //#include "src/benchmarks/Linux/xavier_sensors.h"
 #include "src/linux/filesystem.h"
 
@@ -26,7 +30,34 @@ struct ProcessInfo
 struct PipelineInfo
 {
   int pipelineId;
-  MeasuredItem measuredItem;
+  std::vector<MeasuredItem> measuredItems;
+};
+struct PipelineConfig
+{
+  size_t pipelineId;
+  std::string pipelineCommand;
+  std::unordered_map<int, GStreamer::Identifier> pluginNames;
+};
+enum class Type
+{
+  MEASUREMENT,
+  INFO,
+  LABEL,
+  ARRAY
+};
+struct MeasurementItem
+{
+  using MeasurementItems = std::vector<MeasurementItem>;
+  std::string name;
+  Type type;
+  std::variant<MeasurementItems, std::string, int, double> value;
+};
+struct ExportConfig
+{
+  std::vector<PlatformConfig::SDatafields> measurementsConfig;
+
+  // Only available after a test
+  std::vector<PipelineConfig> pipelineConfig;
 };
 struct ExportData
 {

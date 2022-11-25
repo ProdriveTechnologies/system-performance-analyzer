@@ -123,6 +123,7 @@ struct Stat
         envEnd{std::stoul(stats_[50])}, exitCode{std::stoi(stats_[51])}
   {
   }
+  Stat() = default;
 };
 
 Stat GetStats(const std::string &statLocation);

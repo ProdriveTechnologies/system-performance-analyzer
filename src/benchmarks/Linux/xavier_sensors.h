@@ -51,6 +51,7 @@ public:
   // std::vector<SCpuCoreInfo> GetCoresInfo();
   static Exports::MeasuredItem
   ParseDirect(const PlatformConfig::SMeasureField &datafield);
+  static std::string ReadLocation(const std::string &path);
 
 private:
   // std::vector<CoreSensor> coreSensors_;

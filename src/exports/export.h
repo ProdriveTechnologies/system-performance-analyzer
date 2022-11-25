@@ -20,6 +20,9 @@ public:
   bool DataExport(const ExportData &data);
   bool FinishExport();
 
+  bool FullExport(const std::vector<MeasurementItem> &config,
+                  const FullMeasurement data);
+
 private:
   FileWriter file_;
   const std::string fileName_;
@@ -52,6 +55,12 @@ CExport::InitExport(const std::vector<PlatformConfig::SDatafields> &config)
 inline bool CExport::FinishExport()
 {
   return file_.AddRow(pExportObj_->FinishExport(), false);
+}
+
+inline bool CExport::FullExport(const std::vector<MeasurementItem> &config,
+                                const FullMeasurement data)
+{
+  return pExportObj_->FullExport(config, data);
 }
 
 } // namespace Exports

@@ -4,32 +4,23 @@
 #include <iostream>
 #include <memory>
 
+#include "handler.h"
+#include "measurement_types.h"
+
 namespace GStreamer
 {
 void TraceHandler::TraceCallbackFunction(
     [[maybe_unused]] GstDebugCategory *category, GstDebugLevel level,
     [[maybe_unused]] const gchar *file, [[maybe_unused]] const gchar *function,
     [[maybe_unused]] gint line, GObject *object, GstDebugMessage *message,
-    gpointer user_data)
+    gpointer userData)
 {
   if (level != GST_LEVEL_TRACE)
   {
     // Cannot parse this message, return
     return;
   }
-  //   if (object == nullptr)
-  //   {
-  //     std::cout << "Thingy relates to nothingg" << std::endl;
-  //   }
-  //   else
-  //   {
-  //     std::cout << "THINGY relates to something: "
-  //               << object->g_type_instance.g_class->g_type << std::endl;
-  //   }
-  //   std::cout << "File: " << file << "  line: " << line
-  //             << " function: " << function
-  //             << "  and type: " << gst_debug_message_get(message) <<
-  //             std::endl;
+  TracerUserData *logData = reinterpret_cast<TracerUserData *>(userData);
 
   std::unique_ptr<GstStructure, decltype(&gst_structure_free)> gstStructure{
       gst_structure_from_string(gst_debug_message_get(message), nullptr),
@@ -40,11 +31,12 @@ void TraceHandler::TraceCallbackFunction(
     // No proper structure included, returning as there is no data to parse
     return;
   }
-  ParseTraceStructure(gstStructure.get());
+  logData->parent->ParseTraceStructure(gstStructure.get());
 }
 
 void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
 {
+  GStreamer::Measurement trace;
   switch (Helpers::hash(g_quark_to_string(gstStructure->name)))
   {
   case Helpers::hash("thread-rusage"):
@@ -57,18 +49,24 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     // std::cout << "L";
     break;
   case Helpers::hash("framerate"):
+  {
+    trace.type = MeasureType::FPS;
+    trace.pluginName = gst_structure_get_string(gstStructure, "pad");
+    gst_structure_get_uint(gstStructure, "fps", &trace.valueInt);
+    std::cout << "FPS: " << trace.valueInt << std::endl;
     std::cout << "Frame rate! : " << gst_structure_to_string(gstStructure)
               << std::endl;
-    break;
+  }
+  break;
   default:
     std::cout << "New: " << g_quark_to_string(gstStructure->name) << std::endl;
     std::cout << "Result: " << gst_structure_to_string(gstStructure)
               << std::endl;
   }
-  auto value = gst_structure_get_value(gstStructure, "average-cpuload");
-  if (value != NULL)
+  if (trace.type != MeasureType::NONE)
   {
-    // std::cout << "Value: " << value->data->v_int << std::endl;
+    // Send the "trace" measurement towards the Measurements class
+    fifoMeasurements.push(trace);
   }
 }
 

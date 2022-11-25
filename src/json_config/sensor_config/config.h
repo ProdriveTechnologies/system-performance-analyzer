@@ -13,7 +13,8 @@ enum class Types
   PROC_STAT,
   DIRECT,
   ARRAY,
-  PROC_MEM
+  PROC_MEM,
+  PID_STAT
 };
 enum class Class : int
 {
@@ -33,6 +34,8 @@ inline Types GetType(const std::string &typeStr)
     return Types::ARRAY;
   case Helpers::hash("PROCMEM"):
     return Types::PROC_MEM;
+  case Helpers::hash("PIDSTAT"):
+    return Types::PID_STAT;
   default:
     throw std::runtime_error("Platform Config: Type unknown! Type: " + typeStr);
   }
@@ -54,6 +57,7 @@ struct SDatafields
 {
   std::string name;
   int id = 0;
+  std::string userId;
   Types type;
   Class classType = Class::NONE;
   std::string suffix;

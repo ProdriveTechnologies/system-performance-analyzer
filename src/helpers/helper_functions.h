@@ -7,6 +7,14 @@
 #include <unordered_set>
 #include <vector>
 
+// Overload operator to ease the traversal of the std::variant
+template <typename... Ts> // (7)
+struct Overload : Ts...
+{
+  using Ts::operator()...;
+};
+template <class... Ts> Overload(Ts...) -> Overload<Ts...>; // (2)
+
 namespace Helpers
 {
 /** @brief ArgToString converts arguments to a string

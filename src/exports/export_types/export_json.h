@@ -1,14 +1,16 @@
 #pragma once
 
 #include <array>
+#include <string>
 #include <unordered_map>
 
 #include "../exports_base.h"
 #include "src/helpers/helper_functions.h"
+#include <nlohmann/json.hpp>
 
 namespace Exports
 {
-class CCsv : public CBase
+class CJson : public CBase
 {
 public:
   std::string
@@ -25,6 +27,7 @@ public:
                   const FullMeasurement data);
 
 private:
+  static constexpr char EXTENSION[] = ".json";
   enum class CsvIndex : size_t
   {
     TIME = 0,
@@ -36,7 +39,6 @@ private:
     TEMPERATURE_AVERAGE = 6,
     MAX_SIZE // Only used for the size of the array
   };
-  static constexpr char DELIMITER = ',';
 
   struct SCsvStructure
   {
@@ -45,7 +47,8 @@ private:
   std::string InitPipelineConfig(
       const size_t pipelineId,
       const std::unordered_map<int, GStreamer::Identifier> &items);
-  std::string ParseLabel(const MeasurementItem &item);
+  nlohmann::json ParseLabel(const MeasurementItem &item,
+                            const nlohmann::json parent = nlohmann::json{});
 };
 
 } // namespace Exports

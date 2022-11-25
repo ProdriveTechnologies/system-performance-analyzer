@@ -14,6 +14,7 @@
 
 #include "src/exports/export.h"
 #include "src/exports/export_types/export_csv.h"
+#include "src/exports/export_types/export_json.h"
 
 #include "proc_handler.h"
 #include "src/globals.h"
@@ -31,7 +32,8 @@ namespace Linux
 CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer,
                                      const std::string &sensorConfig)
     : threadSync_{synchronizer}, sensorConfigFile_{sensorConfig},
-      cpuUtilizationTimer_{std::chrono::milliseconds{1000}} //,
+      cpuUtilizationTimer_{std::chrono::milliseconds{1000}},
+      sensorMeasurements_{sensorConfig} //,
 // liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
 {
 }
@@ -41,8 +43,10 @@ CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer,
  *
  * @param config
  */
-void CPerfMeasurements::Start(const Core::SConfig &config)
+void CPerfMeasurements::Start(const Core::SConfig &config,
+                              std::vector<ProcessInfo> *processes)
 {
+  processes_ = processes;
   config_ = config;
   Stopwatch stopwatch; // Stopwatch keeps track of how long the test is running
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 1 for benchmarks");
@@ -74,14 +78,26 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
  */
 void CPerfMeasurements::Initialize()
 {
-  auto parsed = PlatformConfig::Parse(sensorConfigFile_);
-  auto measureFields = GetMeasureFields(parsed.sensors);
-  measureFields_ = measureFields.fields;
-  measureFieldsDefinition_ = measureFields.definition;
-  InitExports(measureFieldsDefinition_);
+  sensorMeasurements_.Initialize();
+  // auto parsed = PlatformConfig::Parse(sensorConfigFile_);
+  // auto measureFields =
+  //     GetFields(parsed.sensors, &CPerfMeasurements::GetMeasureFields, this);
+  // measureFields_ = measureFields.fields;
+  // measureFieldsDefinition_ = measureFields.definition;
+  // auto processFields =
+  //     GetFields(parsed.sensors, &CPerfMeasurements::GetProcessFields, this);
+  // processFields_ = processFields.fields;
+  // processFieldsDef_ = processFields.definition;
+  InitExports(sensorMeasurements_.GetDefinition());
+
+  GetProcessPids();
+  OrganizeGstreamerPipelines();
+  gstMeasurements_.Initialize();
 
   pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
   pCpuData_ = std::make_unique<std::vector<Linux::FileSystem::ProcStatData>>();
+  pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
+
   // Thread exists now, store threads that already exist for the monitoring. The
   // newly added ones are from gstreamer and need to be monitored
   // std::cerr << "Monitoring thread: " << threadSync_->getThreadId();
@@ -91,7 +107,7 @@ void CPerfMeasurements::Initialize()
   // excludedThreads_ = FileSystem::GetFiles(processPath.GetPath());
 
   // Initialise proc stat
-  procHandler_.ParseProcStat();
+  // procHandler_.ParseProcStat();
   cpuUtilizationTimer_.restart();
   // lastCpuDataAggregated_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
   while (!cpuUtilizationTimer_.elapsed())
@@ -100,6 +116,31 @@ void CPerfMeasurements::Initialize()
         std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
   }
   // liveFilesystemData_.Init();
+}
+
+void CPerfMeasurements::OrganizeGstreamerPipelines()
+{
+  std::vector<CGstreamerHandler *> gstreamerPipelines;
+  for (auto &e : *processes_)
+  {
+    if (auto process = std::get_if<CGstreamerHandler>(&e.processes))
+      gstreamerPipelines.push_back(process);
+  }
+  gstMeasurements_.AddPipelines(gstreamerPipelines);
+}
+
+/**
+ * @brief Stores the process IDs from the RunProcess processes in the
+ * processPids_ private variable
+ *
+ */
+void CPerfMeasurements::GetProcessPids()
+{
+  for (const auto &e : *processes_)
+  {
+    if (auto process = std::get_if<Linux::RunProcess>(&e.processes))
+      processPids_.push_back(process->GetThreadPid());
+  }
 }
 
 /**
@@ -121,37 +162,31 @@ void CPerfMeasurements::StartMeasurementsLoop()
     //   MeasureThread(e);
     // }
     // Filling the export data
-    procHandler_.ParseMeminfo(); // Parse the /proc/meminfo struct
+    // procHandler_.ParseMeminfo(); // Parse the /proc/meminfo struct
     Exports::ExportData exportData;
     exportData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
-    exportData.measuredItems = GetMeasuredItems(measureFields_);
+    exportData.measuredItems = sensorMeasurements_.GetMeasurements();
+    // GetMeasuredItems(measureFields_);
+
+    // Measure data on each process
+    // MeasureProcesses(processPids_);
+
+    // Measure data on each GStreamer pipeline
+    exportData.pipelineInfo = gstMeasurements_.ProcessGstreamer();
 
     pMeasurementsData_->push_back(exportData);
-    pCpuData_->push_back(procHandler_.GetStats());
-
-    // exportData.cpuInfo = xavierSensors_.GetCoresInfo();
-    // exportData.cpuUtilization = Linux::FileSystem::GetProcStat(XAVIER_CORES);
-
-    // exportData.cpuUtilization = liveFilesystemData_.getLastData();
-    // if (cpuUtilizationTimer_.elapsed())
-    // {
-    //   auto previousAggregated = lastCpuDataAggregated_;
-    //   lastCpuDataAggregated_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
-    //   cpuUtilizationTimer_.restart();
-    //   lastCpuData_ = lastCpuDataAggregated_ - previousAggregated;
-    //   exportData.cpuUtilization = lastCpuData_;
-    // }
-    // else
-    // {
-    //   lastCpuData_;
-    // }
-
-    // SendExportsData(exportData);
+    // pCpuData_->push_back(procHandler_.GetStats());
 
     std::this_thread::sleep_for(
         std::chrono::milliseconds(config_.settings.measureLoopMs));
   }
+  // Sort the pipeline measurements correctly
+  for (auto &e : *pMeasurementsData_)
+  {
+    e.pipelineInfo = gstMeasurements_.SortData(e.pipelineInfo);
+  }
+  exportConfig_.pipelineConfig = gstMeasurements_.GetPipelineConfig();
 }
 
 /**
@@ -161,7 +196,7 @@ void CPerfMeasurements::InitExports(const MeasureFieldsDefType &config)
 {
   if (config_.settings.enableLogs)
   {
-    pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CCsv{},
+    pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CJson{},
                                                      "csvfile.csv", true);
     pExportObj_->InitExport(config);
   }
@@ -190,39 +225,94 @@ void CPerfMeasurements::ExportData()
   {
     SendExportsData(e);
   }
+
+  // Do the full export with all data
+  std::vector<Exports::MeasurementItem> items;
+  items.push_back(sensorMeasurements_.GetConfig());
+  items.push_back(gstMeasurements_.GetPipelineConfig2());
+  pExportObj_->FullExport(items, pMeasurementsData_.get());
+}
+
+/**
+ * @brief Measures the resource usage and interesting data from the processes in
+ * the processId list
+ *
+ * @param processIds
+ */
+void CPerfMeasurements::MeasureProcesses(const std::vector<int> processIds)
+{
+  ProcessesMeasure measurements;
+  for (const auto &e : processIds)
+  {
+    try
+    {
+      ProcessMeasurements processMeasurement;
+      processMeasurement.pid = e;
+      processMeasurement.stats =
+          Linux::FileSystem::GetStats("/proc/" + std::to_string(e) + "/stat");
+      measurements.processes.push_back(processMeasurement);
+    }
+    catch (const std::exception &error)
+    {
+      CLogger::Log(CLogger::Types::INFO, "Process: ", e,
+                   " ended, removing from measurements");
+      RemoveProcessId(e); // Process apparently stopped already
+    }
+  }
+  pProcessesData_->push_back(measurements);
+}
+
+/**
+ * @brief Remove process id from the processPids_ vector
+ */
+void CPerfMeasurements::RemoveProcessId(const int pid)
+{
+  for (size_t i = 0; i < processPids_.size(); i++)
+  {
+    const auto &e = processPids_[i];
+    if (e == pid)
+      processPids_.erase(processPids_.begin() + i);
+  }
 }
 
 void CPerfMeasurements::AnalyzeData()
 {
-  Exports::CSummaryGenerator generator;
-  generator.Generate(*pMeasurementsData_, measureFieldsDefinition_);
-  //   std::cout << "SPA Tool Summary Report\n" << std::endl;
-  //   // First, print the system's specifications
-  //   std::cout << "Version\t\t : " << Globals::version << std::endl;
-  //   std::cout << "Created\t\t : " << Globals::compilationDate << " "
-  //             << Globals::compilationTime << std::endl;
-  //   std::cout << std::endl;
-  //   std::cout << "Processor and System Information" << std::endl;
-  //   const auto quantities = iware::cpu::quantities();
-  //   std::cout << "Physical Cores\t\t : " << quantities.physical << std::endl;
-  //   std::cout << "Logical Cores\t\t : " << quantities.logical << std::endl;
-  //   std::cout << "CPU Package\t\t : " << quantities.packages << std::endl;
+  /**
+   * @brief Steps to execute:
+   * 1. Summarize the necessary data (also min, max, average)
+   * 2. Check thresholds on said summarized data
+   * 3. Add boolean to say whether the test failed/was succesful
+   * 4. Execute correlation checks nevertheless. If failed, check correlation
+   * between performance and resources
+   * 5. Create report with the summarized data. Exports should have access to
+   * the analyzed data as well. Maybe create one structure that can be extended
+   * for this?
+   */
 
-  //   for (unsigned i = 1; i <= 3; ++i)
-  //   {
-  //     const auto cache = iware::cpu::cache(i);
-  //     std::cout << "    L" << i << ":\n"
-  //               << "      Size         : " << cache.size << "B\n"
-  //               << "      Line size    : " << cache.line_size << "B\n"
-  //               << "      Associativity: "
-  //               << static_cast<unsigned int>(cache.associativity) <<
-  //               std::endl;
-  //   }
-  // Second, summarize system wide data
-  // Then, summarize each process the data
-  // Finish with the data of each GStreamer pipeline (FPS, most delaying module,
-  // CPU heavy module?)
+  // CheckThresholds();
+
+  Exports::CSummaryGenerator generator;
+  generator.Generate(*pMeasurementsData_, sensorMeasurements_.GetDefinition());
+  generator.GenerateProcesses(*pProcessesData_);
 }
+
+// void CPerfMeasurements::CheckTresholds() { for (const) }
+#if 0
+Extra types that need to be supported:
+- FPS: average FPS of all sub-modules
+- GStreamer values
+- Summarized data of all cpu cores (array) or for a single core (also in an array?)
+
+These come above the:
+- Sensors in the config file
+- Measured thingies for the running processes
+
+And should include both data from the "xavier_sensors" file as well as the "json_config" file. <- why though?
+A structure should contain all the sensors, with a boolean for whether the sensor has exceeded the threshold
+
+The thresholds:
+Ideally, use a map: std::unordered_map<std::string, Data> where Data can be a pointer to the data. The string is the "userid", for groups, add them separately
+#endif
 /*
 CMonitoring::SCpuInfo CMonitoring::GetCPUInfo()
 {
@@ -284,125 +374,121 @@ std::vector<CMonitoring::SCoreTemperature> CMonitoring::GetCpuTemperatures()
   return temperatures;
 } */
 
-/**
- * @brief ReadLocation reads the data at a certain path location on Linux
- *
- * @param path the path of the file
- * @return std::string the content of the file
- */
-std::string CPerfMeasurements::ReadLocation(const std::string &path)
-{
-  std::string dataBuffer;
-  std::ifstream fileObj(path);
-  if (!fileObj.is_open() || !fileObj.good())
-  {
-    throw std::runtime_error("Monitoring: Path doesn't exist! Path: " + path);
-  }
-  fileObj >> dataBuffer;
-  fileObj.close();
+// CPerfMeasurements::MeasureCombo CPerfMeasurements::GetFields(
+//     std::vector<PlatformConfig::SDatafields> &sensorConfig,
+//     const std::function<MeasureCombo(CPerfMeasurements *,
+//                                      const PlatformConfig::SDatafields &)>
+//         parserFunction,
+//     CPerfMeasurements *memberPtr)
+// {
+//   MeasureCombo result;
 
-  return dataBuffer;
-}
+//   std::for_each(sensorConfig.begin(), sensorConfig.end(),
+//                 [&](const PlatformConfig::SDatafields &dataField) {
+//                   result.Add(parserFunction(memberPtr, dataField));
+//                 });
 
-CPerfMeasurements::MeasureCombo CPerfMeasurements::GetMeasureFields(
-    const std::vector<PlatformConfig::SDatafields> &sensorConfig)
-{
-  MeasureCombo result;
+//   return result;
+// }
 
-  std::for_each(sensorConfig.begin(), sensorConfig.end(),
-                [&](const PlatformConfig::SDatafields &dataField) {
-                  result.Add(GetMeasureFields(dataField));
-                });
+// CPerfMeasurements::MeasureCombo CPerfMeasurements::GetMeasureFields(
+//     const PlatformConfig::SDatafields &dataField)
+// {
+//   MeasureCombo result;
 
-  return result;
-}
+//   switch (dataField.type)
+//   {
+//   case PlatformConfig::Types::ARRAY:
+//     result.Add(ParseArray(dataField));
+//     break;
+//   case PlatformConfig::Types::DIRECT:
+//   case PlatformConfig::Types::PROC_STAT:
+//   case PlatformConfig::Types::PROC_MEM:
+//     result.Add(ParseField(dataField));
+//     break;
+//   default:;
+//   }
+//   return result;
+// }
 
-CPerfMeasurements::MeasureCombo CPerfMeasurements::GetMeasureFields(
-    const PlatformConfig::SDatafields &dataField)
-{
-  MeasureCombo result;
+// CPerfMeasurements::MeasureCombo CPerfMeasurements::GetProcessFields(
+//     const PlatformConfig::SDatafields &dataField)
+// {
+//   MeasureCombo result;
 
-  switch (dataField.type)
-  {
-  case PlatformConfig::Types::ARRAY:
-    result.Add(ParseArray(dataField));
-    break;
-  case PlatformConfig::Types::DIRECT:
-  case PlatformConfig::Types::PROC_STAT:
-  case PlatformConfig::Types::PROC_MEM:
-  // Fallthrough to the "default" case
-  default: // Just add the field as-is, for example for the PROC field
-    result.Add(ParseField(dataField));
-    // throw std::runtime_error(
-    //   "Field not found in the sensor file: " +
-    //   std::to_string(static_cast<unsigned>(dataField.type)));
-  }
+//   switch (dataField.type)
+//   {
+//   case PlatformConfig::Types::PID_STAT:
+//     result.Add(ParseField(dataField));
+//     break;
+//   default:;
+//   }
+//   return {result};
+// }
 
-  return result;
-}
+// CPerfMeasurements::MeasureComboSingular
+// CPerfMeasurements::ParseField(const PlatformConfig::SDatafields &data)
+// {
+//   MeasureComboSingular result;
+//   result.field.path = data.path;
+//   result.field.type = data.type;
+//   result.field.id = PerformanceHelpers::GetUniqueId();
+//   result.definition = data;
+//   result.definition.id = result.field.id;
+//   return result;
+// }
 
-CPerfMeasurements::MeasureComboSingular
-CPerfMeasurements::ParseField(const PlatformConfig::SDatafields &data)
-{
-  MeasureComboSingular result;
-  result.field.path = data.path;
-  result.field.type = data.type;
-  result.field.id = PerformanceHelpers::GetUniqueId();
-  result.definition = data;
-  result.definition.id = result.field.id;
-  return result;
-}
+// CPerfMeasurements::MeasureCombo
+// CPerfMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
+// {
+//   MeasureCombo result;
+//   // Loop through the defined array
+//   for (size_t i = 0; i < data.size; ++i)
+//   {
+//     // Adjust all variables that are defined within the array
+//     for (const auto &e : data.datafields)
+//     {
+//       auto datafieldCopy{e};
+//       Helpers::replaceStr(datafieldCopy.path, "$INDEX$", std::to_string(i));
+//       datafieldCopy.name = datafieldCopy.name + std::to_string(i);
+//       result.Add(GetMeasureFields(datafieldCopy));
+//     }
+//   }
+//   return result;
+// }
 
-CPerfMeasurements::MeasureCombo
-CPerfMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
-{
-  MeasureCombo result;
-  // Loop through the defined array
-  for (size_t i = 0; i < data.size; ++i)
-  {
-    // Adjust all variables that are defined within the array
-    for (const auto &e : data.datafields)
-    {
-      auto datafieldCopy{e};
-      Helpers::replaceStr(datafieldCopy.path, "$INDEX$", std::to_string(i));
-      datafieldCopy.name = datafieldCopy.name + std::to_string(i);
-      result.Add(GetMeasureFields(datafieldCopy));
-    }
-  }
-  return result;
-}
-
-std::vector<Exports::MeasuredItem>
-CPerfMeasurements::GetMeasuredItems(const MeasureFieldsType &measureFields)
-{
-  procHandler_.ParseProcStat();
-  std::vector<Exports::MeasuredItem> measuredItems;
-  for (const auto &e : measureFields)
-  {
-    switch (e.type)
-    {
-    case PlatformConfig::Types::DIRECT:
-      measuredItems.push_back(
-          CXavierSensors::ParseDirect(e)); // ParseDirect(e);
-      break;
-    case PlatformConfig::Types::PROC_STAT:
-    {
-      auto definition = GetFieldDef(e.id);
-      measuredItems.push_back(procHandler_.ParseProcField(definition, e.path));
-    }
-    break;
-    case PlatformConfig::Types::PROC_MEM:
-    {
-      auto definition = GetFieldDef(e.id);
-      measuredItems.push_back(procHandler_.ParseMemField(definition));
-    }
-    break;
-    default:
-      throw std::runtime_error(
-          "Software Error! Incorrect type in the performance measurements!");
-    }
-  }
-  return measuredItems;
-}
+// std::vector<Exports::MeasuredItem>
+// CPerfMeasurements::GetMeasuredItems(const MeasureFieldsType &measureFields)
+// {
+//   procHandler_.ParseProcStat();
+//   std::vector<Exports::MeasuredItem> measuredItems;
+//   for (const auto &e : measureFields)
+//   {
+//     switch (e.type)
+//     {
+//     case PlatformConfig::Types::DIRECT:
+//       measuredItems.push_back(
+//           CXavierSensors::ParseDirect(e)); // ParseDirect(e);
+//       break;
+//     case PlatformConfig::Types::PROC_STAT:
+//     {
+//       auto definition = GetFieldDef(e.id);
+//       measuredItems.push_back(procHandler_.ParseProcField(definition,
+//       e.path));
+//     }
+//     break;
+//     case PlatformConfig::Types::PROC_MEM:
+//     {
+//       auto definition = GetFieldDef(e.id);
+//       measuredItems.push_back(procHandler_.ParseMemField(definition));
+//     }
+//     break;
+//     default:
+//       throw std::runtime_error(
+//           "Software Error! Incorrect type in the performance measurements!");
+//     }
+//   }
+//   return measuredItems;
+// }
 
 } // namespace Linux

@@ -68,7 +68,26 @@ CXavierSensors::ParseDirect(const PlatformConfig::SMeasureField &datafield)
 {
   Exports::MeasuredItem item;
   item.id = datafield.id;
-  item.measuredValue =
-      std::stoi(Linux::CPerfMeasurements::ReadLocation(datafield.path));
+  item.measuredValue = std::stoi(ReadLocation(datafield.path));
   return item;
+}
+
+/**
+ * @brief ReadLocation reads the data at a certain path location on Linux
+ *
+ * @param path the path of the file
+ * @return std::string the content of the file
+ */
+std::string CXavierSensors::ReadLocation(const std::string &path)
+{
+  std::string dataBuffer;
+  std::ifstream fileObj(path);
+  if (!fileObj.is_open() || !fileObj.good())
+  {
+    throw std::runtime_error("Monitoring: Path doesn't exist! Path: " + path);
+  }
+  fileObj >> dataBuffer;
+  fileObj.close();
+
+  return dataBuffer;
 }

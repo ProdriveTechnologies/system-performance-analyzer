@@ -8,6 +8,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "src/gstreamer/measurement_types.h"
 #include "src/helpers/logger.h"
 #include "trace_parser.h"
 #include <memory>
@@ -24,6 +25,10 @@ typedef struct _CustomData
 } CustomData;
 
 /* This function will be called by the pad-added signal */
+/**
+ * @brief This function is not used anymore and can therefore be
+ * removed (including the unnecessary data)
+ */
 static void pad_added_handler(GstElement *src, GstPad *new_pad,
                               CustomData *data)
 {
@@ -161,11 +166,15 @@ void CGstreamerHandler::RunPipelineThread(const std::string &pipelineStr)
       std::thread{&CGstreamerHandler::RunPipeline, this, pipelineStr};
 }
 
+/**
+ * @note This function is NOT used! Anymore RIP!
+ * @todo remove this function, as it is not in use anymore...
+ */
 void CGstreamerHandler::logFunction(GstDebugCategory *category,
                                     GstDebugLevel level, const gchar *file,
                                     const gchar *function, gint line,
                                     GObject *object, GstDebugMessage *message,
-                                    gpointer user_data)
+                                    gpointer userData)
 {
   // std::cout << "category: " << category->name << " and "
   //          << category->description << std::endl;
@@ -183,6 +192,7 @@ void CGstreamerHandler::logFunction(GstDebugCategory *category,
     std::cout << "THINGY relates to something: "
               << object->g_type_instance.g_class->g_type << std::endl;
   }
+  LogStructure *logData = reinterpret_cast<LogStructure *>(userData);
   q++;
   std::cout << "File: " << file << "  line: " << line
             << " function: " << function
@@ -339,6 +349,7 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize for gstreamer");
   threadSync_->WaitForProcess();
   running_ = true;
+  pipelineStr_ = pipelineStr;
   FreeMemory();
 
   SetTracingEnvironmentVars();
@@ -348,11 +359,12 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
 
   GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
-  gst_debug_add_log_function(&GStreamer::TraceHandler::TraceCallbackFunction,
-                             nullptr, nullptr);
-
   logUserData_.loop = loop;
   logUserData_.parentClass = this;
+  tracerUserData_.parent = &traceHandler_;
+
+  gst_debug_add_log_function(&GStreamer::TraceHandler::TraceCallbackFunction,
+                             &tracerUserData_, nullptr);
 
   gstPipeline_ = gst_parse_launch(pipelineStr.c_str(), &gstErrorMsg_);
   GstBus *bussy = gst_pipeline_get_bus(GST_PIPELINE(gstPipeline_));
