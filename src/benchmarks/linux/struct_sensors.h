@@ -248,6 +248,7 @@ struct AllSensors
     else
     {
       data.insert(std::make_pair(c, sensors));
+      allClasses.push_back(c);
       for (auto &e : data.find(c)->second)
         AddMapValues(&mapByProcessId, &e.sensors, e.processId);
     }

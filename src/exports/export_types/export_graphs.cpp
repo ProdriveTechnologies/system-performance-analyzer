@@ -28,9 +28,9 @@ void CGraphs::CreateGraph(const Measurements::Sensors &sensor1,
                           const Measurements::Sensors &sensor2)
 {
   FILE *pipe_gp = popen("gnuplot", "w");
-  fputs("set terminal svg \n", pipe_gp);
+  fputs("set terminal png \n", pipe_gp);
   std::string outputStr = "set output 'graphs/" + sensor1.userId + " + " +
-                          sensor2.userId + ".svg' \n";
+                          sensor2.userId + ".png' \n";
   fputs(outputStr.c_str(), pipe_gp);
   //   fputs("set xlabel 'f' \n", pipe_gp);
   fputs("set datafile separator ','\n", pipe_gp);
