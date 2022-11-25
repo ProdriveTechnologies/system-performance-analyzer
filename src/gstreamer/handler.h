@@ -14,7 +14,8 @@ class CGstreamerHandler : public ProcessRunner::Base
 {
 public:
   CGstreamerHandler(Synchronizer *synchronizer,
-                    const Core::SProcess &userProcessInfo, const int processId);
+                    const Core::SProcess &userProcessInfo,
+                    const Core::SSettings &settings, const int processId);
   CGstreamerHandler(const CGstreamerHandler &gstreamer);
   ~CGstreamerHandler();
 
@@ -55,6 +56,7 @@ private:
   int busWatchId_;
   GError *gstErrorMsg_;
   LogStructure logUserData_;
+  const Core::SSettings settings_;
   GStreamer::TraceHandler::TracerUserData tracerUserData_;
   GStreamer::TraceHandler traceHandler_;
   // std::thread pipelineThread_;

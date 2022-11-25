@@ -54,6 +54,7 @@ struct SSettings
   bool verbose;
   bool enableLogs;
   int measureLoopMs;
+  bool enableProcTime = false;
 };
 struct SConfig
 {

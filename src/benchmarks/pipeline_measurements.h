@@ -30,7 +30,7 @@ class CPipelineMeasurements
 {
 public:
   //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
-  CPipelineMeasurements() = default;
+  CPipelineMeasurements();
 
   void AddPipelines(std::vector<CGstreamerHandler *> gstreamerStream);
 
@@ -47,6 +47,12 @@ public:
   std::vector<Exports::PipelineInfo>
   SortData(const std::vector<Exports::PipelineInfo> &data);
   std::vector<Measurements::AllSensors::SensorGroups> GetSensors() const;
+  void setProctime(const bool proctime)
+  {
+    enableProctime_ = proctime;
+    if (enableProctime_)
+      predefinedSensors.push_back(procTime_);
+  }
 
 private:
   using PipelineNr = int;
@@ -54,6 +60,7 @@ private:
   std::unordered_map<PipelineNr, CGstreamerHandler *> streams_;
   std::unordered_map<PipelineNr, std::unordered_map<Identifier, int>>
       uniqueIds_;
+  bool enableProctime_;
 
   int GetUniqueId(const int pipelineId, const Identifier &id);
   std::unordered_map<int, Identifier>
@@ -88,9 +95,9 @@ private:
   }
   using PerformanceIndicator = bool;
   static inline std::vector<std::pair<MeasureType, PerformanceIndicator>>
-      predefinedSensors = {
-          std::make_pair(MeasureType::FPS, true),
-          // std::make_pair(MeasureType::PROCESSING_TIME, false)
-          /* MeasureType::LATENCY */};
+      predefinedSensors = {std::make_pair(MeasureType::FPS, true)
+                           /* MeasureType::LATENCY */};
+  static inline const std::pair<MeasureType, PerformanceIndicator> procTime_ =
+      std::make_pair(MeasureType::PROCESSING_TIME, false);
 };
 } // namespace GStreamer

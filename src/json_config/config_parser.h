@@ -56,6 +56,8 @@ inline void from_json(const nlohmann::json &j, SProcess &p)
 inline void from_json(const nlohmann::json &j, SSettings &p)
 {
   j.at("measure_loop_ms").get_to(p.measureLoopMs);
+  if (j.contains("enable_proctime"))
+    j.at("enable_proctime").get_to(p.enableProcTime);
   j.at("verbose").get_to(p.verbose);
   j.at("enable_logs").get_to(p.enableLogs);
 }

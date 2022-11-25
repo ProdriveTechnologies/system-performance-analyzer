@@ -10,6 +10,7 @@
 
 namespace GStreamer
 {
+CPipelineMeasurements::CPipelineMeasurements() : enableProctime_{false} {}
 void CPipelineMeasurements::Initialize(
     std::vector<Exports::ExportData> *allData)
 {

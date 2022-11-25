@@ -74,7 +74,8 @@ int main(int argc, char *argv[])
     else if (e.type == "gstreamer")
     {
       processes.push_back(
-          ProcessInfo{e, CGstreamerHandler{&synchronizer, e, e.processId}});
+          ProcessInfo{e, CGstreamerHandler{&synchronizer, e, config.settings,
+                                           e.processId}});
       CLogger::Log(CLogger::Types::INFO,
                    "Added GStreamer pipeline: ", e.command);
     }

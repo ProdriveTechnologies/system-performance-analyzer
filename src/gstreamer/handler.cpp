@@ -16,18 +16,21 @@
 
 CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer,
                                      const Core::SProcess &userProcessInfo,
+                                     const Core::SSettings &settings,
                                      const int processId)
     : ProcessRunner::Base{synchronizer, userProcessInfo},
       threadSync_{synchronizer}, processId_{processId}, running_{false},
       gstPipeline_{nullptr}, gstBus_{nullptr}, gstMsg_{nullptr},
-      gstErrorMsg_{nullptr}, traceHandler_{&pipe_}
+      gstErrorMsg_{nullptr}, settings_{settings}, traceHandler_{&pipe_}
 {
 }
 CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler &gstreamer)
     : ProcessRunner::Base{gstreamer.threadSync_, gstreamer.userProcessInfo_},
-      threadSync_{gstreamer.threadSync_}, processId_{gstreamer.processId_},
-      running_{false}, gstPipeline_{nullptr}, gstBus_{nullptr},
-      gstMsg_{nullptr}, gstErrorMsg_{nullptr}, traceHandler_{&pipe_}
+      threadSync_{gstreamer.threadSync_},
+      processId_{gstreamer.processId_}, running_{false},
+      gstPipeline_{nullptr}, gstBus_{nullptr}, gstMsg_{nullptr},
+      gstErrorMsg_{nullptr}, settings_{gstreamer.settings_}, traceHandler_{
+                                                                 &pipe_}
 {
 }
 
@@ -225,5 +228,11 @@ void CGstreamerHandler::SetTracingEnvironmentVars()
 {
   setenv("GST_DEBUG", "GST_TRACER:7", true);
   // setenv("GST_TRACERS", "rusage;latency;framerate;proctime", true);
-  setenv("GST_TRACERS", "framerate", true);
+  std::string tracingVars = "framerate";
+  if (settings_.enableProcTime)
+  {
+    tracingVars += ";proctime";
+  }
+
+  setenv("GST_TRACERS", tracingVars.c_str(), true);
 }
