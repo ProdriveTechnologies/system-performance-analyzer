@@ -33,6 +33,7 @@ bool FileStream::CheckCustomVars()
       Helpers::isNumber(
           config_.taskConfig.getValWithName(JsonVars::SharedMemorySize)))
     return false;
+  return true;
 }
 
 void FileStream::Run()

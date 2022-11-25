@@ -28,8 +28,8 @@ public:
       moduleObj.Run();
       std::cout << "Child is terminating" << std::endl;
       // Stop the child when it returns (and close pipes accordingly)
-      close(moduleConfig.readPipeParent);
-      close(moduleConfig.writePipeParent);
+      // close(moduleConfig.readPipeParent);
+      // close(moduleConfig.writePipeParent);
       exit(EXIT_SUCCESS);
     }
     else

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "src/json_config/config.h"
+#include "src/linux/pipe_comm.h"
 
 namespace Module
 {
@@ -18,8 +19,7 @@ struct Config
   };
   Core::Task taskConfig;
   std::string moduleName;
-  int readPipeParent;
-  int writePipeParent;
+  Linux::PipeCommunicator parentComm;
   std::vector<Stream> inputStreams;
   std::vector<Stream> outputStreams;
 };
