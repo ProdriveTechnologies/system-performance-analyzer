@@ -62,6 +62,7 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
     exportData.time =
         std::to_string(stopwatch.GetTime<std::milli>()); // Millisecond accuracy
     exportData.cpuInfo = xavierSensors_.GetCoresInfo();
+    exportData.cpuUtilization = Linux::FileSystem::GetProcStat(XAVIER_CORES);
     SendExportsData(exportData);
 
     std::this_thread::sleep_for(

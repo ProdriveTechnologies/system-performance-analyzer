@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "src/benchmarks/Linux/xavier_sensors.h"
+#include "src/linux/filesystem.h"
 
 namespace Exports
 {
@@ -17,7 +18,9 @@ struct ExportData
   std::string time;
   std::vector<double> coreUtilization;
   std::vector<Process> runningProcessIds;
-  double memoryUsage;
+  double memoryUsage; 
   std::vector<CXavierSensors::SCpuCoreInfo> cpuInfo;
+  Linux::FileSystem::ProcStatData cpuUtilization;
+  std::vector<int> pids;
 };
 } // namespace Exports

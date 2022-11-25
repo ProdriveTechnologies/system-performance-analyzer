@@ -125,6 +125,51 @@ struct Stat
 };
 
 Stat GetStats(const std::string &statLocation);
+struct ProcStatRow
+{
+  std::vector<std::string> rowElements;
+};
+struct ProcStatData
+{
+  struct Cpu
+  {
+    long jiffiesUser;
+    long jiffiesNice;
+    long jiffiesSystem;
+    long jiffiesIdle;
+    long jiffiesIoWait;
+    long jiffiesIrq;
+    long jiffiesSoftIrq;
+    Cpu(const ProcStatRow &cpuRow)
+    {
+      if (!Add(cpuRow))
+        throw std::runtime_error("/proc/stat CPU data incorrect!");
+    }
+    Cpu() = default;
+    bool Add(const std::vector<std::string> &cpuRow)
+    {
+      if (cpuRow.size() != 9 || StartsWithCpu(cpuRow.at(0)))
+        return false;
+      jiffiesUser = std::stol(cpuRow.at(1));
+      jiffiesNice = std::stol(cpuRow.at(2));
+      jiffiesSystem = std::stol(cpuRow.at(3));
+      jiffiesIdle = std::stol(cpuRow.at(4));
+      jiffiesIoWait = std::stol(cpuRow.at(5));
+      jiffiesIrq = std::stol(cpuRow.at(6));
+      jiffiesSoftIrq = std::stol(cpuRow.at(7));
+      return true;
+    }
+    bool StartsWithCpu(const std::string &cpuString)
+    {
+      return cpuString.size() >= 3 && cpuString.substr(0, 3) == "cpu";
+    }
+    bool Add(const ProcStatRow &cpuRow) { return Add(cpuRow.rowElements); };
+  };
+  Cpu totalCpu;
+  std::vector<Cpu> cpus;
+};
+
+ProcStatData GetProcStat(const int cpus);
 
 } // namespace FileSystem
 } // namespace Linux
