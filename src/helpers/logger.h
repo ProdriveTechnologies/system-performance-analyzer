@@ -16,7 +16,7 @@ public:
   template <typename... Args>
   static void Log(const Types logType, const Args &... args);
 
-  static void Enable(const bool debug, const bool info)
+  static void Enable(const bool info, const bool debug)
   {
     enableDebugLogging_ = debug;
     enableInfoLogging_ = info;

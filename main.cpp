@@ -33,7 +33,10 @@ void print_info()
       << " -s --sensors [sensorconfig]\t\t use the [sensorconfig file] for the "
          "path and sensor information (must be in the JSON format, read "
          "documentation for the exact format or use the example, by default "
-         "\"sensor_config.json\")\n\n"
+         "\"sensor_config.json\")\n"
+      << " -l --log [loglevel]\t\t enables logging for the tool, [loglevel]: "
+         "0: only error and warnings, 1: info logging, 2: debug logging, 3: "
+         "all loggings\n\n"
       << "NOTE: OPTION --config (or -c) is required for the correct JSON "
          "configuration!\n"
       << std::endl;
@@ -48,7 +51,7 @@ int main(int argc, char *argv[])
     return -1; // Terminate application, arguments are incorrect
 
   // Enabling/disabling logger components
-  CLogger::Enable(false, true);
+  CLogger::Enable(userArgs.enableInfoLog, userArgs.enableDebugLog);
   // Parsing user configuration
   auto config = Core::ConfigParser::Parse(userArgs.configFile);
   CLogger::Log(CLogger::Types::INFO, "Started application");

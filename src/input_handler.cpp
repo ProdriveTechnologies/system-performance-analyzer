@@ -1,7 +1,9 @@
 #include "input_handler.h"
 
 #include "src/helpers/helper_functions.h"
+#include "src/helpers/logger.h"
 #include <iostream>
+#include <stdexcept>
 #include <string.h>
 
 /**
@@ -16,7 +18,8 @@ bool CInputHandler::Parse(int argc, char *argv[])
 
   int optionIndex{0};
   int c;
-  while ((c = getopt_long(argc, argv, "hc:s:", longopts_, &optionIndex)) != -1)
+  while ((c = getopt_long(argc, argv, "hc:s:l:", longopts_, &optionIndex)) !=
+         -1)
   {
     auto incorrectArgs = HandleOption(c, optionIndex);
     if (incorrectArgs || argc < 2)
@@ -60,12 +63,11 @@ bool CInputHandler::HandleOption(const int getoptRetVal,
     incorrectArgs = true;
     break;
   case Helpers::ToUnderlying(Arguments::CONFIG):
-    if (optarg)
-      ParseArguments(Arguments::CONFIG, &userArguments_, optarg);
-    break;
   case Helpers::ToUnderlying(Arguments::SENSORS):
+  case Helpers::ToUnderlying(Arguments::LOG):
     if (optarg)
-      ParseArguments(Arguments::SENSORS, &userArguments_, optarg);
+      ParseArguments(static_cast<Arguments>(getoptRetVal), &userArguments_,
+                     optarg);
     break;
   case '?':
     std::cout << "Unknown option: " << optopt << std::endl;
@@ -95,6 +97,39 @@ void CInputHandler::ParseArguments(const Arguments arg, SUserArgs *userArgs,
   case Arguments::CONFIG:
     userArgs->configFile = extraArg;
     break;
+  case Arguments::LOG:
+    ParseLog(userArgs, extraArg);
+    break;
   default:; // Do nothing
+  }
+}
+
+void CInputHandler::ParseLog(SUserArgs *userArgs, const std::string &extraArg)
+{
+  try
+  {
+    int logCode = std::stoi(extraArg);
+    switch (logCode)
+    {
+    case 0:
+      break; // no logging
+    case 1:
+      userArgs->enableInfoLog = true;
+      break;
+    case 2:
+      userArgs->enableDebugLog = true;
+      break;
+    case 3:
+      userArgs->enableInfoLog = true;
+      userArgs->enableDebugLog = true;
+      break;
+    default:
+      CLogger::Log(CLogger::Types::WARNING,
+                   "Log argument unknown! Disabled logging");
+    }
+  }
+  catch (const std::exception &err)
+  {
+    throw std::runtime_error("The \"log\" argument should be a numeric value!");
   }
 }
