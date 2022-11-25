@@ -171,6 +171,7 @@ void CPerfMeasurements::StartMeasurementsLoop()
     exportData.measuredItems = sensorMeasurements_.GetMeasurements();
     // GetMeasuredItems(measureFields_);
 
+    // exportData.processInfo
     // Measure data on each process
     // MeasureProcesses(processPids_);
 
@@ -198,7 +199,7 @@ void CPerfMeasurements::InitExports(const MeasureFieldsDefType &config)
 {
   if (config_.settings.enableLogs)
   {
-    pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CJson{},
+    pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CCsv{},
                                                      "jsonfile.json", true);
     // pExportObj_->InitExport(config);
   }
@@ -304,7 +305,6 @@ void CPerfMeasurements::AnalyzeData()
   SetThresholdResults(allSensors);
   // SetThresholdResults(sysSensorsMap);
 
-  std::cout << gstSensors.at(0).thresholdExceeded << std::endl;
   // pExportObj_ = std::make_unique<Exports::CExport>(
   //     new Exports::CSummaryGenerator{}, "filename", true);
   Exports::CSummaryGenerator generator;
@@ -320,18 +320,43 @@ void CPerfMeasurements::AnalyzeData()
 void CPerfMeasurements::SetThresholdResults(Measurements::AllSensors allSensors)
 // std::unordered_map<std::string, Measurements::Sensors> &sensorMap)
 {
-  auto sensorMap = allSensors.CreateMap();
-  for (const auto &e : thresholds_)
+  auto allProcessIds = allSensors.GetProcesses();
+  for (const auto &processId : allProcessIds)
   {
-    auto sensor = sensorMap.find(e.name);
-    if (sensor == sensorMap.end())
+    auto sensorMap = allSensors.GetMap(processId);
+
+    for (const auto &e : thresholds_)
     {
-      CLogger::Log(CLogger::Types::WARNING, "Threshold name: \"", e.name,
-                   "\" not found!");
-      continue; // Couldn't check any thresholds, doesn't exist
+      if (e.processId != processId)
+        continue; // This process doesn't need checking for this threshold
+      // if (e.processId != -1)
+      // {
+      //   auto sensorMapTemp = allSensors.GetMap(e.processId);
+      //   auto sensor = sensorMap.find(e.name);
+      //   if (sensor == sensorMap.end())
+      //   {
+      //     CLogger::Log(CLogger::Types::WARNING, "Threshold name: \"", e.name,
+      //                  "\" not found!");
+      //     continue; // Couldn't check any thresholds, doesn't exist
+      //   }
+      //   if (!sensor->second->thresholdExceeded)
+      //     sensor->second->thresholdExceeded =
+      //         PerformanceHelpers::HandleThreshold(sensor->second, e);
+      // }
+      // else
+      // {
+      auto sensor = sensorMap.find(e.name);
+      if (sensor == sensorMap.end())
+      {
+        CLogger::Log(CLogger::Types::WARNING, "Threshold name: \"", e.name,
+                     "\" not found!");
+        continue; // Couldn't check any thresholds, doesn't exist
+      }
+      if (!sensor->second->thresholdExceeded)
+        sensor->second->thresholdExceeded =
+            PerformanceHelpers::HandleThreshold(sensor->second, e);
+      // }
     }
-    sensor->second->thresholdExceeded =
-        PerformanceHelpers::HandleThreshold(sensor->second, e);
   }
 }
 

@@ -63,9 +63,9 @@ struct Sensors
                       // "xavier_config.json" file. If it is in an array, this
                       // userId will have a number of the array behind it
   int uniqueId;
-  std::string groupId; // Only applicable for arrays, this is the groupname and
-  // therefore does not contain the array number. This is
-  // the "original" user id of the sensor
+  // std::string groupId; // Only applicable for arrays, this is the groupname
+  // and therefore does not contain the array number. This is the "original"
+  // user id of the sensor
 
   SensorData data;
   Sensors(const std::string &userId_, const int uniqueId_)
@@ -80,6 +80,27 @@ enum class Classification
   PIPELINE,
   PROCESSES,
   SYSTEM
+};
+
+using SensorName = std::string;
+using SensorProcessId = int;
+using SensorIdentifier = std::pair<SensorName, SensorProcessId>;
+struct SensorIdHash
+{
+  inline size_t operator()(const Measurements::SensorIdentifier &k) const
+  {
+    // computes the hash of a GStreamer::Identifier using a variant
+    // of the Fowler-Noll-Vo hash function
+    // from: https://en.cppreference.com/w/cpp/utility/hash/operator()
+    size_t result = 2166136261;
+
+    for (size_t i = 0, ie = k.first.size(); i != ie; ++i)
+    {
+      result = (result * 16777619) ^ k.first[i];
+    }
+
+    return result ^ (k.second << 1);
+  }
 };
 
 /**
@@ -97,7 +118,13 @@ struct AllSensors
 
   std::unordered_map<Classification, std::vector<SensorGroups>> data;
   std::unordered_map<std::string, Measurements::Sensors *> mapByNameId;
-  // std::unordered_map<std::string, Measurements::Sensors &> mapByNameId2;
+  std::unordered_map<SensorIdentifier, Measurements::Sensors *, SensorIdHash>
+      mapByNameId2;
+
+  using SensorMap = std::unordered_map<std::string, Measurements::Sensors *>;
+  using ProcessId = int;
+  using SensorMapByProcess = std::unordered_map<ProcessId, SensorMap>;
+  SensorMapByProcess mapByProcessId;
   /**
    * @brief Returns the sensors based on a group classification and
    * optionally a process ID
@@ -130,6 +157,18 @@ struct AllSensors
     }
     throw std::runtime_error("Couldn't find sensor in map!");
   }
+  std::unordered_set<int> GetProcesses() const
+  {
+    std::unordered_set<int> result;
+    for (const auto &e : data)
+    {
+      for (const auto &processSensors : e.second)
+      {
+        result.insert(processSensors.processId);
+      }
+    }
+    return result;
+  }
 
   void AddSensors(const Classification c, const std::vector<Sensors> &sensors,
                   const int processId = -1)
@@ -140,40 +179,64 @@ struct AllSensors
     if (existingGroup != data.end())
     {
       existingGroup->second.push_back(sensorGroup);
-      AddMapValues(&existingGroup->second.back().sensors);
+      AddMapValues(&mapByProcessId, &existingGroup->second.back().sensors,
+                   processId);
     }
     else
     {
       std::vector<SensorGroups> groups{sensorGroup};
       data.insert(std::make_pair(c, groups));
-      AddMapValues(&data.find(c)->second.back().sensors);
-      // AddMapValues2(data.find(c)->second.back().sensors);
+      AddMapValues(&mapByProcessId, &data.find(c)->second.back().sensors,
+                   processId);
     }
   }
-  std::unordered_map<std::string, Measurements::Sensors *> CreateMap() const
+  void AddSensors(const Classification c,
+                  const std::vector<SensorGroups> &sensors)
   {
-    return mapByNameId;
+    auto existingGroup = data.find(c);
+
+    if (existingGroup != data.end())
+    {
+      existingGroup->second = sensors;
+      for (auto &e : existingGroup->second)
+        AddMapValues(&mapByProcessId, &e.sensors, e.processId);
+    }
+    else
+    {
+      data.insert(std::make_pair(c, sensors));
+      for (auto &e : data.find(c)->second)
+        AddMapValues(&mapByProcessId, &e.sensors, e.processId);
+    }
   }
-  // std::unordered_map<std::string, Measurements::Sensors &> GetMap() const
+  // std::unordered_map<std::string, Measurements::Sensors *> GetMap() const
   // {
-  //   return mapByNameId2;
+  //   return mapByNameId;
   // }
+  SensorMap GetMap(const int processId) const
+  {
+    auto mapResult = mapByProcessId.find(processId);
+    if (mapResult == mapByProcessId.end())
+    {
+      throw std::runtime_error("Process ID not existent!");
+    }
+    return mapResult->second;
+  }
 
 private:
-  void AddMapValues(const std::vector<Sensors> *sensors)
+  void AddMapValues(SensorMapByProcess *mapObj, std::vector<Sensors> *sensors,
+                    const int processId) const
   {
-    for (auto e : *sensors)
+    auto mapResult = mapObj->find(processId);
+    if (mapResult == mapObj->end())
     {
-      mapByNameId.insert(std::make_pair(e.userId, &e));
+      mapObj->insert(std::make_pair(processId, SensorMap{}));
+      mapResult = mapObj->find(processId);
+    }
+    for (auto &e : *sensors)
+    {
+      mapResult->second.insert(std::make_pair(e.userId, &e));
     }
   }
-  // void AddMapValues2(const std::vector<Sensors> &sensors)
-  // {
-  //   for (auto e : sensors)
-  //   {
-  //     mapByNameId2.insert(std::make_pair(e.userId, e));
-  //   }
-  // }
 };
 
 // std::unordered_map<std::string, Sensors> sensors_;

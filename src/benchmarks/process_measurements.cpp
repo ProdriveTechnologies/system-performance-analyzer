@@ -1,4 +1,4 @@
-#include "sensor_measurements.h"
+#include "process_measurements.h"
 
 #include "Linux/xavier_sensors.h"
 #include "src/benchmarks/Linux/performance_helpers.h"
@@ -6,21 +6,26 @@
 
 namespace Measurements
 {
-CSensors::CSensors(const std::string &configFile) : configFile_{configFile} {}
+CProcessMeasurements::CProcessMeasurements(const std::string &configFile)
+    : configFile_{configFile}
+{
+}
 
-void CSensors::Initialize(std::vector<Exports::ExportData> *allData)
+void CProcessMeasurements::Initialize(std::vector<Exports::ExportData> *allData,
+                                      const std::unordered_set<int> processIds)
 {
   allData_ = allData;
+  processIds_ = processIds;
   auto parsed = PlatformConfig::Parse(configFile_);
   auto measureFields =
-      GetFields(parsed.sensors, &CSensors::GetMeasureFields, this);
+      GetFields(parsed.sensors, &CProcessMeasurements::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
   measureFieldsDefinition_ = measureFields.definition;
   // Reset the proc-stat variables because they accumulate over-time
   procHandler_.ParseProcStat();
 }
 
-Exports::MeasurementItem CSensors::GetConfig() const
+Exports::MeasurementItem CProcessMeasurements::GetConfig() const
 {
   Exports::MeasurementItem config;
   config.name = "Measurement fields";
@@ -29,7 +34,8 @@ Exports::MeasurementItem CSensors::GetConfig() const
   return config;
 }
 
-std::vector<Exports::MeasurementItem> CSensors::GetMeasurementFields() const
+std::vector<Exports::MeasurementItem>
+CProcessMeasurements::GetMeasurementFields() const
 {
   std::vector<Exports::MeasurementItem> result;
   for (const auto &e : measureFieldsDefinition_)
@@ -43,20 +49,46 @@ std::vector<Exports::MeasurementItem> CSensors::GetMeasurementFields() const
   return result;
 }
 
-std::vector<Sensors> CSensors::GetSensors() const
+std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
 {
-  std::vector<Sensors> result;
-  for (const auto &e : measureFieldsDefinition_)
-  {
-    Sensors sensor{e.name, e.id};
-    sensor.data = PerformanceHelpers::GetSummarizedDataSensors(allData_, e.id);
-    result.push_back(sensor);
-  }
-  return result;
+  std::vector<AllSensors::SensorGroups> result;
+  // for (const auto &e : measureFieldsDefinition_)
+  // {
+  //   Sensors sensor{e.name, e.id};
+  //   sensor.data = PerformanceHelpers::GetSummarizedDataSensors(allData_,
+  //   e.id); result.push_back(sensor);
+  // }
+  // // Add the collective groups, such as the combined cpu's instead of the
+  // single
+  // // cores
+  // std::unordered_map<std::string, std::unordered_set<int>> classes;
+  // for (const auto &e : measureFieldsDefinition_)
+  // {
+  //   // Check if it is within an array, then these values are non-equal
+  //   if (e.name != e.nameClass)
+  //   {
+  //     auto nameClass = classes.find(e.nameClass);
+  //     if (nameClass != classes.end())
+  //     {
+  //       nameClass->second.insert(e.id);
+  //     }
+  //     else
+  //     {
+  //       classes.insert(
+  //           std::make_pair(e.nameClass, std::unordered_set<int>{e.id}));
+  //     }
+  //   }
+  // }
+  // for (const auto &e : classes)
+  // {
+  //   result.push_back(PerformanceHelpers::GetSummarizedDataSensors(
+  //       allData_, e.second, e.first));
+  // }
+  // return result;
 }
 
-std::vector<Exports::MeasurementItem>
-CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
+std::vector<Exports::MeasurementItem> CProcessMeasurements::GetDefinitionItems(
+    const PlatformConfig::SDatafields &field) const
 {
   std::vector<Exports::MeasurementItem> result;
   auto item1 =
@@ -74,14 +106,14 @@ CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
   return result;
 }
 
-std::vector<Exports::MeasuredItem> CSensors::GetMeasurements()
+std::vector<Exports::MeasuredItem> CProcessMeasurements::GetMeasurements()
 {
   procHandler_.ParseMeminfo();
   return GetMeasurements(measureFields_);
 }
 
 std::vector<Exports::MeasuredItem>
-CSensors::GetMeasurements(const MeasureFieldsType &measureFields)
+CProcessMeasurements::GetMeasurements(const MeasureFieldsType &measureFields)
 {
   procHandler_.ParseProcStat();
   std::vector<Exports::MeasuredItem> measuredItems;
@@ -113,12 +145,12 @@ CSensors::GetMeasurements(const MeasureFieldsType &measureFields)
   return measuredItems;
 }
 
-CSensors::MeasureCombo CSensors::GetFields(
+CProcessMeasurements::MeasureCombo CProcessMeasurements::GetFields(
     std::vector<PlatformConfig::SDatafields> &sensorConfig,
-    const std::function<MeasureCombo(CSensors *,
+    const std::function<MeasureCombo(CProcessMeasurements *,
                                      const PlatformConfig::SDatafields &)>
         parserFunction,
-    CSensors *memberPtr)
+    CProcessMeasurements *memberPtr)
 {
   MeasureCombo result;
 
@@ -129,8 +161,8 @@ CSensors::MeasureCombo CSensors::GetFields(
 
   return result;
 }
-CSensors::MeasureCombo
-CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
+CProcessMeasurements::MeasureCombo CProcessMeasurements::GetMeasureFields(
+    const PlatformConfig::SDatafields &dataField)
 {
   MeasureCombo result;
 
@@ -149,8 +181,8 @@ CSensors::GetMeasureFields(const PlatformConfig::SDatafields &dataField)
   return result;
 }
 
-CSensors::MeasureCombo
-CSensors::ParseArray(const PlatformConfig::SDatafields &data)
+CProcessMeasurements::MeasureCombo
+CProcessMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
 {
   MeasureCombo result;
   // Loop through the defined array
@@ -161,6 +193,7 @@ CSensors::ParseArray(const PlatformConfig::SDatafields &data)
     {
       auto datafieldCopy{e};
       Helpers::replaceStr(datafieldCopy.path, "$INDEX$", std::to_string(i));
+      datafieldCopy.nameClass = datafieldCopy.name;
       datafieldCopy.name = datafieldCopy.name + std::to_string(i);
       result.Add(GetMeasureFields(datafieldCopy));
     }
@@ -168,8 +201,8 @@ CSensors::ParseArray(const PlatformConfig::SDatafields &data)
   return result;
 }
 
-CSensors::MeasureComboSingular
-CSensors::ParseField(const PlatformConfig::SDatafields &data)
+CProcessMeasurements::MeasureComboSingular
+CProcessMeasurements::ParseField(const PlatformConfig::SDatafields &data)
 {
   MeasureComboSingular result;
   result.field.path = data.path;

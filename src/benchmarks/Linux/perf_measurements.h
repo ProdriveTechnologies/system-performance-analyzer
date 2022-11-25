@@ -16,8 +16,8 @@
 #include "src/json_config/sensor_config/config.h"
 // #include "xavier_sensors_live.h"
 #include "src/benchmarks/Linux/struct_sensors.h"
-#include "src/benchmarks/gstreamer_measurements.h"
-#include "src/benchmarks/sensor_measurements.h"
+#include "src/benchmarks/pipeline_measurements.h"
+#include "src/benchmarks/system_measurements.h"
 #include "src/processes_struct.h"
 
 class Synchronizer; // pre-definition
@@ -81,7 +81,7 @@ private:
   // MeasureFieldsDefType processFieldsDef_;
   // MeasureFieldsType processFields_;
 
-  GStreamer::CProcessMeasurements gstMeasurements_;
+  GStreamer::CPipelineMeasurements gstMeasurements_;
   Exports::ExportConfig exportConfig_;
   Measurements::CSensors sensorMeasurements_;
   std::vector<Core::SThreshold> thresholds_;

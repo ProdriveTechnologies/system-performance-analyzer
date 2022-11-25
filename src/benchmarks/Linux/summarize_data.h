@@ -44,12 +44,16 @@ private:
       aggregatedData += item.measuredValue;
       datapoints += 1;
     }
-    double Get() const { return aggregatedData / datapoints; }
+    double Get() const
+    {
+      return datapoints != 0 ? aggregatedData / datapoints : 0;
+    }
   };
   Average average_;
 
   void AddInitial(const Exports::MeasuredItem &item)
   {
+    firstDataPoint_ = false;
     minFound_ = item.measuredValue;
     maxFound_ = item.measuredValue;
   }

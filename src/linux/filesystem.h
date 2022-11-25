@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "src/helpers/helper_functions.h"
@@ -124,6 +125,60 @@ struct Stat
   {
   }
   Stat() = default;
+  std::unordered_map<std::string,
+                     std::variant<int *, long unsigned *, long int *,
+                                  long long unsigned *, char *>>
+      nameToValue = {{"pid", &pid},
+                     {"state", &state},
+                     {"ppid", &ppid},
+                     {"pgrp", &pgrp},
+                     {"session", &session},
+                     {"tty_nr", &ttyNr},
+                     {"tpgid", &tpgid},
+                     {"flags", &flags},
+                     {"minflt", &minFaults},
+                     {"cminflt", &cminFaults},
+                     {"majflt", &majorFaults},
+                     {"cmajflt", &cmajorFaults},
+                     {"utime", &utime},
+                     {"stime", &stime},
+                     {"cutime", &cutime},
+                     {"cstime", &cstime},
+                     {"priority", &priority},
+                     {"nice", &nice},
+                     {"num_threads", &numThreads},
+                     {"itrealvalue", &itrealvalue},
+                     {"starttime", &starttime},
+                     {"vsize", &vsize},
+                     {"rss", &rss},
+                     {"rsslim", &rsslim},
+                     {"startcode", &startcode},
+                     {"endcode", &endcode},
+                     {"startstack", &startstack},
+                     {"kstkesp", &kstkesp},
+                     {"kstkeip", &kstkeip},
+                     {"signal", &signal},
+                     {"blocked", &blocked},
+                     {"sigignore", &sigignore},
+                     {"sigcatch", &sigcatch},
+                     {"wchan", &wchan},
+                     {"nswap", &nswap},
+                     {"cnswap", &cnswap},
+                     {"exit_signal", &exitSignal},
+                     {"processor", &processor},
+                     {"rt_priority", &rtPriority},
+                     {"policy", &policy},
+                     {"delayacct_blkio_ticks", &delayAcctBlkioTicks},
+                     {"guest_time", &guestTime},
+                     {"cguest_time", &cguestTime},
+                     {"start_data", &startData},
+                     {"end_data", &endData},
+                     {"start_brk", &startBrk},
+                     {"arg_start", &argStart},
+                     {"arg_end", &argEnd},
+                     {"env_start", &envStart},
+                     {"env_end", &envEnd},
+                     {"exit_code", &exitCode}};
 };
 
 Stat GetStats(const std::string &statLocation);

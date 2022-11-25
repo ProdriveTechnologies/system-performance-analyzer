@@ -118,14 +118,17 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
   switch (threshold.type)
   {
   case Core::ThresholdType::MAX:
-    return parseSign(sensor->data.Get(Measurements::ValueTypes::MAX),
-                     threshold.value, threshold.sign);
+    return parseSign(threshold.value,
+                     sensor->data.Get(Measurements::ValueTypes::MAX),
+                     threshold.sign);
   case Core::ThresholdType::MIN:
-    return parseSign(sensor->data.Get(Measurements::ValueTypes::MIN),
-                     threshold.value, threshold.sign);
+    return parseSign(threshold.value,
+                     sensor->data.Get(Measurements::ValueTypes::MIN),
+                     threshold.sign);
   case Core::ThresholdType::AVERAGE:
-    return parseSign(sensor->data.Get(Measurements::ValueTypes::AVERAGE),
-                     threshold.value, threshold.sign);
+    return parseSign(threshold.value,
+                     sensor->data.Get(Measurements::ValueTypes::AVERAGE),
+                     threshold.sign);
   }
 }
 
@@ -148,6 +151,30 @@ GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
     }
   }
   return summarizedData.GetSensorData();
+}
+
+/**
+ * @brief Get the Summarized Data object
+ */
+Measurements::Sensors
+GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
+                         const std::unordered_set<int> uniqueIds,
+                         const std::string &name)
+{
+  Measurements::CSummarizeData summarizedData;
+  // This is the loop for each measurement
+  for (const auto &e : *data)
+  {
+    // This is the loop for the datapoints, only the uniqueId datapoint is used
+    for (const auto &e2 : e.measuredItems)
+    {
+      if (uniqueIds.find(e2.id) != uniqueIds.end())
+        summarizedData.AddDataPoint(e2);
+    }
+  }
+  Measurements::Sensors result{name, PerformanceHelpers::GetUniqueId()};
+  result.data = summarizedData.GetSensorData();
+  return result;
 }
 
 } // namespace PerformanceHelpers

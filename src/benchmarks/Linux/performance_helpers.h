@@ -27,4 +27,9 @@ Measurements::SensorData
 GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
                          const int uniqueId);
 
+Measurements::Sensors
+GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,
+                         const std::unordered_set<int> uniqueId,
+                         const std::string &name);
+
 } // namespace PerformanceHelpers

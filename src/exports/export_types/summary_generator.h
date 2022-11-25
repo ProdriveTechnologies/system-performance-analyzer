@@ -32,7 +32,7 @@ private:
   void PrintPcieInfo();
   std::string PrintValues(const Measurements::SensorData data)
   {
-    std::string result;
+    std::string result = "\n";
     for (const auto &e : data.summarizedValues)
       result += "\t" + ToString(e.type) + ": " + std::to_string(e.value) + "\n";
     return result;

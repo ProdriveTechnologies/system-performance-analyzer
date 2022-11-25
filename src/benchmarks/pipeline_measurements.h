@@ -26,16 +26,13 @@ namespace GStreamer
  * 4. Support exports and analysis
  * 5. Detect performance decreases
  */
-class CProcessMeasurements
+class CPipelineMeasurements
 {
 public:
   //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
-  CProcessMeasurements() = default;
+  CPipelineMeasurements() = default;
 
-  void AddPipelines(std::vector<CGstreamerHandler *> gstreamerStream)
-  {
-    streams_ = gstreamerStream;
-  }
+  void AddPipelines(std::vector<CGstreamerHandler *> gstreamerStream);
 
   void Initialize(std::vector<Exports::ExportData> *allData);
   void ConcludeMeasurement();
@@ -44,34 +41,33 @@ public:
   std::vector<Exports::PipelineConfig> GetPipelineConfig() const;
   Exports::MeasurementItem GetPipelineConfig2() const;
   std::vector<Exports::MeasurementItem>
-  GetPipelineConfig(const size_t pipelineNr) const;
+  GetPipelineConfig(const int pipelineNr) const;
   std::vector<Exports::MeasurementItem>
-  GetMeasurementLabels(const size_t pipelineNr) const;
-  std::vector<Exports::MeasurementItem>
-  GetPipelineMeasurements(const size_t pipelineNr) const;
+  GetMeasurementLabels(const int pipelineNr) const;
   std::vector<Exports::PipelineInfo>
   SortData(const std::vector<Exports::PipelineInfo> &data);
-  std::vector<Measurements::Sensors> GetSensors() const;
+  std::vector<Measurements::AllSensors::SensorGroups> GetSensors() const;
 
 private:
+  using PipelineNr = int;
   std::vector<Exports::ExportData> *allData_;
-  std::vector<CGstreamerHandler *> streams_;
-  std::vector<std::unordered_map<Identifier, int>> uniqueIds_;
+  std::unordered_map<PipelineNr, CGstreamerHandler *> streams_;
+  std::unordered_map<PipelineNr, std::unordered_map<Identifier, int>>
+      uniqueIds_;
 
-  int GetUniqueId(const size_t pipelineId, const Identifier &id);
+  int GetUniqueId(const int pipelineId, const Identifier &id);
   std::unordered_map<int, Identifier>
-  GetPluginNames(const size_t pipelineId) const;
+  GetPluginNames(const int pipelineId) const;
 
-  std::string CreateSensorName(const int pipelineNr,
-                               const std::string moduleName,
-                               MeasureType type) const;
+  std::string CreateSensorName(const std::string moduleName, MeasureType type,
+                               const int pipelineNr = -1) const;
   inline std::unordered_set<int>
   GetUniqueIdsByType(const MeasureType type) const
   {
     std::unordered_set<int> result;
     for (const auto &e : uniqueIds_)
     {
-      for (const auto &e2 : e)
+      for (const auto &e2 : e.second)
       {
         if (e2.first.type == type)
           result.insert(e2.second);

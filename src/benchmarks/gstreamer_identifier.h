@@ -30,7 +30,7 @@ template <> struct hash<GStreamer::Identifier>
 {
   inline size_t operator()(const GStreamer::Identifier &k) const
   {
-    // computes the hash of an employee using a variant
+    // computes the hash of a GStreamer::Identifier using a variant
     // of the Fowler-Noll-Vo hash function
     // from: https://en.cppreference.com/w/cpp/utility/hash/operator()
     size_t result = 2166136261;

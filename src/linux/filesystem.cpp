@@ -31,6 +31,13 @@ Stat GetStats(const std::string &statLocation)
   return Stat{statElements};
 }
 
+/**
+ * @brief Get the /proc/stat data
+ *
+ * @param procStatLocation the location of the /proc/stat content, normally
+ * /proc/stat
+ * @return ProcStatData the measured data
+ */
 ProcStatData GetProcStat(const std::string &procStatLocation)
 {
   std::ifstream statFile{procStatLocation, std::ios_base::in};
@@ -67,6 +74,14 @@ ProcStatData GetProcStat(const std::string &procStatLocation)
   return procStatData;
 }
 
+/**
+ * @brief Grouped names that can be used to access the parameters from the
+ * config file
+ *
+ * @param cpuField
+ * @param groupName
+ * @return long long
+ */
 long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
                            const std::string &groupName)
 {
@@ -94,14 +109,16 @@ long long GetProcStatGroup(const ProcStatData::Cpu &cpuField,
     return cpuField.jiffiesIrq;
   case Helpers::hash("softirq"):
     return cpuField.jiffiesSoftIrq;
-
-    // case Helpers::hash("steal"):
-    // case Helpers::hash("guest"):
-    // case Helpers::hash("guest_nice"):
   }
-  throw std::runtime_error("Name: " + groupName + "not recognised!");
+  throw std::runtime_error("Name: " + groupName + " not recognised!");
 }
 
+/**
+ * @brief Get the /proc/meminfo info
+ *
+ * @param memInfoLocation
+ * @return MemInfoData
+ */
 MemInfoData GetMemInfo(const std::string &memInfoLocation)
 {
   std::ifstream memoryFile{memInfoLocation, std::ios_base::in};
@@ -122,9 +139,7 @@ MemInfoData GetMemInfo(const std::string &memInfoLocation)
     memoryRows.push_back(row);
   }
 
-  // const auto &procStatRow = statElements.at(0);
   MemInfoData memoryData;
-  // procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
 
   for (const auto &memoryRow : memoryRows)
   {

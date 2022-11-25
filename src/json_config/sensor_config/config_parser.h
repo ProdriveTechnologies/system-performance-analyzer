@@ -13,6 +13,7 @@ SConfig Parse(const std::string &jsonFile);
 inline void from_json(const nlohmann::json &j, SDatafields &p)
 {
   j.at("name").get_to(p.name);
+  p.nameClass = p.name;
   std::string typeStr;
   j.at("type").get_to(typeStr);
   p.type = GetType(typeStr);

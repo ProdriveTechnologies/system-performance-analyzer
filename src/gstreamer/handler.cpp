@@ -78,17 +78,18 @@ static void pad_added_handler(GstElement *src, GstPad *new_pad,
   gst_object_unref(sink_pad);
 }
 
-CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer)
-    : ProcessRunner::Base{synchronizer},
-      threadSync_{synchronizer}, running_{false}, gstPipeline_{nullptr},
+CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer,
+                                     const int processId)
+    : ProcessRunner::Base{synchronizer}, threadSync_{synchronizer},
+      processId_{processId}, running_{false}, gstPipeline_{nullptr},
       gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{nullptr}
 {
 }
 CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler &gstreamer)
     : ProcessRunner::Base{gstreamer.threadSync_},
-      threadSync_{gstreamer.threadSync_}, running_{false},
-      gstPipeline_{nullptr}, gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{
-                                                                     nullptr}
+      threadSync_{gstreamer.threadSync_},
+      processId_{gstreamer.processId_}, running_{false}, gstPipeline_{nullptr},
+      gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{nullptr}
 {
 }
 
@@ -133,7 +134,6 @@ CGstreamerHandler::~CGstreamerHandler()
   FreeMemory();
   if (pipelineThread_.joinable())
     pipelineThread_.join();
-  gst_deinit();
 }
 
 void CGstreamerHandler::FreeMemory()
@@ -355,7 +355,8 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   SetTracingEnvironmentVars();
   gst_debug_remove_log_function(gst_debug_log_default);
   // gstreamer initialization
-  gst_init(nullptr, nullptr);
+  if (!gst_is_initialized())
+    gst_init(nullptr, nullptr);
 
   GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
@@ -409,6 +410,7 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
 void CGstreamerHandler::SetTracingEnvironmentVars()
 {
   setenv("GST_DEBUG", "GST_TRACER:7", true);
-  setenv("GST_TRACERS", "rusage;latency;framerate", true);
+  // setenv("GST_TRACERS", "rusage;latency;framerate", true);
+  setenv("GST_TRACERS", "framerate", true);
   // setenv("GST_TRACE_CHANNEL", "");
 }

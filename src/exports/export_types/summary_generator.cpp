@@ -28,22 +28,31 @@ bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
   for (const auto &e : config)
   {
   }
-  const auto sensors = allSensors.CreateMap();
 
-  SummaryWriter::PrintSubSection("Thresholds:");
-  for (const auto &e : sensors)
+  auto processIds = allSensors.GetProcesses();
+
+  SummaryWriter::PrintSection(SummaryTranslations::thresholdTitle);
+  bool exceeded = false;
+  for (const auto &processId : processIds)
   {
-    if (e.second->thresholdExceeded)
+    auto sensors = allSensors.GetMap(processId);
+    for (const auto &sensor : sensors)
     {
-      SummaryWriter::PrintRow("theshold exceeded");
-      SummaryWriter::PrintRow(std::to_string(e.second->uniqueId));
-      SummaryWriter::PrintRow("ID: " + e.second->userId);
-      SummaryWriter::PrintRow(
-          "Threshold for " + e.second->userId + " was exceeded for group " +
-          e.second->userId +
-          ". The values were: " + PrintValues(e.second->data));
+      if (sensor.second->thresholdExceeded)
+      {
+        SummaryWriter::PrintRow(
+            "Threshold for " + sensor.second->userId +
+            " was exceeded for process id: " + std::to_string(processId) +
+            ". The values were: " + PrintValues(sensor.second->data));
+        exceeded = true;
+      }
     }
   }
+  if (!exceeded)
+  {
+    SummaryWriter::PrintRow(SummaryTranslations::thresholdExceeded);
+  }
+  return true;
 }
 
 bool CSummaryGenerator::Generate(

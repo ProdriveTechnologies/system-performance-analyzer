@@ -30,5 +30,9 @@ void Synchronizer::WaitForProcess()
 bool Synchronizer::AllCompleted()
 {
   const size_t allThreadsExcludingThis = threadNr_ - 1;
-  return threadReadyCount_ == allThreadsExcludingThis;
+  bool res = threadReadyCount_ == allThreadsExcludingThis;
+  if (res)
+    return true;
+  else
+    return false;
 }

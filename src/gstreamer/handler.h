@@ -13,7 +13,7 @@ class Synchronizer;
 class CGstreamerHandler : public ProcessRunner::Base
 {
 public:
-  CGstreamerHandler(Synchronizer *synchronizer);
+  CGstreamerHandler(Synchronizer *synchronizer, const int processId);
   CGstreamerHandler(const CGstreamerHandler &gstreamer);
   ~CGstreamerHandler();
 
@@ -27,6 +27,8 @@ public:
   bool IsRunning() const { return running_; }
 
   size_t GetMeasurementsSize() { return traceHandler_.GetMeasurementsSize(); }
+  int GetProcessId() const { return processId_; }
+
   GStreamer::Measurement GetMeasurement()
   {
     return traceHandler_.GetMeasurement();
@@ -41,6 +43,7 @@ private:
   std::string pipelineStr_;
   Synchronizer *threadSync_;
   std::atomic<int> threadPid_;
+  const int processId_;
   bool running_;
   GstElement *gstPipeline_;
   GstBus *gstBus_;

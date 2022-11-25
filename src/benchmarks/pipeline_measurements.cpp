@@ -1,7 +1,8 @@
-#include "gstreamer_measurements.h"
+#include "pipeline_measurements.h"
 
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 
 #include "src/benchmarks/Linux/performance_helpers.h"
 #include "src/gstreamer/handler.h"
@@ -9,13 +10,25 @@
 
 namespace GStreamer
 {
-void CProcessMeasurements::Initialize(std::vector<Exports::ExportData> *allData)
+void CPipelineMeasurements::Initialize(
+    std::vector<Exports::ExportData> *allData)
 {
   allData_ = allData;
   // Initialize the uniqueIds_ vector
-  for (size_t i = 0; i < streams_.size(); ++i)
+  for (const auto &e : streams_)
   {
-    uniqueIds_.push_back(std::unordered_map<Identifier, int>{});
+    uniqueIds_.insert(
+        std::make_pair(e.first, std::unordered_map<Identifier, int>{}));
+  }
+}
+
+void CPipelineMeasurements::AddPipelines(
+    std::vector<CGstreamerHandler *> gstreamerStream)
+{
+  for (auto &e : gstreamerStream)
+  {
+    auto pipelineId = e->GetProcessId();
+    streams_.insert(std::make_pair(pipelineId, e));
   }
 }
 
@@ -24,7 +37,7 @@ void CProcessMeasurements::Initialize(std::vector<Exports::ExportData> *allData)
  * The sorting is based on the ID field
  */
 std::vector<Exports::PipelineInfo>
-CProcessMeasurements::SortData(const std::vector<Exports::PipelineInfo> &data)
+CPipelineMeasurements::SortData(const std::vector<Exports::PipelineInfo> &data)
 {
   std::vector<Exports::PipelineInfo> sorted;
   auto sortFunction = [](const Exports::MeasuredItem &lhs,
@@ -45,30 +58,29 @@ CProcessMeasurements::SortData(const std::vector<Exports::PipelineInfo> &data)
  *
  * @return std::vector<Exports::PipelineInfo>
  */
-std::vector<Exports::PipelineInfo> CProcessMeasurements::ProcessGstreamer()
+std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
 {
   std::vector<Exports::PipelineInfo> result;
   // Check each individual gstreamer pipeline
-  for (size_t i = 0; i < streams_.size(); ++i)
+  for (auto &e : streams_)
   {
-    auto &e = streams_.at(i);
-    size_t queueSize = e->GetMeasurementsSize();
+    size_t queueSize = e.second->GetMeasurementsSize();
     // Read each measurement of the GStreamer pipeline and put it in a map
     std::vector<PlatformConfig::SMeasureField> measureField_;
     std::unordered_map<Identifier, GStreamer::Measurement> summarizeMap;
     for (size_t qI = 0; qI < queueSize; qI++)
     {
-      auto measurement = e->GetMeasurement();
+      auto measurement = e.second->GetMeasurement();
       const auto id = Identifier{measurement.type, measurement.pluginName};
       if (summarizeMap.find(id) == summarizeMap.end())
         summarizeMap.insert(std::make_pair(id, measurement));
     }
     // Convert the measured data to an Exports::MeasuredItem type
     Exports::PipelineInfo gsData;
-    gsData.pipelineId = e->GetThreadPid();
+    gsData.pipelineId = e.second->GetThreadPid();
     for (const auto &m : summarizeMap)
     {
-      Exports::MeasuredItem field{GetUniqueId(i, m.first),
+      Exports::MeasuredItem field{GetUniqueId(e.first, m.first),
                                   static_cast<double>(m.second.valueInt)};
       gsData.measuredItems.push_back(field);
     }
@@ -78,20 +90,19 @@ std::vector<Exports::PipelineInfo> CProcessMeasurements::ProcessGstreamer()
 }
 
 std::vector<Exports::PipelineConfig>
-CProcessMeasurements::GetPipelineConfig() const
+CPipelineMeasurements::GetPipelineConfig() const
 {
   std::vector<Exports::PipelineConfig> result;
-  for (size_t i = 0; i < streams_.size(); ++i)
+  for (const auto &e : streams_)
   {
-    const auto &e = streams_.at(i);
     Exports::PipelineConfig stream;
-    stream.pipelineCommand = e->GetPipeline();
-    stream.pipelineId = i;
-    stream.pluginNames = GetPluginNames(i);
+    stream.pipelineCommand = e.second->GetPipeline();
+    stream.pipelineId = e.first;
+    stream.pluginNames = GetPluginNames(e.first);
   }
   return result;
 }
-Exports::MeasurementItem CProcessMeasurements::GetPipelineConfig2() const
+Exports::MeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
 {
   Exports::MeasurementItem pipelineConfig;
   pipelineConfig.name = "Pipeline config";
@@ -99,12 +110,12 @@ Exports::MeasurementItem CProcessMeasurements::GetPipelineConfig2() const
   // What info should this return? The pipeline command, the pipeline id, and
   // the pipeline measurement values
   std::vector<Exports::MeasurementItem> pipelineItems;
-  for (size_t i = 0; i < streams_.size(); ++i)
+  for (const auto &e : streams_)
   {
     Exports::MeasurementItem item;
-    item.name = std::to_string(i);
+    item.name = std::to_string(e.first);
     item.type = Exports::Type::INFO;
-    item.value = GetPipelineConfig(i);
+    item.value = GetPipelineConfig(e.first);
     pipelineItems.push_back(item);
   }
 
@@ -117,55 +128,70 @@ Exports::MeasurementItem CProcessMeasurements::GetPipelineConfig2() const
  *
  * @return Measurements::Sensors
  */
-std::vector<Measurements::Sensors> CProcessMeasurements::GetSensors() const
+std::vector<Measurements::AllSensors::SensorGroups>
+CPipelineMeasurements::GetSensors() const
 {
-  std::vector<Measurements::Sensors> result;
-  for (size_t pipelineNr = 0; pipelineNr < uniqueIds_.size(); ++pipelineNr)
-  {
-    const auto &pipeline = uniqueIds_.at(pipelineNr);
+  std::vector<Measurements::AllSensors::SensorGroups> result;
 
-    for (const auto &e : pipeline)
+  for (const auto &pipeline : uniqueIds_)
+  {
+    Measurements::AllSensors::SensorGroups sensorGroup;
+    sensorGroup.processId = pipeline.first;
+
+    for (const auto &e : pipeline.second)
     {
+      std::vector<Measurements::Sensors> sensors;
       std::string sensorName =
-          CreateSensorName(pipelineNr, e.first.moduleName, e.first.type);
+          CreateSensorName(e.first.moduleName, e.first.type);
       Measurements::Sensors sensor{sensorName, e.second};
       sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second);
-      result.push_back(sensor);
+      sensorGroup.sensors.push_back(sensor);
     }
-  }
-  for (const auto &e : predefinedSensors)
-  {
-    auto uniqueIdsSet = GetUniqueIdsByType(e);
-    result.push_back(
-        PerformanceHelpers::GetGstCategoriesSummary(allData_, uniqueIdsSet, e));
+    for (const auto &e : predefinedSensors)
+    {
+      auto uniqueIdsSet = GetUniqueIdsByType(e);
+      sensorGroup.sensors.push_back(PerformanceHelpers::GetGstCategoriesSummary(
+          allData_, uniqueIdsSet, e));
+    }
+    result.push_back(sensorGroup);
   }
   return result;
 }
 
 std::vector<Exports::MeasurementItem>
-CProcessMeasurements::GetPipelineConfig(const size_t pipelineNr) const
+CPipelineMeasurements::GetPipelineConfig(const int pipelineNr) const
 {
   std::vector<Exports::MeasurementItem> result;
-  result.push_back(Exports::MeasurementItem{
-      "Command", Exports::Type::INFO, streams_.at(pipelineNr)->GetPipeline()});
+  auto stream = streams_.find(pipelineNr);
+  if (stream == streams_.end())
+    throw std::runtime_error(
+        "GStreamer measurements: GetPipelineConfig received "
+        "incorrect pipeline number!");
+  result.push_back(Exports::MeasurementItem{"Command", Exports::Type::INFO,
+                                            stream->second->GetPipeline()});
   result.push_back(Exports::MeasurementItem{"Labels", Exports::Type::ARRAY,
                                             GetMeasurementLabels(pipelineNr)});
   return result;
 }
 
 std::vector<Exports::MeasurementItem>
-CProcessMeasurements::GetMeasurementLabels(const size_t pipelineNr) const
+CPipelineMeasurements::GetMeasurementLabels(const int pipelineNr) const
 {
-  auto ids = uniqueIds_.at(pipelineNr);
+  auto ids = uniqueIds_.find(pipelineNr);
+
+  if (ids == uniqueIds_.end())
+    throw std::runtime_error(
+        "GStreamer measurements: GetMeasurementLabels received "
+        "incorrect pipeline number!");
   // Using an ordered map so it automatically orders on the int, which is the
   // unique id of the field
   std::map<int, Exports::MeasurementItem> mapResult;
-  for (const auto &e : ids)
+  for (const auto &e : ids->second)
   {
     Exports::MeasurementItem item;
     item.name = "Label";
     item.type = Exports::Type::LABEL;
-    item.value = CreateSensorName(pipelineNr, e.first.moduleName, e.first.type);
+    item.value = CreateSensorName(e.first.moduleName, e.first.type, pipelineNr);
     mapResult.insert(std::make_pair(e.second, item));
   }
 
@@ -175,28 +201,18 @@ CProcessMeasurements::GetMeasurementLabels(const size_t pipelineNr) const
   return result; // the vector ordered by unique IDs of the measurements
 }
 
-// std::vector<Exports::MeasurementItem>
-// CProcessMeasurements::GetPipelineMeasurements()
-// {
-//   std::vector<Exports::MeasurementItem> result;
-//   for (const auto &e : streams_)
-//   {
-//     Exports::MeasurementItem item;
-//     // item.name =
-//   }
-// }
-
 /**
  * @brief Get the Plugin Names object
  *
  * @return std::unordered_map<int, Identifier>
  */
 std::unordered_map<int, Identifier>
-CProcessMeasurements::GetPluginNames(const size_t pipelineId) const
+CPipelineMeasurements::GetPluginNames(const int pipelineId) const
 {
-  auto ids = uniqueIds_.at(pipelineId);
+  auto ids = uniqueIds_.find(pipelineId);
+
   std::unordered_map<int, Identifier> result;
-  for (const auto &e : ids)
+  for (const auto &e : ids->second)
   {
     result.insert(std::make_pair(e.second, e.first));
   }
@@ -209,10 +225,10 @@ CProcessMeasurements::GetPluginNames(const size_t pipelineId) const
  * Because the module names are only known during runtime, the map containing
  * the IDs is also filled during runtime
  */
-int CProcessMeasurements::GetUniqueId(const size_t pipelineId,
-                                      const Identifier &id)
+int CPipelineMeasurements::GetUniqueId(const int pipelineId,
+                                       const Identifier &id)
 {
-  auto &idsMap = uniqueIds_.at(pipelineId);
+  auto &idsMap = uniqueIds_.find(pipelineId)->second;
   auto result = idsMap.find(id);
   if (result != idsMap.end())
   {
@@ -231,11 +247,13 @@ int CProcessMeasurements::GetUniqueId(const size_t pipelineId,
  *
  * @param pipelineNr should be the number from the pipeline, indexed from 0
  */
-std::string CProcessMeasurements::CreateSensorName(const int pipelineNr,
-                                                   const std::string moduleName,
-                                                   MeasureType type) const
+std::string CPipelineMeasurements::CreateSensorName(
+    const std::string moduleName, MeasureType type, const int pipelineNr) const
 {
-  return std::to_string(pipelineNr + 1) + "." + moduleName + "." +
-         GetMeasureType(type);
+  if (pipelineNr == -1)
+    return moduleName + "." + GetMeasureType(type);
+  else
+    return std::to_string(pipelineNr) + "." + moduleName + "." +
+           GetMeasureType(type);
 }
 } // namespace GStreamer

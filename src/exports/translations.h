@@ -23,4 +23,7 @@ constexpr std::string_view type{"Type"};
 constexpr std::string_view systemSummaryTitle{"System Resource Usage"};
 constexpr std::string_view average{"Average "};
 
+constexpr std::string_view thresholdTitle{"Thresholds"};
+constexpr std::string_view thresholdExceeded{"No thresholds were exceeded!"};
+
 } // namespace SummaryTranslations

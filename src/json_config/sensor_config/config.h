@@ -55,6 +55,7 @@ inline Class GetClass(const int classNr)
 
 struct SDatafields
 {
+  std::string nameClass;
   std::string name;
   int id = 0;
   std::string userId;
