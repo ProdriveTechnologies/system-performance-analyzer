@@ -41,7 +41,7 @@ private:
   static inline std::string GetTabs(const size_t nonTabChars)
   {
     std::string tabs;
-    int tabsNr = std::ceil((tabRowLength_ - nonTabChars) /
+    int tabsNr = std::ceil((tabRowLength_ - static_cast<int>(nonTabChars)) /
                            static_cast<double>(tabSize_));
     for (int i = 0; i < tabsNr; ++i)
       tabs += '\t';
