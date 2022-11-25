@@ -52,9 +52,6 @@ ProcHandler::ParseMemField(const PlatformConfig::SDatafields &procInfo)
 
   Exports::MeasuredItem measuredItem;
   measuredItem.id = procInfo.id;
-  // std::cout << "Value second: " << memValue->second << std::endl;
-  //  std::cout << "Value direct output: "
-  //            << meminfo_.fieldMap.find(procInfo.value)->second << std::endl;
   measuredItem.measuredValue = static_cast<double>(memValue) / comparedTo;
   return measuredItem;
 }

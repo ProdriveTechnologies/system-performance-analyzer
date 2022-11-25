@@ -154,17 +154,11 @@ void CPerfMeasurements::StartMeasurementsLoop()
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
     exportData.measuredItems = sensorMeasurements_.GetMeasurements();
     exportData.processInfo = processMeasurements_.GetMeasurements();
-    // GetMeasuredItems(measureFields_);
-
-    // exportData.processInfo
-    // Measure data on each process
-    // MeasureProcesses(processPids_);
 
     // Measure data on each GStreamer pipeline
     exportData.pipelineInfo = gstMeasurements_.ProcessGstreamer();
 
     pMeasurementsData_->push_back(exportData);
-    // pCpuData_->push_back(procHandler_.GetStats());
 
     std::this_thread::sleep_for(
         std::chrono::milliseconds(config_.settings.measureLoopMs));
@@ -187,36 +181,6 @@ void CPerfMeasurements::ExportData(const Exports::AllSensors &sensors)
   ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors);
   ExecuteExport<Exports::CCsv>("filename", items, sensors);
 }
-
-/**
- * @brief Measures the resource usage and interesting data from the processes in
- * the processId list
- *
- * @param processIds
- */
-// void CPerfMeasurements::MeasureProcesses(const std::vector<int> processIds)
-// {
-//   ProcessesMeasure measurements;
-//   for (const auto &e : processIds)
-//   {
-//     try
-//     {
-//       ProcessMeasurements processMeasurement;
-//       processMeasurement.pid = e;
-//       processMeasurement.stats =
-//           Linux::FileSystem::GetStats("/proc/" + std::to_string(e) +
-//           "/stat");
-//       measurements.processes.push_back(processMeasurement);
-//     }
-//     catch (const std::exception &error)
-//     {
-//       CLogger::Log(CLogger::Types::INFO, "Process: ", e,
-//                    " ended, removing from measurements");
-//       RemoveProcessId(e); // Process apparently stopped already
-//     }
-//   }
-//   pProcessesData_->push_back(measurements);
-// }
 
 /**
  * @brief Remove process id from the processPids_ vector
@@ -245,12 +209,11 @@ void CPerfMeasurements::AnalyzeData()
    * for this?
    */
 
-  // CheckThresholds();
   // Collect all sensors
   auto gstSensors = gstMeasurements_.GetSensors();
   auto sysSensors = sensorMeasurements_.GetSensors();
   auto processSensors = processMeasurements_.GetSensors();
-  std::cout << "Process sensors size: " << processSensors.size() << std::endl;
+
   Exports::AllSensors allSensors;
   allSensors.AddSensors(Measurements::Classification::PIPELINE, gstSensors);
   allSensors.AddSensors(Measurements::Classification::SYSTEM, sysSensors);

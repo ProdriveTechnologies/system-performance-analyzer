@@ -77,6 +77,7 @@ std::vector<Exports::PipelineInfo> CPipelineMeasurements::ProcessGstreamer()
       if (summarizeMap.find(id) == summarizeMap.end())
         summarizeMap.insert(std::make_pair(id, measurement));
     }
+
     // Convert the measured data to an Exports::MeasuredItem type
     Exports::PipelineInfo gsData;
     gsData.pipelineId = e.second->GetProcessId();

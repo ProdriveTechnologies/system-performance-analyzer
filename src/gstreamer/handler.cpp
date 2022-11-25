@@ -110,10 +110,11 @@ void CGstreamerHandler::StartThread(const std::string &command)
   {
     // Initialize GST for the parent, such that it can also use the GStreamer
     // functions to parse the trace messages
-    if (!gst_is_initialized())
-      gst_init(nullptr, nullptr);
+    // if (!gst_is_initialized())
+    //   gst_init(nullptr, nullptr);
     pipe_.SetParent();
     pipelineThread_ = std::thread(&CGstreamerHandler::ParentWaitProcess, this);
+    traceHandler_.pid = processId_;
     // Parent process
     return;
   }
@@ -132,6 +133,13 @@ void CGstreamerHandler::ParentWaitProcess()
       processSync_->WaitForProcess();
       waitCount++;
       pipe_.Write(waitDoneMsg_);
+      if (waitCount == 1)
+      {
+        // Initialize GST for the parent, must be separated from the GST
+        // environments from the other processes
+        if (!gst_is_initialized())
+          gst_init(nullptr, nullptr);
+      }
     }
     else
     {

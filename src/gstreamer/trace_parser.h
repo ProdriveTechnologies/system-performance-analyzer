@@ -50,6 +50,7 @@ public:
           "Could not retrieve measurement as the FIFO is empty!");
     }
   }
+  int pid;
 
 private:
   Helpers::AtomicQueue<Measurement> fifoMeasurements;
