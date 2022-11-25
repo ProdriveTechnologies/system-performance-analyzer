@@ -81,8 +81,6 @@ void CGstreamerHandler::FreeMemory()
     gst_element_set_state(gstPipeline_, GST_STATE_NULL);
     gst_object_unref(gstPipeline_);
   }
-  if (gstBus_ != nullptr)
-    gst_object_unref(gstBus_);
   if (gstMsg_ != nullptr)
     gst_message_unref(gstMsg_);
   if (gstErrorMsg_ != nullptr)
@@ -91,13 +89,11 @@ void CGstreamerHandler::FreeMemory()
 
 void CGstreamerHandler::StartThread(const std::string &command)
 {
-  // if (pipelineThread_.joinable())
-  //   pipelineThread_.join();
-  // pipelineThread_ = std::thread{&CGstreamerHandler::RunPipeline, this,
-  // command};
+  // First, clean up an old thread, if existent
   if (pipelineThread_.joinable())
     pipelineThread_.join();
-  applicationPid_ = fork();
+
+  applicationPid_ = fork(); // Fork the process where GStreamer will run in
   if (applicationPid_ < 0)
   {
     std::string response{strerror(errno)};
@@ -112,6 +108,8 @@ void CGstreamerHandler::StartThread(const std::string &command)
   }
   else
   {
+    // Initialize GST for the parent, such that it can also use the GStreamer
+    // functions to parse the trace messages
     if (!gst_is_initialized())
       gst_init(nullptr, nullptr);
     pipe_.SetParent();
@@ -156,135 +154,29 @@ void CGstreamerHandler::RunPipelineThread(const std::string &pipelineStr)
 
 void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
 {
-#if 0
-  /************************************************
-   *  BEGIN EXAMPLE ONLINE
-   *************************************************/
-  CustomData data;
-  GstBus *bus;
-  GstMessage *msg;
-  GstStateChangeReturn ret;
-  gboolean terminate = FALSE;
+  GMainLoop *loop = PipelineInitialization(pipelineStr);
 
-  SetTracingEnvironmentVars();
-  gst_debug_remove_log_function(gst_debug_log_default);
-  gst_debug_add_log_function(&GStreamer::TraceHandler::TraceCallbackFunction,
-                             nullptr, nullptr);
-  /* Initialize GStreamer */
-  gst_init(NULL, NULL);
+  // start playing
+  CLogger::Log(CLogger::Types::INFO, "Starting the pipeline for gstreamer");
+  gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
+  g_main_loop_run(loop);
 
-  /* Create the elements */
-  data.source = gst_element_factory_make("filesrc", "source");
-  data.convert = gst_element_factory_make("queue", "convert");
-  data.resample = gst_element_factory_make("rawvideoparse", "resample");
-  data.sink = gst_element_factory_make("autovideosink", "sink");
+  // De-initialize
+  FreeMemory();
+  g_source_remove(busWatchId_);
+  g_main_loop_unref(loop);
 
-  /* Create the empty pipeline */
-  data.pipeline = gst_pipeline_new("test-pipeline");
+  ChildWaitProcess();
+  gst_deinit();
+  running_ = false;
+}
 
-  if (!data.pipeline || !data.source || !data.convert || !data.resample ||
-      !data.sink)
-  {
-    g_printerr("Not all elements could be created.\n");
-    return;
-  }
-
-  /* Build the pipeline. Note that we are NOT linking the source at this
-   * point. We will do it later. */
-  gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.convert,
-                   data.resample, data.sink, NULL);
-  if (!gst_element_link_many(data.source, data.convert, data.resample,
-                             data.sink, NULL))
-  {
-    g_printerr("Elements could not be linked.\n");
-    gst_object_unref(data.pipeline);
-    return;
-  }
-
-  /* Set the URI to play */
-  g_object_set(data.source, "location", "midlength.yuv", NULL);
-
-  /* Connect to the pad-added signal */
-  std::cout << "Adding pad signal, please execute it though" << std::endl;
-  g_signal_connect(data.source, "pad-added", G_CALLBACK(pad_added_handler),
-                   &data);
-
-  /* Start playing */
-  ret = gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
-  if (ret == GST_STATE_CHANGE_FAILURE)
-  {
-    g_printerr("Unable to set the pipeline to the playing state.\n");
-    gst_object_unref(data.pipeline);
-    return;
-  }
-
-  /* Listen to the bus */
-  bus = gst_element_get_bus(data.pipeline);
-  do
-  {
-    msg = gst_bus_timed_pop_filtered(
-        bus, GST_CLOCK_TIME_NONE,
-        static_cast<GstMessageType>(GST_MESSAGE_STATE_CHANGED |
-                                    GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
-
-    /* Parse message */
-    if (msg != NULL)
-    {
-      GError *err;
-      gchar *debug_info;
-
-      switch (GST_MESSAGE_TYPE(msg))
-      {
-      case GST_MESSAGE_ERROR:
-        gst_message_parse_error(msg, &err, &debug_info);
-        g_printerr("Error received from element %s: %s\n",
-                   GST_OBJECT_NAME(msg->src), err->message);
-        g_printerr("Debugging information: %s\n",
-                   debug_info ? debug_info : "none");
-        g_clear_error(&err);
-        g_free(debug_info);
-        terminate = TRUE;
-        break;
-      case GST_MESSAGE_EOS:
-        g_print("End-Of-Stream reached.\n");
-        terminate = TRUE;
-        break;
-      case GST_MESSAGE_STATE_CHANGED:
-        /* We are only interested in state-changed messages from the pipeline */
-        if (GST_MESSAGE_SRC(msg) == GST_OBJECT(data.pipeline))
-        {
-          GstState old_state, new_state, pending_state;
-          gst_message_parse_state_changed(msg, &old_state, &new_state,
-                                          &pending_state);
-          g_print("Pipeline state changed from %s to %s:\n",
-                  gst_element_state_get_name(old_state),
-                  gst_element_state_get_name(new_state));
-        }
-        break;
-      default:
-        /* We should not reach here */
-        g_printerr("Unexpected message received.\n");
-        break;
-      }
-      gst_message_unref(msg);
-    }
-  } while (!terminate);
-
-  /* Free resources */
-  gst_object_unref(bus);
-  gst_element_set_state(data.pipeline, GST_STATE_NULL);
-  gst_object_unref(data.pipeline);
-  std::cout << "DONE, RETURING" << std::endl;
-  return;
-#endif
-  /*************************************************
-   * END EXAMPLE ONLINE
-   **************************************************/
-
-  threadSync_->setThreadId(gettid());
+GMainLoop *
+CGstreamerHandler::PipelineInitialization(const std::string &pipelineStr)
+{
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize for gstreamer");
   ChildWaitProcess();
-  //  threadSync_->WaitForProcess();
+
   running_ = true;
   pipelineStr_ = pipelineStr;
   FreeMemory();
@@ -305,27 +197,13 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
                              &tracerUserData_, nullptr);
 
   gstPipeline_ = gst_parse_launch(pipelineStr.c_str(), &gstErrorMsg_);
-  GstBus *bussy = gst_pipeline_get_bus(GST_PIPELINE(gstPipeline_));
-  int bus_watch_id = gst_bus_add_watch(bussy, bus_call, &logUserData_);
-  gst_object_unref(bussy);
+  gstBus_ = gst_pipeline_get_bus(GST_PIPELINE(gstPipeline_));
+  busWatchId_ = gst_bus_add_watch(gstBus_, bus_call, &logUserData_);
+  gst_object_unref(gstBus_);
 
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for gstreamer");
-  // threadSync_->WaitForProcess();
   ChildWaitProcess();
-  CLogger::Log(CLogger::Types::INFO,
-               "Starting the pipeline (finally) for gstreamer");
-  // start playing
-  gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
-
-  g_main_loop_run(loop);
-  g_source_remove(bus_watch_id);
-  g_main_loop_unref(loop);
-
-  ChildWaitProcess();
-  threadSync_->WaitForProcess();
-  FreeMemory();
-  gst_deinit();
-  running_ = false;
+  return loop;
 }
 
 /**

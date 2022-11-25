@@ -51,6 +51,7 @@ private:
   GstElement *gstPipeline_;
   GstBus *gstBus_;
   GstMessage *gstMsg_;
+  int busWatchId_;
   GError *gstErrorMsg_;
   LogStructure logUserData_;
   GStreamer::TraceHandler::TracerUserData tracerUserData_;
@@ -58,6 +59,8 @@ private:
   // std::thread pipelineThread_;
 
   pid_t applicationPid_;
+
+  GMainLoop *PipelineInitialization(const std::string &pipelineStr);
 
   void FreeMemory();
   void SetTracingEnvironmentVars();
