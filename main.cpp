@@ -12,8 +12,8 @@ int VerifyArguments(const bool incorrectArgs, const int argc, const CInputHandle
  */
 void print_info()
 {
-  std::cout << "Execute this application using ./benchmarks -c [config file]\n\n"
-            << "Usage: ./benchmarks [OPTION [ARG]] ...\n"
+  std::cout << "Execute this application using ./spa -c [config file]\n\n"
+            << "Usage: ./spa [OPTION [ARG]] ...\n"
             << " -h, --help\t\t show this help statement\n"
             << " -c, --config [config file]\t\t use the [config file] for the "
                "measurements (must be in the JSON format, read documentation for the "
