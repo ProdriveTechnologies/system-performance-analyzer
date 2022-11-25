@@ -63,6 +63,8 @@ struct Sensors
   std::string suffix;
   double multiplier = 1.0;
 
+  bool performanceIndicator = false;
+
   // The summarized data, such as average, minimum found, maximum found
   SensorData data;
 
@@ -78,6 +80,7 @@ struct Sensors
         suffix{fields.suffix}, multiplier{fields.multiplier}
   {
   }
+  Sensors() = default;
   void SetDataInfo(const std::string &suffix_, const double multiplier_ = 1.0)
   {
     suffix = suffix_;

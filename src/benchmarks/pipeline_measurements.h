@@ -61,6 +61,16 @@ private:
 
   std::string CreateSensorName(const std::string moduleName, MeasureType type,
                                const int pipelineNr = -1) const;
+
+  bool GetPerformanceIndicator(const MeasureType type) const
+  {
+    for (const auto &[predefinedType, perfIndicator] : predefinedSensors)
+    {
+      if (type == predefinedType)
+        return perfIndicator;
+    }
+    return false;
+  }
   inline std::unordered_set<int>
   GetUniqueIdsByType(const MeasureType type) const
   {
@@ -75,8 +85,9 @@ private:
     }
     return result;
   }
-
-  static inline std::vector<MeasureType> predefinedSensors = {
-      MeasureType::FPS /*MeasureType::LATENCY */};
+  using PerformanceIndicator = bool;
+  static inline std::vector<std::pair<MeasureType, PerformanceIndicator>>
+      predefinedSensors = {
+          std::make_pair(MeasureType::FPS, true) /* MeasureType::LATENCY */};
 };
 } // namespace GStreamer

@@ -147,15 +147,17 @@ CPipelineMeasurements::GetSensors() const
       std::string sensorName =
           CreateSensorName(e.first.moduleName, e.first.type);
       Measurements::Sensors sensor{sensorName, e.second};
+
+      sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
       sensor.SetDataInfo(GetMeasureType(e.first.type));
       sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second);
       sensorGroup.sensors.push_back(sensor);
     }
-    for (const auto &e : predefinedSensors)
+    for (const auto &[type, _] : predefinedSensors)
     {
-      auto uniqueIdsSet = GetUniqueIdsByType(e);
+      auto uniqueIdsSet = GetUniqueIdsByType(type);
       sensorGroup.sensors.push_back(PerformanceHelpers::GetGstCategoriesSummary(
-          allData_, uniqueIdsSet, e));
+          allData_, uniqueIdsSet, type));
     }
     result.push_back(sensorGroup);
   }
