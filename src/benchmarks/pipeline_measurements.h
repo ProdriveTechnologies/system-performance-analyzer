@@ -58,6 +58,7 @@ private:
   int GetUniqueId(const int pipelineId, const Identifier &id);
   std::unordered_map<int, Identifier>
   GetPluginNames(const int pipelineId) const;
+  int GetProcessDelay(const int pipelineId) const;
 
   std::string CreateSensorName(const std::string moduleName, MeasureType type,
                                const int pipelineNr = -1) const;

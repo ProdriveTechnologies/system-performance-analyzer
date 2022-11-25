@@ -22,6 +22,7 @@ public:
 
   void ChildWaitProcess();
   int GetUserProcessId() const { return userProcessInfo_.processId; }
+  int GetProcessDelay() const { return userProcessInfo_.startDelay; }
 
 protected:
   Synchronizer *processSync_;

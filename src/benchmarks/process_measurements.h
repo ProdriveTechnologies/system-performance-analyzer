@@ -118,5 +118,6 @@ private:
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
   Linux::FileSystem::Stat GetProcStat(const int procId);
   void SetDataHandlers();
+  int GetProcessDelay(const int processId) const;
 };
 } // namespace Measurements

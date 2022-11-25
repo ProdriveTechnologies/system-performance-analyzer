@@ -96,6 +96,7 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
   {
     AllSensors::SensorGroups sensorGroup;
     sensorGroup.processId = e.userProcessId;
+    sensorGroup.processDelay = GetProcessDelay(e.userProcessId);
 
     for (const auto &datafield : measureFieldsDefinition_)
     {
@@ -109,6 +110,24 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
     result.push_back(sensorGroup);
   }
   return result;
+}
+
+/**
+ * @brief Returns the delay of a process based on the ID
+ *
+ * @param processId
+ * @return int
+ */
+int CProcessMeasurements::GetProcessDelay(const int processId) const
+{
+  for (const auto &e : processes_)
+  {
+    if (e->GetUserProcessId() == processId)
+    {
+      return e->GetProcessDelay();
+    }
+  }
+  throw std::runtime_error("Could not find process with pipelineId");
 }
 
 std::vector<Exports::MeasurementItem> CProcessMeasurements::GetDefinitionItems(

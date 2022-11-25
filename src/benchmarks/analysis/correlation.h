@@ -52,9 +52,16 @@ private:
   CreateEqualSizedVectors(const Measurements::AllSensors &allSensors,
                           const std::vector<Exports::ExportData> *measuredData,
                           const bool isPerformanceMetric);
+  static std::vector<SSensorMeasurements> CreateEqualSizedVector(
+      const std::vector<Measurements::AllSensors::SensorGroups> &allSensors,
+      const std::vector<Exports::ExportData> *measuredData,
+      const bool isPerformanceMetric);
   static std::vector<SSensorMeasurements>
   GetSensors(const Measurements::AllSensors &allSensors,
              const Measurements::Classification classification,
+             const bool isPerformanceMetric);
+  static std::vector<SSensorMeasurements>
+  GetSensors(const std::vector<Sensors> &sensors,
              const bool isPerformanceMetric);
 };
 

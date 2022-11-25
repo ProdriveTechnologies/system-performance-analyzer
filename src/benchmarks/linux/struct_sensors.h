@@ -128,8 +128,14 @@ struct AllSensors
   struct SensorGroups
   {
     int processId; // Only used for Classification::PIPELINE and
-                   // Classification::PROCESSES
+    // Classification::PROCESSES
     std::vector<Sensors> sensors;
+    int processDelay = -1;
+    SensorGroups(const int processId_, const std::vector<Sensors> &sensors_)
+        : processId{processId_}, sensors{sensors_}
+    {
+    }
+    SensorGroups() = default;
   };
 
   // All the sensors classified by the different groups (Pipeline data, process
@@ -206,6 +212,7 @@ struct AllSensors
     {
       std::vector<SensorGroups> groups{sensorGroup};
       data.insert(std::make_pair(c, groups));
+      allClasses.push_back(c);
       AddMapValues(&mapByProcessId, &data.find(c)->second.back().sensors,
                    processId);
     }
@@ -228,7 +235,8 @@ struct AllSensors
         AddMapValues(&mapByProcessId, &e.sensors, e.processId);
     }
   }
-  std::vector<SensorGroups> GetSensorGroups(const Classification classification)
+  std::vector<SensorGroups>
+  GetSensorGroups(const Classification classification) const
   {
     auto sensorGroup = data.find(classification);
     if (sensorGroup == data.end())

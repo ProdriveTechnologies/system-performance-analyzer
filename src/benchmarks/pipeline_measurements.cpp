@@ -140,6 +140,7 @@ CPipelineMeasurements::GetSensors() const
   {
     Measurements::AllSensors::SensorGroups sensorGroup;
     sensorGroup.processId = pipeline.first;
+    sensorGroup.processDelay = GetProcessDelay(pipeline.first);
 
     for (const auto &e : pipeline.second)
     {
@@ -179,6 +180,24 @@ CPipelineMeasurements::GetPipelineConfig(const int pipelineNr) const
   result.push_back(Exports::MeasurementItem{"Labels", Exports::Type::ARRAY,
                                             GetMeasurementLabels(pipelineNr)});
   return result;
+}
+
+/**
+ * @brief Returns the delay of a pipeline
+ *
+ * @param pipelineId
+ * @return int
+ */
+int CPipelineMeasurements::GetProcessDelay(const int pipelineId) const
+{
+  for (const auto &e : streams_)
+  {
+    if (e.second->GetUserProcessId() == pipelineId)
+    {
+      return e.second->GetProcessDelay();
+    }
+  }
+  throw std::runtime_error("Could not find process with pipelineId");
 }
 
 std::vector<Exports::MeasurementItem>
