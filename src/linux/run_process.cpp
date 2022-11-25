@@ -83,6 +83,7 @@ void RunProcess::ChildWaitProcess()
   while (true)
   {
     pipe_.Read(readMsg, 4);
+
     if (strcmp(readMsg, "DONE") == 0)
       return;
   }

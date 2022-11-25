@@ -77,12 +77,13 @@ std::string PipeCommunicator::Read()
  * @brief Reads until X bytes are read or when the read function returns (can be
  * less than X bytes)
  */
-size_t PipeCommunicator::Read(void *message, const size_t bytes)
+size_t PipeCommunicator::ReadRaw(void *message, const size_t bytes)
 {
   int fd = isParent_ ? parentReadPipe_[READ] : parentWritePipe_[READ];
   size_t readBytes = read(fd, message, bytes);
   if (readBytes != READ_BUFFER_SIZE)
     return readBytes;
+
   throw std::runtime_error("PipeCommunicator: Read buffer exceeded!");
 }
 
