@@ -9,7 +9,7 @@
 namespace Exports
 {
 bool CGraphs::FullExport(
-    [[maybe_unused]] const std::vector<MeasurementItem> &config,
+    [[maybe_unused]] const std::vector<SMeasurementItem> &config,
     [[maybe_unused]] const FullMeasurement data, const AllSensors &allSensors,
     [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>
         &correlations)
@@ -24,8 +24,8 @@ bool CGraphs::FullExport(
   return true;
 }
 
-void CGraphs::CreateGraph(const Measurements::Sensors &sensor1,
-                          const Measurements::Sensors &sensor2)
+void CGraphs::CreateGraph(const Measurements::SSensors &sensor1,
+                          const Measurements::SSensors &sensor2)
 {
   FILE *pipe_gp = popen("gnuplot", "w");
   fputs("set terminal png \n", pipe_gp);
@@ -62,12 +62,12 @@ void CGraphs::CreateGraph(const Measurements::Sensors &sensor1,
  * @param c
  * @return std::string
  */
-std::string CGraphs::GetFileName(const Measurements::Classification c)
+std::string CGraphs::GetFileName(const Measurements::EClassification c)
 {
   std::string sensorfile;
-  if (c == Measurements::Classification::PIPELINE)
+  if (c == Measurements::EClassification::PIPELINE)
     sensorfile = "PipelineMeasurements.csv";
-  else if (c == Measurements::Classification::PROCESSES)
+  else if (c == Measurements::EClassification::PROCESSES)
     sensorfile = "ProcessMeasurements.csv";
   else
     sensorfile = "SystemResources.csv";

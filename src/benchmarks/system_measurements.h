@@ -34,11 +34,11 @@ public:
 
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData);
 
-  Exports::MeasurementItem GetConfig() const;
+  Exports::SMeasurementItem GetConfig() const;
   // std::vector<Measurements::SMeasuredItem> GetMeasurements();
   std::vector<Measurements::SMeasuredItem> GetMeasurements();
 
-  std::vector<Sensors> GetSensors(const bool summarizeData = true) const;
+  std::vector<SSensors> GetSensors(const bool summarizeData = true) const;
 
   // Should be removed
   std::vector<PlatformConfig::SDatafields> GetDefinition() const
@@ -57,8 +57,8 @@ private:
   using MeasureFieldsType = std::vector<PlatformConfig::SMeasureField>;
   MeasureFieldsType measureFields_;
 
-  std::vector<Exports::MeasurementItem> GetMeasurementFields() const;
-  std::vector<Exports::MeasurementItem>
+  std::vector<Exports::SMeasurementItem> GetMeasurementFields() const;
+  std::vector<Exports::SMeasurementItem>
   GetDefinitionItems(const PlatformConfig::SDatafields &field) const;
   /**
    * @brief Necessary for parsing the configuration file for the sensors

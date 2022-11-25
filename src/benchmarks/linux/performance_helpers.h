@@ -11,22 +11,22 @@ namespace PerformanceHelpers
 {
 int GetUniqueId();
 
-std::unordered_map<std::string, Measurements::Sensors>
-CreateMapWithId(const std::vector<Measurements::Sensors> &data);
-bool HandleThreshold(const Measurements::Sensors *sensor,
+std::unordered_map<std::string, Measurements::SSensors>
+CreateMapWithId(const std::vector<Measurements::SSensors> &data);
+bool HandleThreshold(const Measurements::SSensors *sensor,
                      Core::SThreshold threshold);
 
-Measurements::SensorData
-GetSummarizedData(const Measurements::Classification classification,
+Measurements::SSensorData
+GetSummarizedData(const Measurements::EClassification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
                   const int uniqueId, const double multiplier,
                   const bool useSteadyState = false);
 
-Measurements::Sensors
-GetSummarizedData(const Measurements::Classification classification,
+Measurements::SSensors
+GetSummarizedData(const Measurements::EClassification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
                   const std::unordered_set<int> uniqueId,
-                  const Measurements::Sensors &sensorTemplate,
+                  const Measurements::SSensors &sensorTemplate,
                   const bool useSteadyState = false);
 
 } // namespace PerformanceHelpers

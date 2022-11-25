@@ -19,7 +19,7 @@ namespace Exports
 {
 struct SExportData
 {
-  const std::vector<MeasurementItem> &config;
+  const std::vector<SMeasurementItem> &config;
   const FullMeasurement data;
   const AllSensors &allSensors;
   const std::vector<Measurements::CCorrelation::SResult> &correlations;
@@ -31,7 +31,7 @@ public:
   CExport();
   ~CExport();
 
-  void InitialiseLiveMeasurements(Measurements::AllSensors *sensors,
+  void InitialiseLiveMeasurements(Measurements::SAllSensors *sensors,
                                   const Core::SConfig &config);
 
   void AddMeasurements([
@@ -103,7 +103,7 @@ inline CExport::~CExport() {}
  *
  */
 inline void
-CExport::InitialiseLiveMeasurements(Measurements::AllSensors *sensors,
+CExport::InitialiseLiveMeasurements(Measurements::SAllSensors *sensors,
                                     const Core::SConfig &settings)
 {
   SetLiveModeObjects();

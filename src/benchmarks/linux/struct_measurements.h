@@ -17,10 +17,10 @@ struct SMeasurementGroup
 struct SMeasurementsData
 {
   std::string time;
-  std::vector<Classification> allClasses;
-  std::unordered_map<Classification, std::vector<SMeasurementGroup>> data;
+  std::vector<EClassification> allClasses;
+  std::unordered_map<EClassification, std::vector<SMeasurementGroup>> data;
 
-  void AddMeasurements(const Classification c,
+  void AddMeasurements(const EClassification c,
                        const std::vector<SMeasurementGroup> &measurements)
   {
     auto existingGroup = data.find(c);
@@ -36,14 +36,14 @@ struct SMeasurementsData
       allClasses.push_back(c);
     }
   }
-  void AddMeasurements(const Classification c,
+  void AddMeasurements(const EClassification c,
                        const std::vector<SMeasuredItem> &measurement,
                        const int pipelineId = -1)
   {
     auto measurementGroup = SMeasurementGroup{pipelineId, measurement};
     AddMeasurements(c, {measurementGroup});
   }
-  std::vector<SMeasuredItem> GetItems(const Classification c) const
+  std::vector<SMeasuredItem> GetItems(const EClassification c) const
   {
     std::vector<SMeasuredItem> items;
     auto measurementGroups = GetItemGroups(c);
@@ -52,7 +52,7 @@ struct SMeasurementsData
       items = Helpers::CombineVectors(items, e.measuredItems);
     return items;
   }
-  std::vector<SMeasurementGroup> GetItemGroups(const Classification c) const
+  std::vector<SMeasurementGroup> GetItemGroups(const EClassification c) const
   {
     auto classData = data.find(c);
     if (classData == data.end())

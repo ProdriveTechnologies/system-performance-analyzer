@@ -40,39 +40,39 @@ void CSensors::SetDataHandlers()
       std::make_unique<Linux::CProcStatHandler>(Linux::CProcStatHandler())});
 }
 
-Exports::MeasurementItem CSensors::GetConfig() const
+Exports::SMeasurementItem CSensors::GetConfig() const
 {
-  Exports::MeasurementItem config;
+  Exports::SMeasurementItem config;
   config.name = "SystemResources";
-  config.type = Exports::Type::INFO;
+  config.type = Exports::EType::INFO;
   config.value = GetMeasurementFields();
   return config;
 }
 
-std::vector<Exports::MeasurementItem> CSensors::GetMeasurementFields() const
+std::vector<Exports::SMeasurementItem> CSensors::GetMeasurementFields() const
 {
-  std::vector<Exports::MeasurementItem> result;
+  std::vector<Exports::SMeasurementItem> result;
   for (const auto &e : measureFieldsDefinition_)
   {
-    Exports::MeasurementItem config;
+    Exports::SMeasurementItem config;
     config.name = e.name;
-    config.type = Exports::Type::INFO;
+    config.type = Exports::EType::INFO;
     config.value = GetDefinitionItems(e);
     result.push_back(config);
   }
   return result;
 }
 
-std::vector<Sensors> CSensors::GetSensors(const bool summarizeData) const
+std::vector<SSensors> CSensors::GetSensors(const bool summarizeData) const
 {
-  std::vector<Sensors> result;
+  std::vector<SSensors> result;
   for (const auto &datafield : measureFieldsDefinition_)
   {
-    Sensors sensor{datafield};
+    SSensors sensor{datafield};
     if (summarizeData)
     {
       sensor.data = PerformanceHelpers::GetSummarizedData(
-          Measurements::Classification::SYSTEM, allData_, datafield.id,
+          Measurements::EClassification::SYSTEM, allData_, datafield.id,
           sensor.multiplier);
     }
     result.push_back(sensor);
@@ -105,26 +105,26 @@ std::vector<Sensors> CSensors::GetSensors(const bool summarizeData) const
     auto datafield = GetDatafield(className);
     datafield.name = className;
     result.push_back(PerformanceHelpers::GetSummarizedData(
-        Measurements::Classification::SYSTEM, allData_, classIds,
-        Measurements::Sensors{datafield}));
+        Measurements::EClassification::SYSTEM, allData_, classIds,
+        Measurements::SSensors{datafield}));
   }
   return result;
 }
 
-std::vector<Exports::MeasurementItem>
+std::vector<Exports::SMeasurementItem>
 CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
 {
-  std::vector<Exports::MeasurementItem> result;
+  std::vector<Exports::SMeasurementItem> result;
   auto item1 =
-      Exports::MeasurementItem{"Label", Exports::Type::LABEL, field.name};
+      Exports::SMeasurementItem{"Label", Exports::EType::LABEL, field.name};
   result.push_back(item1);
   auto item2 =
-      Exports::MeasurementItem{"Unique ID", Exports::Type::INFO, field.id};
+      Exports::SMeasurementItem{"Unique ID", Exports::EType::INFO, field.id};
   result.push_back(item2);
   if (!field.path.empty())
   {
     auto item3 =
-        Exports::MeasurementItem{"Path", Exports::Type::INFO, field.path};
+        Exports::SMeasurementItem{"Path", Exports::EType::INFO, field.path};
     result.push_back(item3);
   }
   return result;

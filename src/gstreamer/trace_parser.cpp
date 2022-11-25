@@ -42,7 +42,7 @@ void TraceHandler::ParseTraceStructure(const std::string &gstStructureStr)
 
 void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
 {
-  GStreamer::Measurement trace;
+  GStreamer::EMeasurement trace;
   switch (Helpers::hash(g_quark_to_string(gstStructure->name)))
   {
   case Helpers::hash("thread-rusage"):
@@ -53,7 +53,7 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     break;
   case Helpers::hash("proctime"):
   {
-    trace.type = MeasureType::PROCESSING_TIME;
+    trace.type = EMeasureType::PROCESSING_TIME;
     trace.pluginName = gst_structure_get_string(gstStructure, "element");
     std::string time = gst_structure_get_string(gstStructure, "time");
     trace.valueInt = TimeToInt(time);
@@ -73,7 +73,7 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     break;
   case Helpers::hash("framerate"):
   {
-    trace.type = MeasureType::FPS;
+    trace.type = EMeasureType::FPS;
     trace.pluginName = gst_structure_get_string(gstStructure, "pad");
     gst_structure_get_uint(gstStructure, "fps", &trace.valueInt);
   }
@@ -83,10 +83,10 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     std::cout << "Result: " << gst_structure_to_string(gstStructure)
               << std::endl;
   }
-  if (trace.type != MeasureType::NONE)
+  if (trace.type != EMeasureType::NONE)
   {
     // Send the "trace" measurement towards the Measurements class
-    fifoMeasurements.push(trace);
+    fifoMeasurements_.push(trace);
   }
 }
 

@@ -29,7 +29,7 @@ namespace Measurements
  *  5. Store the correlation result of -1 <= correlation <= 1
  */
 std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
-    const Measurements::AllSensors &allSensors,
+    const Measurements::SAllSensors &allSensors,
     const std::vector<Measurements::SMeasurementsData> *measuredData,
     const bool enablePretestZeroes)
 {
@@ -71,7 +71,7 @@ std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
  */
 std::vector<CCorrelation::SSensorMeasurements>
 CCorrelation::CreateEqualSizedVectors(
-    const Measurements::AllSensors &allSensors,
+    const Measurements::SAllSensors &allSensors,
     const std::vector<Measurements::SMeasurementsData> *measuredData,
     const bool isPerformanceMetric, const bool enablePretestZeroes)
 {
@@ -155,8 +155,8 @@ CCorrelation::CreateEqualSizedVectors(
 }
 
 std::vector<CCorrelation::SSensorMeasurements>
-CCorrelation::GetSensors(const Measurements::AllSensors &allSensors,
-                         const Measurements::Classification classification,
+CCorrelation::GetSensors(const Measurements::SAllSensors &allSensors,
+                         const Measurements::EClassification classification,
                          const bool isPerformanceMetric)
 {
   auto sensors = allSensors.GetSensors(classification);
@@ -164,7 +164,7 @@ CCorrelation::GetSensors(const Measurements::AllSensors &allSensors,
 }
 
 std::vector<CCorrelation::SSensorMeasurements>
-CCorrelation::GetSensors(const std::vector<Sensors> &sensors,
+CCorrelation::GetSensors(const std::vector<SSensors> &sensors,
                          const bool isPerformanceMetric)
 {
   std::vector<SSensorMeasurements> result;

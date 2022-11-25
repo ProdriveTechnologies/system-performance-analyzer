@@ -8,7 +8,7 @@
 namespace Exports
 {
 std::string CCsv::ParseData(const std::string &timeStr,
-                            const std::vector<Measurements::Sensors> &sensors,
+                            const std::vector<Measurements::SSensors> &sensors,
                             const std::vector<SMeasuredItem> &items)
 {
   std::string row{timeStr};
@@ -26,7 +26,7 @@ std::string CCsv::ParseData(const std::string &timeStr,
 }
 
 bool CCsv::FullExport(
-    [[maybe_unused]] const std::vector<MeasurementItem> &config,
+    [[maybe_unused]] const std::vector<SMeasurementItem> &config,
     const FullMeasurement data, const AllSensors &allSensors,
     [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>
         &correlations)
@@ -58,7 +58,7 @@ bool CCsv::FullExport(
  * @param item
  * @return std::string
  */
-std::string CCsv::ParseLabel(const std::vector<Measurements::Sensors> &sensors)
+std::string CCsv::ParseLabel(const std::vector<Measurements::SSensors> &sensors)
 {
   std::string result;
 

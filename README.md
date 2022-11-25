@@ -7,12 +7,19 @@ This tool can execute any Linux application as well as [GStreamer](https://gstre
 ## Installation
 
 1. Clone the Git repository: `git clone <repo link>`
-2. Create a build folder
+2. Create a build folder and enter it (`mkdir build && cd build`)
 3. Execute the CMake build script: `cmake ..` (this downloads necessary packages automatically)
 4. Build the sources with: `make` (this can be sped up by asigning an X amount of cores: `make -jX`)
 5. The executable `spa` has been built! :)
 
-Note: to build the tests, execute CMake with the command: `cmake -D BUILD_TESTS=ON ..`
+## Tests
+To build and execute the tests, execute the following steps:
+
+1. Go to the build folder created in the [Installation](#installation) process
+2. Re-execute the CMake command with the parameter `BUILD_TESTS` as follows: `cmake -D BUILD_TESTS=ON ..`
+3. Rebuild the `spa` application including the tests with: `make` (exactly the same as step 4 of the [Installation](#installation)) process
+4. Execute the tests by executing: `./tests/tests`, this will run all tests
+5. The tests should all pass
 
 ## Execution
 

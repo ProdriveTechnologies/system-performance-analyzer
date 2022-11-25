@@ -11,24 +11,24 @@
 
 namespace Measurements
 {
-enum class ValueTypes
+enum class EValueTypes
 {
   MIN,
   MAX,
   AVERAGE,
   MEDIAN
 };
-std::string ToString(const ValueTypes t);
-struct SensorData
+std::string ToString(const EValueTypes t);
+struct SSensorData
 {
-  struct MeasureValue
+  struct SMeasureValue
   {
-    ValueTypes type;
+    EValueTypes type;
     double value;
   };
-  std::vector<MeasureValue> summarizedValues;
+  std::vector<SMeasureValue> summarizedValues;
 
-  double Get(const ValueTypes valueType) const
+  double Get(const EValueTypes valueType) const
   {
     for (const auto &e : summarizedValues)
     {
@@ -46,7 +46,7 @@ struct SensorData
     return result;
   }
 };
-struct Sensors
+struct SSensors
 {
   bool thresholdExceeded = false;
   std::string userId; // UserId is the ID that's given by the user in the
@@ -63,22 +63,22 @@ struct Sensors
   PlatformConfig::SDatafields userData;
 
   // The summarized data, such as average, minimum found, maximum found
-  SensorData data;
+  SSensorData data;
 
   // Constructor with the name and unique id
-  Sensors(const std::string &userId_, const int uniqueId_,
-          PlatformConfig::EClass sensorClass_ = PlatformConfig::EClass::NONE)
+  SSensors(const std::string &userId_, const int uniqueId_,
+           PlatformConfig::EClass sensorClass_ = PlatformConfig::EClass::NONE)
       : userId{userId_}, uniqueId{uniqueId_}, classType{sensorClass_}
   {
   }
   // Constructor with an SDataFields object
-  Sensors(const PlatformConfig::SDatafields &fields)
+  SSensors(const PlatformConfig::SDatafields &fields)
       : userId{fields.name}, uniqueId{fields.id}, classType{fields.classType},
         suffix{fields.suffix}, multiplier{fields.multiplier},
         measuredRaw{true}, userData{fields}
   {
   }
-  Sensors() = default;
+  SSensors() = default;
   void SetDataInfo(const std::string &suffix_, const double multiplier_ = 1.0)
   {
     suffix = suffix_;
@@ -87,18 +87,18 @@ struct Sensors
   // Something of a pointer to the necessary data
 };
 
-enum class Classification
+enum class EClassification
 {
   PIPELINE,
   PROCESSES,
   SYSTEM
 };
-inline std::unordered_map<Classification, std::string> classificationToString =
-    {{Classification::PIPELINE, "PipelineMeasurements"},
-     {Classification::PROCESSES, "ProcessMeasurements"},
-     {Classification::SYSTEM, "SystemResources"}};
+inline std::unordered_map<EClassification, std::string> classificationToString =
+    {{EClassification::PIPELINE, "PipelineMeasurements"},
+     {EClassification::PROCESSES, "ProcessMeasurements"},
+     {EClassification::SYSTEM, "SystemResources"}};
 
-inline std::string GetClassificationStr(const Classification c)
+inline std::string GetClassificationStr(const EClassification c)
 {
   auto res = classificationToString.find(c);
   if (res != classificationToString.end())
@@ -106,7 +106,7 @@ inline std::string GetClassificationStr(const Classification c)
   throw std::runtime_error("Could not find translation for Classification!");
 }
 
-inline void SetClassificationStr(const Classification c,
+inline void SetClassificationStr(const EClassification c,
                                  const std::string &newText)
 {
   auto res = classificationToString.find(c);
@@ -129,52 +129,52 @@ struct SensorIdHash
  * @brief This struct can contain all the sensors of the different types of
  * measurements. It contains functions to make it easy to access the data
  */
-struct AllSensors
+struct SAllSensors
 {
-  std::vector<Classification> allClasses;
-  struct SensorGroups
+  std::vector<EClassification> allClasses;
+  struct SSensorGroups
   {
-    int processId; // Only used for Classification::PIPELINE and
-    // Classification::PROCESSES
-    std::vector<Sensors> sensors;
+    int processId; // Only used for EClassification::PIPELINE and
+    // EClassification::PROCESSES
+    std::vector<SSensors> sensors;
     int processDelay = -1;
-    SensorGroups(const int processId_, const std::vector<Sensors> &sensors_)
+    SSensorGroups(const int processId_, const std::vector<SSensors> &sensors_)
         : processId{processId_}, sensors{sensors_}
     {
     }
-    SensorGroups() = default;
+    SSensorGroups() = default;
   };
 
   // All the sensors classified by the different groups (Pipeline data, process
   // data, system data)
-  std::unordered_map<Classification, std::vector<SensorGroups>> data;
+  std::unordered_map<EClassification, std::vector<SSensorGroups>> data;
 
-  using SensorMap = std::unordered_map<std::string, Measurements::Sensors *>;
+  using SensorMap = std::unordered_map<std::string, Measurements::SSensors *>;
   using ProcessId = int;
   using SensorMapByProcess = std::unordered_map<ProcessId, SensorMap>;
   SensorMapByProcess mapByProcessId;
 
   SensorMap GetMap(const int processId) const;
 
-  std::vector<Sensors> GetSensors(const Classification c,
-                                  const int processId = -1) const;
+  std::vector<SSensors> GetSensors(const EClassification c,
+                                   const int processId = -1) const;
 
-  Classification GetClassification(const int uniqueId) const;
+  EClassification GetClassification(const int uniqueId) const;
 
   /**
    * @brief Returns all process IDs
    */
   std::unordered_set<int> GetProcesses() const;
 
-  void AddSensors(const Classification c, const std::vector<Sensors> &sensors,
+  void AddSensors(const EClassification c, const std::vector<SSensors> &sensors,
                   const int processId = -1);
-  void AddSensors(const Classification c,
-                  const std::vector<SensorGroups> &sensors);
-  std::vector<SensorGroups>
-  GetSensorGroups(const Classification classification) const;
+  void AddSensors(const EClassification c,
+                  const std::vector<SSensorGroups> &sensors);
+  std::vector<SSensorGroups>
+  GetSensorGroups(const EClassification classification) const;
 
 private:
-  void AddMapValues(SensorMapByProcess *mapObj, std::vector<Sensors> *sensors,
+  void AddMapValues(SensorMapByProcess *mapObj, std::vector<SSensors> *sensors,
                     const int processId) const;
 };
 

@@ -55,30 +55,30 @@ void CProcessMeasurements::SetDataHandlers()
       std::make_unique<Linux::CPidStatmHandler>(Linux::CPidStatmHandler())});
 }
 
-Exports::MeasurementItem CProcessMeasurements::GetConfig() const
+Exports::SMeasurementItem CProcessMeasurements::GetConfig() const
 {
-  Exports::MeasurementItem config;
+  Exports::SMeasurementItem config;
   config.name = "ProcessMeasurements";
-  config.type = Exports::Type::INFO;
+  config.type = Exports::EType::INFO;
   config.value = GetMeasurementFields();
   return config;
 }
 
-std::vector<Exports::MeasurementItem>
+std::vector<Exports::SMeasurementItem>
 CProcessMeasurements::GetMeasurementFields() const
 {
-  std::vector<Exports::MeasurementItem> result;
+  std::vector<Exports::SMeasurementItem> result;
   for (const auto &process : processIds_)
   {
-    Exports::MeasurementItem processInfo;
+    Exports::SMeasurementItem processInfo;
     processInfo.name = std::to_string(process.processId);
-    processInfo.type = Exports::Type::ARRAY;
-    std::vector<Exports::MeasurementItem> datapoints;
+    processInfo.type = Exports::EType::ARRAY;
+    std::vector<Exports::SMeasurementItem> datapoints;
     for (const auto &e : measureFieldsDefinition_)
     {
-      Exports::MeasurementItem config;
+      Exports::SMeasurementItem config;
       config.name = e.name;
-      config.type = Exports::Type::INFO;
+      config.type = Exports::EType::INFO;
       config.value = GetDefinitionItems(e, process.processId);
       datapoints.push_back(config);
     }
@@ -89,14 +89,14 @@ CProcessMeasurements::GetMeasurementFields() const
   return result;
 }
 
-std::vector<AllSensors::SensorGroups>
+std::vector<SAllSensors::SSensorGroups>
 CProcessMeasurements::GetSensors(const bool summarizeData) const
 {
-  std::vector<AllSensors::SensorGroups> result;
+  std::vector<SAllSensors::SSensorGroups> result;
 
   for (const auto &e : processIds_)
   {
-    AllSensors::SensorGroups sensorGroup;
+    SAllSensors::SSensorGroups sensorGroup;
     sensorGroup.processId = e.userProcessId;
     sensorGroup.processDelay = GetProcessDelay(e.userProcessId);
 
@@ -104,12 +104,12 @@ CProcessMeasurements::GetSensors(const bool summarizeData) const
     {
       try
       {
-        Sensors sensor{datafield};
+        SSensors sensor{datafield};
         sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
         if (summarizeData)
         {
           sensor.data = PerformanceHelpers::GetSummarizedData(
-              Measurements::Classification::PROCESSES, allData_,
+              Measurements::EClassification::PROCESSES, allData_,
               sensor.uniqueId, sensor.multiplier);
         }
 
@@ -143,21 +143,21 @@ int CProcessMeasurements::GetProcessDelay(const int processId) const
   throw std::runtime_error("Could not find process with pipelineId");
 }
 
-std::vector<Exports::MeasurementItem> CProcessMeasurements::GetDefinitionItems(
+std::vector<Exports::SMeasurementItem> CProcessMeasurements::GetDefinitionItems(
     const PlatformConfig::SDatafields &field, const int processId) const
 {
-  std::vector<Exports::MeasurementItem> result;
+  std::vector<Exports::SMeasurementItem> result;
   auto item1 =
-      Exports::MeasurementItem{"Label", Exports::Type::LABEL,
-                               std::to_string(processId) + "." + field.name};
+      Exports::SMeasurementItem{"Label", Exports::EType::LABEL,
+                                std::to_string(processId) + "." + field.name};
   result.push_back(item1);
   auto item2 =
-      Exports::MeasurementItem{"Unique ID", Exports::Type::INFO, field.id};
+      Exports::SMeasurementItem{"Unique ID", Exports::EType::INFO, field.id};
   result.push_back(item2);
   if (!field.path.empty())
   {
     auto item3 =
-        Exports::MeasurementItem{"Path", Exports::Type::INFO, field.path};
+        Exports::SMeasurementItem{"Path", Exports::EType::INFO, field.path};
     result.push_back(item3);
   }
   return result;

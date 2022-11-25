@@ -39,14 +39,15 @@ void print_info()
  */
 int main(int argc, char *argv[])
 {
-  // Input checks
+  // Input checks using the CInputHandler
   CInputHandler inputHandler;
   bool incorrectArgs = inputHandler.Parse(argc, argv);
   auto userArgs = inputHandler.GetUserArguments();
   if (VerifyArguments(incorrectArgs, argc, userArgs) == -1)
     return -1; // Terminate application, arguments are incorrect
 
-  // Enabling/disabling logger components (based on the input)
+  // Enabling/disabling logger components (can be enabled using terminal
+  // arguments)
   CLogger::Enable(userArgs.enableInfoLog, userArgs.enableDebugLog);
   // Parsing user configuration
   auto config = Core::ConfigParser::Parse(userArgs.configFile);

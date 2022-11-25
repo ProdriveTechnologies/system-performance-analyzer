@@ -4,34 +4,34 @@
 
 namespace GStreamer
 {
-enum class MeasureType : int
+enum class EMeasureType : int
 {
   NONE = 0,
   FPS = 1,
   LATENCY = 2,
   PROCESSING_TIME = 3
 };
-inline std::string GetMeasureType(const MeasureType t)
+inline std::string GetMeasureType(const EMeasureType t)
 {
   switch (t)
   {
-  case MeasureType::FPS:
+  case EMeasureType::FPS:
     return "fps";
-  case MeasureType::LATENCY:
+  case EMeasureType::LATENCY:
     return "latency";
-  case MeasureType::PROCESSING_TIME:
+  case EMeasureType::PROCESSING_TIME:
     return "processing time";
-  case MeasureType::NONE:
+  case EMeasureType::NONE:
   default:
     return "";
   }
 }
 
-struct Measurement
+struct EMeasurement
 {
-  MeasureType type = MeasureType::NONE;
+  EMeasureType type = EMeasureType::NONE;
   std::string pluginName;
   std::string value;
-  unsigned int valueInt = -1;
+  unsigned int valueInt = 0;
 };
 } // namespace GStreamer

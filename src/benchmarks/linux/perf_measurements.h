@@ -62,7 +62,7 @@ private:
   // CXavierSensors xavierSensors_;
   Timer<> cpuUtilizationTimer_;
   Exports::CExport exportObj_;
-  Measurements::AllSensors allSensors_;
+  Measurements::SAllSensors allSensors_;
 
   // Measurements data
   std::vector<Measurements::SMeasurementsData> measurementsData_;
@@ -97,7 +97,7 @@ private:
     return result;
   }
 
-  void SetThresholdResults(Measurements::AllSensors allSensors);
+  void SetThresholdResults(Measurements::SAllSensors allSensors);
 };
 
 } // namespace Linux

@@ -22,27 +22,27 @@ public:
     average_.Add(item);
     allMeasurements_.push_back(item.measuredValue);
   }
-  SensorData GetSensorData() const
+  SSensorData GetSensorData() const
   {
-    SensorData sensorData;
+    SSensorData sensorData;
     // There must be a datapoint to add sensible data
     if (average_.datapoints != 0)
     {
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MIN, GetMin() * multiplier_});
+          SSensorData::SMeasureValue{EValueTypes::MIN, GetMin() * multiplier_});
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MAX, GetMax() * multiplier_});
-      sensorData.summarizedValues.push_back(SensorData::MeasureValue{
-          ValueTypes::AVERAGE, average_.Get() * multiplier_});
-      sensorData.summarizedValues.push_back(SensorData::MeasureValue{
-          ValueTypes::MEDIAN, GetMedian() * multiplier_});
+          SSensorData::SMeasureValue{EValueTypes::MAX, GetMax() * multiplier_});
+      sensorData.summarizedValues.push_back(SSensorData::SMeasureValue{
+          EValueTypes::AVERAGE, average_.Get() * multiplier_});
+      sensorData.summarizedValues.push_back(SSensorData::SMeasureValue{
+          EValueTypes::MEDIAN, GetMedian() * multiplier_});
     }
     return sensorData;
   }
   int GetSize() const { return average_.datapoints; }
 
 private:
-  SensorData sensorData_;
+  SSensorData sensorData_;
   bool useSteadyState_;
   double multiplier_;
   struct Average

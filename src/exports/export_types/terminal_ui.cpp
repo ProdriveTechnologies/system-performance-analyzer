@@ -9,7 +9,7 @@
 namespace Exports
 {
 bool CTerminalUI::FullExport(
-    [[maybe_unused]] const std::vector<MeasurementItem> &config,
+    [[maybe_unused]] const std::vector<SMeasurementItem> &config,
     [[maybe_unused]] const FullMeasurement data,
     [[maybe_unused]] const AllSensors &allSensors,
     [[maybe_unused]] const std::vector<Measurements::CCorrelation::SResult>
@@ -77,7 +77,7 @@ CTerminalUI::GetElements(const Measurements::SMeasurementsData data)
 }
 
 ftxui::Elements CTerminalUI::GetElementsSensorGroups(
-    const std::vector<Measurements::AllSensors::SensorGroups> &sensorGroups,
+    const std::vector<Measurements::SAllSensors::SSensorGroups> &sensorGroups,
     const Measurements::SMeasurementsData data)
 {
   ftxui::Elements elements;
@@ -109,7 +109,7 @@ ftxui::Elements CTerminalUI::GetElementsSensorGroups(
   return elements;
 }
 
-ftxui::Element CTerminalUI::GetElement(const Measurements::Sensors &sensor,
+ftxui::Element CTerminalUI::GetElement(const Measurements::SSensors &sensor,
                                        const double &item, const int processId)
 {
   double value = GetPercentage(sensor.userData, item);

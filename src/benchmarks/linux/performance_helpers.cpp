@@ -24,12 +24,12 @@ int GetUniqueId()
  * @brief Create a Map With Id object
  *
  * @param data
- * @return std::unordered_map<int, Measurements::Sensors>
+ * @return std::unordered_map<int, Measurements::SSensors>
  */
-std::unordered_map<std::string, Measurements::Sensors>
-CreateMapWithId(const std::vector<Measurements::Sensors> &data)
+std::unordered_map<std::string, Measurements::SSensors>
+CreateMapWithId(const std::vector<Measurements::SSensors> &data)
 {
-  std::unordered_map<std::string, Measurements::Sensors> mapData;
+  std::unordered_map<std::string, Measurements::SSensors> mapData;
   for (const auto &e : data)
   {
     mapData.insert(std::make_pair(e.userId, e));
@@ -45,7 +45,7 @@ CreateMapWithId(const std::vector<Measurements::Sensors> &data)
  * @return true threshold was exceeded
  * @return false threshold didnt get exceeded
  */
-bool HandleThreshold(const Measurements::Sensors *sensor,
+bool HandleThreshold(const Measurements::SSensors *sensor,
                      Core::SThreshold threshold)
 {
   auto parseSign = [](const double lhs, const double rhs,
@@ -68,27 +68,27 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
   {
   case Core::EThresholdType::MAX:
     return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::ValueTypes::MAX),
+                     sensor->data.Get(Measurements::EValueTypes::MAX),
                      threshold.sign);
   case Core::EThresholdType::MIN:
     return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::ValueTypes::MIN),
+                     sensor->data.Get(Measurements::EValueTypes::MIN),
                      threshold.sign);
   case Core::EThresholdType::AVERAGE:
     return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::ValueTypes::AVERAGE),
+                     sensor->data.Get(Measurements::EValueTypes::AVERAGE),
                      threshold.sign);
   case Core::EThresholdType::MEDIAN:
     return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::ValueTypes::MEDIAN),
+                     sensor->data.Get(Measurements::EValueTypes::MEDIAN),
                      threshold.sign);
   default:
     throw std::runtime_error("Cannot parse threshold type! Illegal type!");
   }
 }
 
-Measurements::SensorData
-GetSummarizedData(const Measurements::Classification classification,
+Measurements::SSensorData
+GetSummarizedData(const Measurements::EClassification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
                   const int uniqueId, const double multiplication,
                   const bool useSteadyState)
@@ -113,11 +113,11 @@ GetSummarizedData(const Measurements::Classification classification,
   return summarizedData.GetSensorData();
 }
 
-Measurements::Sensors
-GetSummarizedData(const Measurements::Classification classification,
+Measurements::SSensors
+GetSummarizedData(const Measurements::EClassification classification,
                   const std::vector<Measurements::SMeasurementsData> *data,
                   const std::unordered_set<int> uniqueIds,
-                  const Measurements::Sensors &sensorTemplate,
+                  const Measurements::SSensors &sensorTemplate,
                   const bool useSteadyState)
 {
   Measurements::CSummarizeData summarizedData{useSteadyState};
@@ -132,12 +132,10 @@ GetSummarizedData(const Measurements::Classification classification,
         summarizedData.AddDataPoint(e2);
     }
   }
-  Measurements::Sensors result = sensorTemplate;
+  Measurements::SSensors result = sensorTemplate;
   result.uniqueId = PerformanceHelpers::GetUniqueId();
   summarizedData.SetMultiplier(sensorTemplate.multiplier);
   result.data = summarizedData.GetSensorData();
-  // TODO: remove
-  std::cout << result.userId << ":" << result.data.Printable() << std::endl;
   return result;
 }
 

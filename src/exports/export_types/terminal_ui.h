@@ -18,7 +18,7 @@ public:
   CTerminalUI() : colorRange_{1, 15}, currentColor_{1} { hasLiveMode_ = true; }
 
   bool FullExport(
-      const std::vector<MeasurementItem> &config, const FullMeasurement data,
+      const std::vector<SMeasurementItem> &config, const FullMeasurement data,
       const AllSensors &allSensors,
       const std::vector<Measurements::CCorrelation::SResult> &correlations);
 
@@ -39,12 +39,12 @@ private:
   ftxui::Element document_;
   std::string position_;
 
-  std::string GetFileName(const Measurements::Classification c);
-  ftxui::Element GetElement(const Measurements::Sensors &sensor,
+  std::string GetFileName(const Measurements::EClassification c);
+  ftxui::Element GetElement(const Measurements::SSensors &sensor,
                             const double &measuredValue, const int processId);
   ftxui::Elements GetElements(const Measurements::SMeasurementsData data);
   ftxui::Elements GetElementsSensorGroups(
-      const std::vector<Measurements::AllSensors::SensorGroups> &groups,
+      const std::vector<Measurements::SAllSensors::SSensorGroups> &groups,
       const Measurements::SMeasurementsData data);
   double GetPercentage(const PlatformConfig::SDatafields &datafield,
                        const double &measuredValue);

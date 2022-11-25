@@ -41,14 +41,14 @@ public:
   std::vector<Measurements::SMeasurementGroup> ProcessGstreamer();
   void SetConfig(const Core::SConfig &config) { config_ = config; }
   std::vector<Exports::PipelineConfig> GetPipelineConfig() const;
-  Exports::MeasurementItem GetPipelineConfig2() const;
-  std::vector<Exports::MeasurementItem>
+  Exports::SMeasurementItem GetPipelineConfig2() const;
+  std::vector<Exports::SMeasurementItem>
   GetPipelineConfig(const int pipelineNr) const;
-  std::vector<Exports::MeasurementItem>
+  std::vector<Exports::SMeasurementItem>
   GetMeasurementLabels(const int pipelineNr) const;
   static std::vector<Measurements::SMeasurementGroup>
   SortData(const std::vector<Measurements::SMeasurementGroup> &data);
-  std::vector<Measurements::AllSensors::SensorGroups>
+  std::vector<Measurements::SAllSensors::SSensorGroups>
   GetSensors(const bool summarizeData = true) const;
   void setProctime(const bool proctime)
   {
@@ -61,20 +61,20 @@ private:
   using PipelineNr = int;
   std::vector<Measurements::SMeasurementsData> *allData_;
   std::unordered_map<PipelineNr, CGstreamerHandler *> streams_;
-  std::unordered_map<PipelineNr, std::unordered_map<Identifier, int>>
+  std::unordered_map<PipelineNr, std::unordered_map<SIdentifier, int>>
       uniqueIds_;
   Core::SConfig config_;
   bool enableProctime_;
 
-  int GetUniqueId(const int pipelineId, const Identifier &id);
-  std::unordered_map<int, Identifier>
+  int GetUniqueId(const int pipelineId, const SIdentifier &id);
+  std::unordered_map<int, SIdentifier>
   GetPluginNames(const int pipelineId) const;
   int GetProcessDelay(const int pipelineId) const;
 
-  std::string CreateSensorName(const std::string moduleName, MeasureType type,
+  std::string CreateSensorName(const std::string moduleName, EMeasureType type,
                                const int pipelineNr = -1) const;
 
-  bool GetPerformanceIndicator(const MeasureType type) const
+  bool GetPerformanceIndicator(const EMeasureType type) const
   {
     for (const auto &[predefinedType, perfIndicator] : predefinedSensors)
     {
@@ -83,7 +83,7 @@ private:
     }
     return false;
   }
-  inline std::unordered_set<int> GetUniqueIdsByType(const MeasureType type,
+  inline std::unordered_set<int> GetUniqueIdsByType(const EMeasureType type,
                                                     const int pipelineNr) const
   {
     std::unordered_set<int> result;
@@ -100,10 +100,10 @@ private:
     return result;
   }
   using PerformanceIndicator = bool;
-  static inline std::vector<std::pair<MeasureType, PerformanceIndicator>>
-      predefinedSensors = {{MeasureType::FPS, true}
+  static inline std::vector<std::pair<EMeasureType, PerformanceIndicator>>
+      predefinedSensors = {{EMeasureType::FPS, true}
                            /* MeasureType::LATENCY */};
-  static inline const std::pair<MeasureType, PerformanceIndicator> procTime_ =
-      std::make_pair(MeasureType::PROCESSING_TIME, false);
+  static inline const std::pair<EMeasureType, PerformanceIndicator> procTime_ =
+      std::make_pair(EMeasureType::PROCESSING_TIME, false);
 };
 } // namespace GStreamer

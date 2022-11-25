@@ -97,9 +97,9 @@ void CPerfMeasurements::Initialize()
       GetProcessFromProcesses<RunProcess>();
   processMeasurements_.Initialize(&measurementsData_, linuxProcesses);
 
-  allSensors_.AddSensors(Measurements::Classification::SYSTEM,
+  allSensors_.AddSensors(Measurements::EClassification::SYSTEM,
                          sensorMeasurements_.GetSensors(false));
-  allSensors_.AddSensors(Measurements::Classification::PROCESSES,
+  allSensors_.AddSensors(Measurements::EClassification::PROCESSES,
                          processMeasurements_.GetSensors(false));
 
   cpuUtilizationTimer_.restart();
@@ -141,12 +141,12 @@ void CPerfMeasurements::StartMeasurementsLoop()
     measurementData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
 
-    measurementData.AddMeasurements(Measurements::Classification::SYSTEM,
+    measurementData.AddMeasurements(Measurements::EClassification::SYSTEM,
                                     sensorMeasurements_.GetMeasurements());
-    measurementData.AddMeasurements(Measurements::Classification::PROCESSES,
+    measurementData.AddMeasurements(Measurements::EClassification::PROCESSES,
                                     processMeasurements_.GetMeasurements());
 
-    measurementData.AddMeasurements(Measurements::Classification::PIPELINE,
+    measurementData.AddMeasurements(Measurements::EClassification::PIPELINE,
                                     gstMeasurements_.ProcessGstreamer());
 
     // Measure data on each GStreamer pipeline
@@ -156,7 +156,7 @@ void CPerfMeasurements::StartMeasurementsLoop()
     {
       // Have to add the sensors of the pipeline each time as they are
       // dynamically added (the old sensors are cleared when adding new ones)
-      allSensors_.AddSensors(Measurements::Classification::PIPELINE,
+      allSensors_.AddSensors(Measurements::EClassification::PIPELINE,
                              gstMeasurements_.GetSensors(false));
       exportObj_.AddMeasurements(measurementData);
     }
@@ -168,8 +168,8 @@ void CPerfMeasurements::StartMeasurementsLoop()
   for (auto &e : measurementsData_)
   {
     auto newGroups = gstMeasurements_.SortData(
-        e.GetItemGroups(Measurements::Classification::PIPELINE));
-    e.AddMeasurements(Measurements::Classification::PIPELINE, newGroups);
+        e.GetItemGroups(Measurements::EClassification::PIPELINE));
+    e.AddMeasurements(Measurements::EClassification::PIPELINE, newGroups);
   }
 }
 
@@ -177,7 +177,7 @@ void CPerfMeasurements::ExportData(
     const Exports::AllSensors &sensors,
     const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
 {
-  std::vector<Exports::MeasurementItem> items;
+  std::vector<Exports::SMeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
   items.push_back(gstMeasurements_.GetPipelineConfig2());
   items.push_back(processMeasurements_.GetConfig());
@@ -230,9 +230,9 @@ void CPerfMeasurements::AnalyzeData()
   auto processSensors = processMeasurements_.GetSensors();
 
   Exports::AllSensors allSensors;
-  allSensors.AddSensors(Measurements::Classification::PIPELINE, gstSensors);
-  allSensors.AddSensors(Measurements::Classification::SYSTEM, sysSensors);
-  allSensors.AddSensors(Measurements::Classification::PROCESSES,
+  allSensors.AddSensors(Measurements::EClassification::PIPELINE, gstSensors);
+  allSensors.AddSensors(Measurements::EClassification::SYSTEM, sysSensors);
+  allSensors.AddSensors(Measurements::EClassification::PROCESSES,
                         processSensors);
 
   // Execute the correlation check here
@@ -245,8 +245,8 @@ void CPerfMeasurements::AnalyzeData()
   ExportData(allSensors, corrResults);
 }
 
-void CPerfMeasurements::SetThresholdResults(Measurements::AllSensors allSensors)
-// std::unordered_map<std::string, Measurements::Sensors> &sensorMap)
+void CPerfMeasurements::SetThresholdResults(
+    Measurements::SAllSensors allSensors)
 {
   auto allProcessIds = allSensors.GetProcesses();
   for (const auto &processId : allProcessIds)

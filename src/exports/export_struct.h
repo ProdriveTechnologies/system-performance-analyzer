@@ -15,11 +15,6 @@
 
 namespace Exports
 {
-struct Process
-{
-  int pid;
-  std::string appName;
-};
 using SMeasuredItem = Measurements::SMeasuredItem;
 
 static inline SMeasuredItem
@@ -37,20 +32,20 @@ struct PipelineConfig
 {
   size_t pipelineId;
   std::string pipelineCommand;
-  std::unordered_map<int, GStreamer::Identifier> pluginNames;
+  std::unordered_map<int, GStreamer::SIdentifier> pluginNames;
 };
-enum class Type
+enum class EType
 {
   MEASUREMENT,
   INFO,
   LABEL,
   ARRAY
 };
-struct MeasurementItem
+struct SMeasurementItem
 {
-  using MeasurementItems = std::vector<MeasurementItem>;
+  using MeasurementItems = std::vector<SMeasurementItem>;
   std::string name;
-  Type type;
+  EType type;
   std::variant<MeasurementItems, std::string, int, double> value;
 };
 

@@ -33,10 +33,10 @@ public:
   void Initialize(std::vector<Measurements::SMeasurementsData> *allData,
                   std::vector<Linux::RunProcess *> processes);
 
-  Exports::MeasurementItem GetConfig() const;
+  Exports::SMeasurementItem GetConfig() const;
   std::vector<Measurements::SMeasurementGroup> GetMeasurements();
 
-  std::vector<AllSensors::SensorGroups>
+  std::vector<SAllSensors::SSensorGroups>
   GetSensors(const bool summarizeData = true) const;
 
   // Should be removed
@@ -66,8 +66,8 @@ private:
   MeasureFieldsType measureFields_;
 
   void SetProcesses();
-  std::vector<Exports::MeasurementItem> GetMeasurementFields() const;
-  std::vector<Exports::MeasurementItem>
+  std::vector<Exports::SMeasurementItem> GetMeasurementFields() const;
+  std::vector<Exports::SMeasurementItem>
   GetDefinitionItems(const PlatformConfig::SDatafields &field,
                      const int processId) const;
   void SetInactive(const int processId);

@@ -19,7 +19,7 @@ void CPipelineMeasurements::Initialize(
   for (const auto &e : streams_)
   {
     uniqueIds_.insert(
-        std::make_pair(e.first, std::unordered_map<Identifier, int>{}));
+        std::make_pair(e.first, std::unordered_map<SIdentifier, int>{}));
   }
 }
 
@@ -70,12 +70,12 @@ CPipelineMeasurements::ProcessGstreamer()
 
     // Read each measurement of the GStreamer pipeline and put it in a map
     std::vector<PlatformConfig::SMeasureField> measureField_;
-    std::unordered_map<Identifier, GStreamer::Measurement> summarizeMap;
+    std::unordered_map<SIdentifier, GStreamer::EMeasurement> summarizeMap;
 
     for (size_t qI = 0; qI < queueSize; qI++)
     {
       auto measurement = e.second->GetMeasurement();
-      const auto id = Identifier{measurement.type, measurement.pluginName};
+      const auto id = SIdentifier{measurement.type, measurement.pluginName};
       if (summarizeMap.find(id) == summarizeMap.end())
         summarizeMap.insert(std::make_pair(id, measurement));
     }
@@ -107,19 +107,19 @@ CPipelineMeasurements::GetPipelineConfig() const
   }
   return result;
 }
-Exports::MeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
+Exports::SMeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
 {
-  Exports::MeasurementItem pipelineConfig;
+  Exports::SMeasurementItem pipelineConfig;
   pipelineConfig.name = "PipelineMeasurements";
-  pipelineConfig.type = Exports::Type::INFO;
+  pipelineConfig.type = Exports::EType::INFO;
   // What info should this return? The pipeline command, the pipeline id, and
   // the pipeline measurement values
-  std::vector<Exports::MeasurementItem> pipelineItems;
+  std::vector<Exports::SMeasurementItem> pipelineItems;
   for (const auto &e : streams_)
   {
-    Exports::MeasurementItem item;
+    Exports::SMeasurementItem item;
     item.name = std::to_string(e.first);
-    item.type = Exports::Type::INFO;
+    item.type = Exports::EType::INFO;
     item.value = GetPipelineConfig(e.first);
     pipelineItems.push_back(item);
   }
@@ -131,22 +131,22 @@ Exports::MeasurementItem CPipelineMeasurements::GetPipelineConfig2() const
 /**
  * @brief Returns the sensors supported and measured by the pipeline
  *
- * @return Measurements::Sensors
+ * @return Measurements::SSensors
  * @note For the live mode, we need to assign one "fps" measurement to
  * visualize. Because it is shown during runtime, we don't have access to the
  * averages. Therefore, the "fps" of the first component will be marked for the
  * live view (For each MeasureType, one component will be marked)
  */
-std::vector<Measurements::AllSensors::SensorGroups>
+std::vector<Measurements::SAllSensors::SSensorGroups>
 CPipelineMeasurements::GetSensors(const bool summarizeData) const
 {
-  std::vector<Measurements::AllSensors::SensorGroups> result;
+  std::vector<Measurements::SAllSensors::SSensorGroups> result;
 
   for (const auto &pipeline : uniqueIds_)
   {
     std::cout << "Unique ID execution: " << pipeline.first << std::endl;
-    std::unordered_set<GStreamer::MeasureType> livemodeTypes;
-    Measurements::AllSensors::SensorGroups sensorGroup;
+    std::unordered_set<GStreamer::EMeasureType> livemodeTypes;
+    Measurements::SAllSensors::SSensorGroups sensorGroup;
     sensorGroup.processId = pipeline.first;
     sensorGroup.processDelay = GetProcessDelay(pipeline.first);
     const bool useSteadyState =
@@ -154,10 +154,10 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
 
     for (const auto &e : pipeline.second)
     {
-      std::vector<Measurements::Sensors> sensors;
+      std::vector<Measurements::SSensors> sensors;
       std::string sensorName =
           CreateSensorName(e.first.moduleName, e.first.type);
-      Measurements::Sensors sensor{sensorName, e.second};
+      Measurements::SSensors sensor{sensorName, e.second};
       sensor.measuredRaw = true;
 
       sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
@@ -174,12 +174,8 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
       if (summarizeData)
       {
         sensor.data = PerformanceHelpers::GetSummarizedData(
-            Measurements::Classification::PIPELINE, allData_, e.second,
+            Measurements::EClassification::PIPELINE, allData_, e.second,
             sensor.multiplier, useSteadyState);
-        // TODO: remove
-        std::cout << std::to_string(sensorGroup.processId) + ": "
-                  << sensor.userId << ":" << sensor.data.Printable()
-                  << std::endl;
       }
       sensorGroup.sensors.push_back(sensor);
     }
@@ -189,13 +185,13 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
       for (const auto &[type, _] : predefinedSensors)
       {
         auto uniqueIdsSet = GetUniqueIdsByType(type, pipeline.first);
-        Measurements::Sensors sensorTemplate{
+        Measurements::SSensors sensorTemplate{
             GStreamer::GetMeasureType(type), PerformanceHelpers::GetUniqueId(),
             PlatformConfig::EClass::PIPELINE_MEASUREMENTS};
         sensorTemplate.suffix = GStreamer::GetMeasureType(type);
 
         sensorGroup.sensors.push_back(PerformanceHelpers::GetSummarizedData(
-            Measurements::Classification::PIPELINE, allData_, uniqueIdsSet,
+            Measurements::EClassification::PIPELINE, allData_, uniqueIdsSet,
             sensorTemplate, useSteadyState));
       }
     }
@@ -204,19 +200,19 @@ CPipelineMeasurements::GetSensors(const bool summarizeData) const
   return result;
 }
 
-std::vector<Exports::MeasurementItem>
+std::vector<Exports::SMeasurementItem>
 CPipelineMeasurements::GetPipelineConfig(const int pipelineNr) const
 {
-  std::vector<Exports::MeasurementItem> result;
+  std::vector<Exports::SMeasurementItem> result;
   auto stream = streams_.find(pipelineNr);
   if (stream == streams_.end())
     throw std::runtime_error(
         "GStreamer measurements: GetPipelineConfig received "
         "incorrect pipeline number!");
-  result.push_back(Exports::MeasurementItem{"Command", Exports::Type::INFO,
-                                            stream->second->GetPipeline()});
-  result.push_back(Exports::MeasurementItem{"Labels", Exports::Type::ARRAY,
-                                            GetMeasurementLabels(pipelineNr)});
+  result.push_back(Exports::SMeasurementItem{"Command", Exports::EType::INFO,
+                                             stream->second->GetPipeline()});
+  result.push_back(Exports::SMeasurementItem{"Labels", Exports::EType::ARRAY,
+                                             GetMeasurementLabels(pipelineNr)});
   return result;
 }
 
@@ -231,14 +227,12 @@ int CPipelineMeasurements::GetProcessDelay(const int pipelineId) const
   for (const auto &e : streams_)
   {
     if (e.second->GetUserProcessId() == pipelineId)
-    {
       return e.second->GetProcessDelay();
-    }
   }
   throw std::runtime_error("Could not find process with pipelineId");
 }
 
-std::vector<Exports::MeasurementItem>
+std::vector<Exports::SMeasurementItem>
 CPipelineMeasurements::GetMeasurementLabels(const int pipelineNr) const
 {
   auto ids = uniqueIds_.find(pipelineNr);
@@ -249,17 +243,17 @@ CPipelineMeasurements::GetMeasurementLabels(const int pipelineNr) const
         "incorrect pipeline number!");
   // Using an ordered map so it automatically orders on the int, which is the
   // unique id of the field
-  std::map<int, Exports::MeasurementItem> mapResult;
+  std::map<int, Exports::SMeasurementItem> mapResult;
   for (const auto &e : ids->second)
   {
-    Exports::MeasurementItem item;
+    Exports::SMeasurementItem item;
     item.name = "Label";
-    item.type = Exports::Type::LABEL;
+    item.type = Exports::EType::LABEL;
     item.value = CreateSensorName(e.first.moduleName, e.first.type, pipelineNr);
     mapResult.insert(std::make_pair(e.second, item));
   }
 
-  std::vector<Exports::MeasurementItem> result;
+  std::vector<Exports::SMeasurementItem> result;
   std::transform(mapResult.begin(), mapResult.end(), std::back_inserter(result),
                  [](const auto p) { return p.second; });
   return result; // the vector ordered by unique IDs of the measurements
@@ -268,14 +262,14 @@ CPipelineMeasurements::GetMeasurementLabels(const int pipelineNr) const
 /**
  * @brief Get the Plugin Names object
  *
- * @return std::unordered_map<int, Identifier>
+ * @return std::unordered_map<int, SIdentifier>
  */
-std::unordered_map<int, Identifier>
+std::unordered_map<int, SIdentifier>
 CPipelineMeasurements::GetPluginNames(const int pipelineId) const
 {
   auto ids = uniqueIds_.find(pipelineId);
 
-  std::unordered_map<int, Identifier> result;
+  std::unordered_map<int, SIdentifier> result;
   for (const auto &e : ids->second)
   {
     result.insert(std::make_pair(e.second, e.first));
@@ -290,7 +284,7 @@ CPipelineMeasurements::GetPluginNames(const int pipelineId) const
  * the IDs is also filled during runtime
  */
 int CPipelineMeasurements::GetUniqueId(const int pipelineId,
-                                       const Identifier &id)
+                                       const SIdentifier &id)
 {
   auto &idsMap = uniqueIds_.find(pipelineId)->second;
   auto result = idsMap.find(id);
@@ -312,7 +306,7 @@ int CPipelineMeasurements::GetUniqueId(const int pipelineId,
  * @param pipelineNr should be the number from the pipeline, indexed from 0
  */
 std::string CPipelineMeasurements::CreateSensorName(
-    const std::string moduleName, MeasureType type, const int pipelineNr) const
+    const std::string moduleName, EMeasureType type, const int pipelineNr) const
 {
   if (pipelineNr == -1)
     return moduleName + "." + GetMeasureType(type);

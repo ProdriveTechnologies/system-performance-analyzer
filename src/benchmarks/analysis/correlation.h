@@ -14,12 +14,12 @@ class CCorrelation
 public:
   struct SResult
   {
-    Measurements::Sensors sensor1;
-    Measurements::Sensors sensor2;
+    Measurements::SSensors sensor1;
+    Measurements::SSensors sensor2;
     double correlation;
   };
   static std::vector<SResult> GetCorrelation(
-      const Measurements::AllSensors &allSensors,
+      const Measurements::SAllSensors &allSensors,
       const std::vector<Measurements::SMeasurementsData> *measuredData,
       const bool enablePretestZeroes = false);
 
@@ -40,7 +40,7 @@ private:
       }
     };
     std::vector<SMeasurement> rawMeasurements;
-    Measurements::Sensors sensor;
+    Measurements::SSensors sensor;
   };
 
   static std::pair<SSensorMeasurements, SSensorMeasurements>
@@ -51,7 +51,7 @@ private:
                const SSensorMeasurements &vec2);
   static std::vector<double> ConvertToRaw(const SSensorMeasurements &vec1);
   static std::vector<SSensorMeasurements> CreateEqualSizedVectors(
-      const Measurements::AllSensors &allSensors,
+      const Measurements::SAllSensors &allSensors,
       const std::vector<Measurements::SMeasurementsData> *measuredData,
       const bool isPerformanceMetric, const bool enablePretestZeroes);
   // static std::vector<SSensorMeasurements> CreateEqualSizedVector(
@@ -59,11 +59,11 @@ private:
   //     const std::vector<Measurements::SMeasurementsData> *measuredData,
   //     const bool isPerformanceMetric);
   static std::vector<SSensorMeasurements>
-  GetSensors(const Measurements::AllSensors &allSensors,
-             const Measurements::Classification classification,
+  GetSensors(const Measurements::SAllSensors &allSensors,
+             const Measurements::EClassification classification,
              const bool isPerformanceMetric);
   static std::vector<SSensorMeasurements>
-  GetSensors(const std::vector<Sensors> &sensors,
+  GetSensors(const std::vector<SSensors> &sensors,
              const bool isPerformanceMetric);
 };
 

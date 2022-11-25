@@ -12,7 +12,7 @@ class CCsv : public CBase
 {
 public:
   bool FullExport(
-      const std::vector<MeasurementItem> &config, const FullMeasurement data,
+      const std::vector<SMeasurementItem> &config, const FullMeasurement data,
       const AllSensors &allSensors,
       const std::vector<Measurements::CCorrelation::SResult> &correlations);
 
@@ -20,9 +20,9 @@ private:
   static constexpr char DELIMITER = ',';
 
   std::string ParseData(const std::string &timeStr,
-                        const std::vector<Measurements::Sensors> &allSensors,
+                        const std::vector<Measurements::SSensors> &allSensors,
                         const std::vector<SMeasuredItem> &items);
-  std::string ParseLabel(const std::vector<Measurements::Sensors> &sensors);
+  std::string ParseLabel(const std::vector<Measurements::SSensors> &sensors);
 };
 
 } // namespace Exports

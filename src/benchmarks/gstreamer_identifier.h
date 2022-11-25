@@ -13,11 +13,11 @@
  */
 namespace GStreamer
 {
-struct Identifier
+struct SIdentifier
 {
-  GStreamer::MeasureType type;
+  GStreamer::EMeasureType type;
   std::string moduleName;
-  bool operator==(const Identifier &r) const
+  bool operator==(const SIdentifier &r) const
   {
     return ((type == r.type) && (moduleName == r.moduleName));
   }
@@ -26,11 +26,11 @@ struct Identifier
 
 namespace std
 {
-template <> struct hash<GStreamer::Identifier>
+template <> struct hash<GStreamer::SIdentifier>
 {
-  inline size_t operator()(const GStreamer::Identifier &k) const
+  inline size_t operator()(const GStreamer::SIdentifier &k) const
   {
-    // computes the hash of a GStreamer::Identifier using a variant
+    // computes the hash of a GStreamer::SIdentifier using a variant
     // of the Fowler-Noll-Vo hash function
     // from: https://en.cppreference.com/w/cpp/utility/hash/operator()
     size_t result = 2166136261;

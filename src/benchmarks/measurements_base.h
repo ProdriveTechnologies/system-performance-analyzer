@@ -14,7 +14,7 @@ public:
   {
     allData_ = allData;
   }
-  virtual std::vector<Sensors> GetSensors() const = 0;
+  virtual std::vector<SSensors> GetSensors() const = 0;
   virtual std::vector<Measurements::SMeasurementGroup> GetMeasurements() = 0;
 
 private:

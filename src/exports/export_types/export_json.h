@@ -14,7 +14,7 @@ class CJson : public CBase
 {
 public:
   bool FullExport(
-      const std::vector<MeasurementItem> &config, const FullMeasurement data,
+      const std::vector<SMeasurementItem> &config, const FullMeasurement data,
       const AllSensors &allSensors,
       const std::vector<Measurements::CCorrelation::SResult> &correlations);
 
@@ -38,8 +38,8 @@ private:
   };
   std::string InitPipelineConfig(
       const size_t pipelineId,
-      const std::unordered_map<int, GStreamer::Identifier> &items);
-  nlohmann::json ParseLabel(const MeasurementItem &item,
+      const std::unordered_map<int, GStreamer::SIdentifier> &items);
+  nlohmann::json ParseLabel(const SMeasurementItem &item,
                             const nlohmann::json parent = nlohmann::json{});
 };
 

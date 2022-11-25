@@ -35,7 +35,7 @@ public:
   size_t GetMeasurementsSize() { return traceHandler_.GetMeasurementsSize(); }
   int GetProcessId() const { return processId_; }
 
-  GStreamer::Measurement GetMeasurement()
+  GStreamer::EMeasurement GetMeasurement()
   {
     return traceHandler_.GetMeasurement();
   }

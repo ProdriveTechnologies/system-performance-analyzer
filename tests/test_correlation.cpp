@@ -57,11 +57,11 @@ TEST(Correlation, LowCorrelation)
  */
 TEST(Correlation, CorrelationFull)
 {
-  Measurements::AllSensors allsensors;
-  Measurements::Sensors sensor{"name", 1,
-                               PlatformConfig::EClass::PIPELINE_MEASUREMENTS};
+  Measurements::SAllSensors allsensors;
+  Measurements::SSensors sensor{"name", 1,
+                                PlatformConfig::EClass::PIPELINE_MEASUREMENTS};
   sensor.performanceIndicator = true;
-  Measurements::Sensors sensor2{"name", 2};
+  Measurements::SSensors sensor2{"name", 2};
   sensor2.performanceIndicator = false;
 
   std::vector<Measurements::SMeasurementsData> alldata;
@@ -78,7 +78,7 @@ TEST(Correlation, CorrelationFull)
       AddPoints(&alldata, _Item{1, i_d});
   }
 
-  allsensors.AddSensors(Measurements::Classification::PIPELINE,
+  allsensors.AddSensors(Measurements::EClassification::PIPELINE,
                         {sensor, sensor2});
 
   auto res = Measurements::CCorrelation::GetCorrelation(allsensors, &alldata);
@@ -95,9 +95,9 @@ void AddPoints(std::vector<Measurements::SMeasurementsData> *alldata,
   Measurements::SMeasurementsData data;
   data.time = "3000";
   if (item2.id != -1)
-    data.AddMeasurements(Measurements::Classification::PIPELINE,
+    data.AddMeasurements(Measurements::EClassification::PIPELINE,
                          {item1, item2});
   else
-    data.AddMeasurements(Measurements::Classification::PIPELINE, {item1});
+    data.AddMeasurements(Measurements::EClassification::PIPELINE, {item1});
   alldata->push_back(data);
 }

@@ -9,7 +9,7 @@
 namespace Exports
 {
 bool CJson::FullExport(
-    const std::vector<MeasurementItem> &config,
+    const std::vector<SMeasurementItem> &config,
     [[maybe_unused]] const FullMeasurement data,
     [[maybe_unused]] const AllSensors &allSensors,
     const std::vector<Measurements::CCorrelation::SResult> &correlations)
@@ -21,25 +21,7 @@ bool CJson::FullExport(
   {
     const auto &item = config.at(i);
     jsonObject[item.name] = ParseLabel(item);
-    // FileWriter systemFile{item.name + EXTENSION};
-    // labels = "time" + ParseLabel(item);
-    // systemFile.AddRow(labels);
-
-    // for (const auto &e : *data)
-    // {
-    //   if (i == 0)
-    //   {
-    //     systemFile.AddRow(ParseData(e), false);
-    //   }
-    //   else if (i == 1)
-    //   {
-    //     systemFile.AddRow(ParseData(e.time, e.pipelineInfo), false);
-    //   }
-    // }
   }
-  // for(const auto& e : allSensors.) {
-
-  // }
 
   for (const auto &e : correlations)
   {
@@ -62,7 +44,7 @@ bool CJson::FullExport(
  * @param item
  * @return std::string
  */
-nlohmann::json CJson::ParseLabel(const MeasurementItem &item,
+nlohmann::json CJson::ParseLabel(const SMeasurementItem &item,
                                  const nlohmann::json parent)
 {
   nlohmann::json result = parent;
@@ -72,8 +54,8 @@ nlohmann::json CJson::ParseLabel(const MeasurementItem &item,
   std::visit(Overload{[&](const auto &e) {
                         result[item.name] = e;
                       }, // for string, double, and int
-                      [&](const std::vector<MeasurementItem> &items) {
-                        if (item.type == Type::ARRAY)
+                      [&](const std::vector<SMeasurementItem> &items) {
+                        if (item.type == EType::ARRAY)
                         {
                           nlohmann::json newJson = nlohmann::json::array();
                           for (const auto &e2 : items)

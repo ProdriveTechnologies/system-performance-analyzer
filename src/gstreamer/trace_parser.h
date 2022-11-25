@@ -30,18 +30,18 @@ public:
     TraceHandler *parent;
   };
 
-  size_t GetMeasurementsSize() const { return fifoMeasurements.size(); }
+  size_t GetMeasurementsSize() const { return fifoMeasurements_.size(); }
 
   /**
    * @brief Gets the measurement object and directly removes it from the FIFO
 
    */
-  Measurement GetMeasurement()
+  EMeasurement GetMeasurement()
   {
     if (GetMeasurementsSize() != 0)
     {
-      auto measurement = fifoMeasurements.front();
-      fifoMeasurements.pop(); // Directly remove it from the fifo
+      auto measurement = fifoMeasurements_.front();
+      fifoMeasurements_.pop(); // Directly remove it from the fifo
       return measurement;
     }
     else
@@ -53,9 +53,8 @@ public:
   int pid;
 
 private:
-  Helpers::AtomicQueue<Measurement> fifoMeasurements;
+  Helpers::AtomicQueue<EMeasurement> fifoMeasurements_;
   Linux::PipeCommunicator *pipe_;
-  // static std::unordered_map()
 
   int TimeToInt(const std::string &time);
 };

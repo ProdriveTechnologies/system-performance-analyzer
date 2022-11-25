@@ -20,7 +20,7 @@ namespace Exports
  * @return false
  */
 bool CSummaryGenerator::FullExport(
-    [[maybe_unused]] const std::vector<MeasurementItem> &config,
+    [[maybe_unused]] const std::vector<SMeasurementItem> &config,
     const FullMeasurement data, const AllSensors &allSensors,
     const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
 {
@@ -147,7 +147,7 @@ void CSummaryGenerator::PrintCacheInfo()
 void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
 {
   SummaryWriter::PrintSection(SummaryTranslations::systemSummaryTitle);
-  auto systemRsc = allSensors.data.find(Measurements::Classification::SYSTEM);
+  auto systemRsc = allSensors.data.find(Measurements::EClassification::SYSTEM);
   if (systemRsc != allSensors.data.end())
   {
     if (systemRsc->second.size() > 1)
@@ -160,14 +160,14 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
             !settings_.settings.verboseSummary)
           continue;
         PrintValue(SummaryTranslations::average, sensor,
-                   Measurements::ValueTypes::AVERAGE);
+                   Measurements::EValueTypes::AVERAGE);
       }
     }
   }
   SummaryWriter::PrintRow();
   SummaryWriter::PrintSection(SummaryTranslations::processSummaryTitle);
   auto processRsc =
-      allSensors.data.find(Measurements::Classification::PROCESSES);
+      allSensors.data.find(Measurements::EClassification::PROCESSES);
   if (processRsc != allSensors.data.end())
   {
     for (const auto &processGroup : processRsc->second)
@@ -180,7 +180,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
             !settings_.settings.verboseSummary)
           continue;
         PrintValue(SummaryTranslations::average, sensor,
-                   Measurements::ValueTypes::AVERAGE);
+                   Measurements::EValueTypes::AVERAGE);
       }
       SummaryWriter::PrintRow();
     }
@@ -188,7 +188,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
   SummaryWriter::PrintRow();
   SummaryWriter::PrintSection(SummaryTranslations::pipelineSummaryTitle);
   auto pipelineRsc =
-      allSensors.data.find(Measurements::Classification::PIPELINE);
+      allSensors.data.find(Measurements::EClassification::PIPELINE);
   if (pipelineRsc != allSensors.data.end())
   {
     for (const auto &pipelineGroup : pipelineRsc->second)
@@ -200,7 +200,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
         if (settings_.settings.verboseSummary || sensor.measuredRaw == false)
         {
           PrintValue(SummaryTranslations::average, sensor,
-                     Measurements::ValueTypes::AVERAGE);
+                     Measurements::EValueTypes::AVERAGE);
         }
         // if (sensor.classType != PlatformConfig::Class::)
         //   continue;
@@ -219,8 +219,8 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
  * @param valueType
  */
 void CSummaryGenerator::PrintValue(const std::string_view translation,
-                                   const Measurements::Sensors &sensor,
-                                   const Measurements::ValueTypes valueType)
+                                   const Measurements::SSensors &sensor,
+                                   const Measurements::EValueTypes valueType)
 {
   std::string valName{translation};
   valName += sensor.userId;

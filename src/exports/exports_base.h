@@ -12,7 +12,7 @@
 namespace Exports
 {
 using FullMeasurement = std::vector<Measurements::SMeasurementsData> *;
-using AllSensors = Measurements::AllSensors;
+using AllSensors = Measurements::SAllSensors;
 /**
  * @brief CBase the base class for the exports,
  * contains the data structure for the exports data
@@ -30,7 +30,7 @@ public:
   void SetSettings(const Core::SConfig &settings) { settings_ = settings; }
   bool GetLiveMode() const { return hasLiveMode_; }
 
-  void SetSensorConfig(Measurements::AllSensors *sensors)
+  void SetSensorConfig(Measurements::SAllSensors *sensors)
   {
     liveSensors_ = sensors;
   }
@@ -43,15 +43,15 @@ public:
   virtual void FinishLiveMeasurements() {}
 
   virtual bool FullExport(
-      const std::vector<MeasurementItem> &config, const FullMeasurement data,
-      const Measurements::AllSensors &allSensors,
+      const std::vector<SMeasurementItem> &config, const FullMeasurement data,
+      const Measurements::SAllSensors &allSensors,
       const std::vector<Measurements::CCorrelation::SResult> &correlations) = 0;
 
 protected:
   std::string filename_;
   Core::SConfig settings_;
   bool hasLiveMode_;
-  Measurements::AllSensors *liveSensors_;
+  Measurements::SAllSensors *liveSensors_;
 
   void enableLiveMode() { hasLiveMode_ = true; }
 };

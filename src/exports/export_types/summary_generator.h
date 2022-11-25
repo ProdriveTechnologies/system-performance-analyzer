@@ -14,7 +14,7 @@ namespace Exports
 class CSummaryGenerator : public CBase
 {
 public:
-  bool FullExport(const std::vector<MeasurementItem> &config,
+  bool FullExport(const std::vector<SMeasurementItem> &config,
                   const FullMeasurement data, const AllSensors &allSensors,
                   const std::vector<Measurements::CCorrelation::SResult>
                       &correlationResults);
@@ -35,7 +35,7 @@ private:
     else
       return fullMeasurement->back().time;
   }
-  std::string PrintValues(const Measurements::SensorData data)
+  std::string PrintValues(const Measurements::SSensorData data)
   {
     std::string result = "\n";
     for (const auto &e : data.summarizedValues)
@@ -46,8 +46,8 @@ private:
   // Dynamic info based on the test which was executed
   void PrintSystemSummary(const AllSensors &allSensors);
   void PrintValue(const std::string_view translation,
-                  const Measurements::Sensors &sensor,
-                  const Measurements::ValueTypes valueType);
+                  const Measurements::SSensors &sensor,
+                  const Measurements::EValueTypes valueType);
 };
 
 } // namespace Exports
