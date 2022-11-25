@@ -169,12 +169,12 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
   g_main_loop_run(loop);
 
+  ChildWaitProcess();
   // De-initialize
   FreeMemory();
   g_source_remove(busWatchId_);
   g_main_loop_unref(loop);
 
-  ChildWaitProcess();
   gst_deinit();
   running_ = false;
 }

@@ -176,6 +176,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
         PrintValue(SummaryTranslations::average, sensor,
                    Measurements::ValueTypes::AVERAGE);
       }
+      SummaryWriter::PrintRow();
     }
   }
   SummaryWriter::PrintRow();
@@ -195,6 +196,7 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
         PrintValue(SummaryTranslations::average, sensor,
                    Measurements::ValueTypes::AVERAGE);
       }
+      SummaryWriter::PrintRow();
     }
   }
   SummaryWriter::PrintRow();
@@ -212,7 +214,7 @@ double CSummaryGenerator::GetAverage(
     }
     return Exports::MeasuredItem{0, 0};
   };
-  double total;
+  double total = 0;
 
   for (const auto &e : measurementsData)
   {
