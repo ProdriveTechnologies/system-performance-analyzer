@@ -14,25 +14,33 @@ System resource usage values: 1
                     "name": "Current Frequency",
                     "class": 1,
                     "type": "DIRECT",
-                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq"
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq",
+                    "suffix": "Mhz",
+                    "multiplier": 0.000001
                 },
                 {
                     "name": "Current Frequency",
                     "class": 1,
                     "type": "DIRECT",
-                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq"
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq",
+                    "suffix": "Mhz",
+                    "multiplier": 0.000001
                 },
                 {
                     "name": "Min Frequency",
                     "class": 1,
                     "type": "DIRECT",
-                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_min_freq"
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_min_freq",
+                    "suffix": "Mhz",
+                    "multiplier": 0.000001
                 },
                 {
                     "name": "Max Frequency",
                     "class": 1,
                     "type": "DIRECT",
-                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_max_freq"
+                    "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_max_freq",
+                    "suffix": "Mhz",
+                    "multiplier": 0.000001
                 },
                 {
                     "name": "CPU utilization per core",
@@ -40,7 +48,9 @@ System resource usage values: 1
                     "type": "PROC",
                     "value": "all_excl_idle",
                     "compared_to": "all",
-                    "path": "cpu$INDEX$"
+                    "path": "cpu$INDEX$",
+                    "suffix": "%",
+                    "multplier": 100
                 },
                 {
                     "name": "CPU IO time",
@@ -48,7 +58,9 @@ System resource usage values: 1
                     "type": "PROC",
                     "value": "iowait",
                     "compared_to": "all",
-                    "path": "cpu$INDEX$"
+                    "path": "cpu$INDEX$",
+                    "suffix": "%",
+                    "multplier": 100
                 }
             ]
         },
@@ -58,7 +70,9 @@ System resource usage values: 1
             "type": "PROC",
             "compared_to": "all",
             "value": "all_excl_idle",
-            "path": "cpu"
+            "path": "cpu",
+            "suffix": "%",
+            "multplier": 100
         },
         {
             "name": "CPU IO time",
@@ -66,20 +80,26 @@ System resource usage values: 1
             "type": "PROC",
             "compared_to": "all",
             "value": "iowait",
-            "path": "cpu"
+            "path": "cpu",
+            "suffix": "%",
+            "multplier": 100
         },
         {
             "name": "Memory usage",
             "class": 1,
             "type": "PROCMEM",
-            "value": "MemFree"
+            "value": "MemFree",
+            "suffix": "MB",
+            "multplier": 0.001
         },
         {
             "name": "Memory utilization",
             "class": 1,
             "type": "PROCMEM",
             "value": "MemFree",
-            "compared_to": "MemTotal"
+            "compared_to": "MemTotal",
+            "suffix": "%",
+            "multplier": 100
         },
         // {
         //     "name": "Memory usage",
@@ -95,49 +115,65 @@ System resource usage values: 1
             "name": "CPU temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone0/temp"
+            "path": "/sys/class/thermal/thermal_zone0/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "GPU temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone1/temp"
+            "path": "/sys/class/thermal/thermal_zone1/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "AUX temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone2/temp"
+            "path": "/sys/class/thermal/thermal_zone2/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "Always On thermal zone",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone3/temp"
+            "path": "/sys/class/thermal/thermal_zone3/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "PMIC-Die temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone4/temp"
+            "path": "/sys/class/thermal/thermal_zone4/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "Board temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone5/temp"
+            "path": "/sys/class/thermal/thermal_zone5/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "Diode temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone6/temp"
+            "path": "/sys/class/thermal/thermal_zone6/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         {
             "name": "FAN temperature",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/thermal/thermal_zone7/temp"
+            "path": "/sys/class/thermal/thermal_zone7/temp",
+            "suffix": "C",
+            "multplier": 0.001
         },
         /*******************************************/
         /**
@@ -147,37 +183,46 @@ System resource usage values: 1
             "name": "Voltage GPU",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon2/in1_input"
+            "path": "/sys/class/hwmon/hwmon2/in1_input",
+            "suffix": "V",
+            "multplier": 0.001
         },
         {
             "name": "Current GPU",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon2/curr1_input"
+            "path": "/sys/class/hwmon/hwmon2/curr1_input",
+            "suffix": "mA"
         },
         {
             "name": "Voltage CPU",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon2/in2_input"
+            "path": "/sys/class/hwmon/hwmon2/in2_input",
+            "suffix": "V",
+            "multplier": 0.001
         },
         {
             "name": "Current CPU",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon2/curr2_input"
+            "path": "/sys/class/hwmon/hwmon2/curr2_input",
+            "suffix": "mA"
         },
         {
             "name": "Voltage SOC",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon2/in3_input"
+            "path": "/sys/class/hwmon/hwmon2/in3_input",
+            "suffix": "V",
+            "multplier": 0.001
         },
         {
             "name": "Current SOC",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon2/curr3_input"
+            "path": "/sys/class/hwmon/hwmon2/curr3_input",
+            "suffix": "mA"
         },
         /*******************************************/
         /**
@@ -187,37 +232,46 @@ System resource usage values: 1
             "name": "Voltage Computer-vision components",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon3/in1_input"
+            "path": "/sys/class/hwmon/hwmon3/in1_input",
+            "suffix": "V",
+            "multplier": 0.001
         },
         {
             "name": "Current Computer-vision components",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon3/curr1_input"
+            "path": "/sys/class/hwmon/hwmon3/curr1_input",
+            "suffix": "mA"
         },
         {
             "name": "Voltage VDDRQ",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon3/in2_input"
+            "path": "/sys/class/hwmon/hwmon3/in2_input",
+            "suffix": "V",
+            "multplier": 0.001
         },
         {
             "name": "Current VDDRQ",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon3/curr2_input"
+            "path": "/sys/class/hwmon/hwmon3/curr2_input",
+            "suffix": "mA"
         },
         {
             "name": "Voltage SYS5V",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon3/in3_input"
+            "path": "/sys/class/hwmon/hwmon3/in3_input",
+            "suffix": "V",
+            "multplier": 0.001
         },
         {
             "name": "Current SYS5V",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/class/hwmon/hwmon3/curr3_input"
+            "path": "/sys/class/hwmon/hwmon3/curr3_input",
+            "suffix": "mA"
         },
         /*******************************************/
         /**
@@ -227,13 +281,15 @@ System resource usage values: 1
             "name": "EMC Frequency",
             "class": 1,
             "type": "DIRECT",
-            "path": "/sys/kernel/debug/bpmp/debug/clk/emc/rate"
-        } //,
-        // {
-        //     "name": "EMC Utilization",
-        //     "class": 1,
-        //     "type": "DIRECT",
-        //     "path": "/sys/kernel/actmon_avg_activity/mc_all"
-        // }
+            "path": "/sys/kernel/debug/bpmp/debug/clk/emc/rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "EMC Activity",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/actmon_avg_activity/mc_all"
+        }
     ]
 }

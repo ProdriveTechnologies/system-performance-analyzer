@@ -3,7 +3,7 @@ System resource usage values: 1
 
 */
 {
-    "name": "Jetson AGX Xavier",
+    "name": "Windows VM",
     "sensors": [
         {
             "name": "cpu",
@@ -14,22 +14,28 @@ System resource usage values: 1
                     "name": "cooling",
                     "id": "cooling",
                     "type": "DIRECT",
-                    "path": "/sys/class/thermal/cooling_device$INDEX$/cur_state"
+                    "path": "/sys/class/thermal/cooling_device$INDEX$/cur_state",
+                    "suffix": "",
+                    "multiplier": 3.8
                 },
                 {
-                    "name": "CPU utilization",
+                    "name": "CPU utilization per core",
                     "id": "cpu",
                     "type": "PROC",
                     "value": "all_excl_idle",
                     "compared_to": "all",
-                    "path": "cpu$INDEX$"
+                    "path": "cpu$INDEX$",
+                    "suffix": "%",
+                    "multplier": 100
                 },
                 {
                     "name": "CPU IO time",
                     "type": "PROC",
                     "value": "iowait",
                     "compared_to": "all",
-                    "path": "cpu$INDEX$"
+                    "path": "cpu$INDEX$",
+                    "multplier": 100,
+                    "suffix": "%"
                 }
             ]
         },
@@ -39,7 +45,9 @@ System resource usage values: 1
             "type": "PROC",
             "compared_to": "all",
             "value": "all_excl_idle",
-            "path": "cpu"
+            "path": "cpu",
+            "multiplier": 100,
+            "suffix": "%"
         },
         {
             "name": "CPU IO time",
@@ -48,20 +56,26 @@ System resource usage values: 1
             "type": "PROC",
             "compared_to": "all",
             "value": "iowait",
-            "path": "cpu"
+            "path": "cpu",
+            "multiplier": 100,
+            "suffix": "%"
         },
         {
-            "name": "Memory usage",
+            "name": "Memory free",
             "class": 1,
             "type": "PROCMEM",
-            "value": "MemFree"
+            "value": "MemFree",
+            "multiplier": 0.001,
+            "suffix": "MB"
         },
         {
             "name": "Memory utilization",
             "class": 1,
             "type": "PROCMEM",
             "value": "MemFree",
-            "compared_to": "MemTotal"
+            "compared_to": "MemTotal",
+            "multiplier": 100,
+            "suffix": "%"
         },
         {
             "name": "Priority",
@@ -69,7 +83,8 @@ System resource usage values: 1
             "type": "PIDSTAT",
             "path": "/proc/$PID$/stat",
             "value": "priority",
-            "compared_to": "stime"
+            "compared_to": "stime",
+            "suffix": "%"
         },
         {
             "name": "Size",
@@ -77,14 +92,17 @@ System resource usage values: 1
             "type": "PIDSTATM",
             "path": "/proc/$PID$/stat",
             "value": "size",
-            "compared_to": "data"
+            "compared_to": "data",
+            "suffix": "KB"
         },
         {
             "name": "Timerslack",
             //"class": 1,
             "type": "DIRECT_PID",
             "path2": "/sys/class/thermal/cooling_device0/cur_state",
-            "path": "/proc/$PID$/timerslack_ns"
+            "path": "/proc/$PID$/timerslack_ns",
+            "multiplier": 0.001,
+            "suffix": "us"
         }
     ]
 }
