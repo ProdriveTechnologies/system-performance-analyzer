@@ -22,6 +22,8 @@ std::vector<std::string> Split(const std::string &text, char delimiter)
   {
     std::string substr;
     getline(textSs, substr, delimiter);
+    if (substr.empty())
+      continue;
     result.push_back(substr);
   }
   return result;
