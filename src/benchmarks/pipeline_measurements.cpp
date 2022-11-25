@@ -41,10 +41,9 @@ std::vector<Exports::PipelineInfo>
 CPipelineMeasurements::SortData(const std::vector<Exports::PipelineInfo> &data)
 {
   std::vector<Exports::PipelineInfo> sorted;
-  auto sortFunction = [](const Exports::MeasuredItem &lhs,
-                         const Exports::MeasuredItem &rhs) {
-    return lhs.id < rhs.id;
-  };
+  auto sortFunction =
+      [](const Exports::MeasuredItem &lhs, const Exports::MeasuredItem &rhs)
+  { return lhs.id < rhs.id; };
   for (auto e : data)
   {
     std::sort(e.measuredItems.begin(), e.measuredItems.end(), sortFunction);
@@ -142,6 +141,8 @@ CPipelineMeasurements::GetSensors() const
     Measurements::AllSensors::SensorGroups sensorGroup;
     sensorGroup.processId = pipeline.first;
     sensorGroup.processDelay = GetProcessDelay(pipeline.first);
+    const bool useSteadyState =
+        config_.GetProcess(pipeline.first).useSteadyState;
 
     for (const auto &e : pipeline.second)
     {
@@ -153,14 +154,15 @@ CPipelineMeasurements::GetSensors() const
 
       sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
       sensor.SetDataInfo(GetMeasureType(e.first.type));
-      sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second);
+      sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second,
+                                                          useSteadyState);
       sensorGroup.sensors.push_back(sensor);
     }
     for (const auto &[type, _] : predefinedSensors)
     {
       auto uniqueIdsSet = GetUniqueIdsByType(type);
       sensorGroup.sensors.push_back(PerformanceHelpers::GetGstCategoriesSummary(
-          allData_, uniqueIdsSet, type, pipeline.first));
+          allData_, uniqueIdsSet, type, pipeline.first, useSteadyState));
     }
     result.push_back(sensorGroup);
   }

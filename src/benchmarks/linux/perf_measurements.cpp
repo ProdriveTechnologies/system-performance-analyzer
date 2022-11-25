@@ -84,6 +84,7 @@ void CPerfMeasurements::Initialize()
 {
   OrganizeGstreamerPipelines();
   gstMeasurements_.setProctime(config_.settings.enableProcTime);
+  gstMeasurements_.SetConfig(config_);
 
   pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
   pCpuData_ = std::make_unique<std::vector<Linux::FileSystem::ProcStatData>>();

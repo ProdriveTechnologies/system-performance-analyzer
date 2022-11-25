@@ -12,7 +12,7 @@ int GetUniqueId();
 
 Measurements::SensorData
 GetSummarizedData(const std::vector<Exports::ExportData> *data,
-                  const int uniqueId);
+                  const int uniqueId, const bool useSteadyState);
 std::unordered_map<std::string, Measurements::Sensors>
 CreateMapWithId(const std::vector<Measurements::Sensors> &data);
 bool HandleThreshold(const Measurements::Sensors *sensor,
@@ -21,8 +21,8 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
 Measurements::Sensors
 GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
                         const std::unordered_set<int> uniqueIds,
-                        const GStreamer::MeasureType type,
-                        const int pipelineId);
+                        const GStreamer::MeasureType type, const int pipelineId,
+                        const bool useSteadyState);
 
 Measurements::SensorData
 GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,

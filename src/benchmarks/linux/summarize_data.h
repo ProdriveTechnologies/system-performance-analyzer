@@ -8,7 +8,11 @@ namespace Measurements
 class CSummarizeData
 {
 public:
-  CSummarizeData() : firstDataPoint_{true} {}
+  CSummarizeData() : firstDataPoint_{true}, useSteadyState_{false} {}
+  CSummarizeData(const bool useSteadyState)
+      : firstDataPoint_{true}, useSteadyState_{useSteadyState}
+  {
+  }
   void AddDataPoint(const Exports::MeasuredItem item)
   {
     if (firstDataPoint_)
@@ -26,9 +30,9 @@ public:
     if (average_.datapoints != 0)
     {
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MIN, minFound_});
+          SensorData::MeasureValue{ValueTypes::MIN, GetMin()});
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MAX, maxFound_});
+          SensorData::MeasureValue{ValueTypes::MAX, GetMax()});
       sensorData.summarizedValues.push_back(
           SensorData::MeasureValue{ValueTypes::AVERAGE, average_.Get()});
       sensorData.summarizedValues.push_back(
@@ -41,6 +45,7 @@ public:
 private:
   SensorData sensorData_;
   bool firstDataPoint_;
+  bool useSteadyState_;
   double minFound_;
   double maxFound_;
   struct Average
@@ -59,6 +64,27 @@ private:
   };
   Average average_;
   std::vector<double> allMeasurements_;
+
+  double GetMin() const
+  {
+    auto localVector = allMeasurements_;
+    if (useSteadyState_ && localVector.size() > 10)
+    {
+      localVector.erase(localVector.end() - 2, localVector.end());
+      localVector.erase(localVector.begin(), localVector.begin() + 2);
+    }
+    return *std::min_element(localVector.begin(), localVector.end());
+  }
+  double GetMax() const
+  {
+    auto localVector = allMeasurements_;
+    if (useSteadyState_ && localVector.size() > 10)
+    {
+      localVector.erase(localVector.end() - 2, localVector.end());
+      localVector.erase(localVector.begin(), localVector.begin() + 2);
+    }
+    return *std::max_element(localVector.begin(), localVector.end());
+  }
 
   double GetMean() const
   {

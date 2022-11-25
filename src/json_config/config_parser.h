@@ -38,6 +38,9 @@ inline void from_json(const nlohmann::json &j, SProcess &p)
   if (j.contains("start_delay"))
     j.at("start_delay").get_to(p.startDelay);
   j.at("id").get_to(p.processId);
+
+  if (j.contains("use_steady_state"))
+    j.at("use_steady_state").get_to(p.useSteadyState);
   // Parameter checks
   if (p.startDelay < 0)
   {

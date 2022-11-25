@@ -12,6 +12,7 @@
 #include "src/exports/export_struct.h"
 #include "src/gstreamer/measurement_types.h"
 #include "src/helpers/helper_functions.h"
+#include "src/json_config/config.h"
 
 class CGstreamerHandler; // Forward declaration for compilation improvement
 
@@ -38,6 +39,7 @@ public:
   void ConcludeMeasurement();
 
   std::vector<Exports::PipelineInfo> ProcessGstreamer();
+  void SetConfig(const Core::SConfig &config) { config_ = config; }
   std::vector<Exports::PipelineConfig> GetPipelineConfig() const;
   Exports::MeasurementItem GetPipelineConfig2() const;
   std::vector<Exports::MeasurementItem>
@@ -60,6 +62,7 @@ private:
   std::unordered_map<PipelineNr, CGstreamerHandler *> streams_;
   std::unordered_map<PipelineNr, std::unordered_map<Identifier, int>>
       uniqueIds_;
+  Core::SConfig config_;
   bool enableProctime_;
 
   int GetUniqueId(const int pipelineId, const Identifier &id);

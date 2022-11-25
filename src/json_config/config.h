@@ -14,6 +14,7 @@ struct SProcess
   std::string type;
   std::string command;
   int startDelay = 0;
+  bool useSteadyState = false;
 };
 enum class ThresholdType
 {
@@ -72,6 +73,16 @@ struct SConfig
   // std::vector<STask> tasks;
   std::vector<SThreshold> thresholds;
   SSettings settings;
+
+  SProcess GetProcess(const int processId) const
+  {
+    for (const auto &e : processes)
+    {
+      if (e.processId == processId)
+        return e;
+    }
+    throw std::runtime_error("Couldn't find processId in the processes!");
+  }
 };
 inline ThresholdType GetThresholdType(const std::string &thresholdGroup)
 {

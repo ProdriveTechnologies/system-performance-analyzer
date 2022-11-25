@@ -138,11 +138,8 @@ private:
                   const std::vector<Measurements::CCorrelation::SResult>
                       &correlationResults);
   void AnalyzeData();
-
   void CheckTresholds();
-
   void RemoveProcessId(const int pid);
-
   void OrganizeGstreamerPipelines();
 
   template <typename T> std::vector<T *> GetProcessFromProcesses() const

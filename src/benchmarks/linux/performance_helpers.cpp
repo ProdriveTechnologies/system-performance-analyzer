@@ -25,9 +25,9 @@ int GetUniqueId()
  */
 Measurements::SensorData
 GetSummarizedData(const std::vector<Exports::ExportData> *data,
-                  const int uniqueId)
+                  const int uniqueId, const bool useSteadyState)
 {
-  Measurements::CSummarizeData summarizedData;
+  Measurements::CSummarizeData summarizedData{useSteadyState};
   // This is the loop for each measurement
   for (const auto &e : *data)
   {
@@ -50,9 +50,10 @@ GetSummarizedData(const std::vector<Exports::ExportData> *data,
 Measurements::Sensors
 GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
                         const std::unordered_set<int> uniqueIds,
-                        const GStreamer::MeasureType type, const int pipelineId)
+                        const GStreamer::MeasureType type, const int pipelineId,
+                        const bool useSteadyState)
 {
-  Measurements::CSummarizeData summarizedData;
+  Measurements::CSummarizeData summarizedData{useSteadyState};
   // This is the loop for each measurement
   for (const auto &e : *data)
   {
@@ -104,8 +105,8 @@ CreateMapWithId(const std::vector<Measurements::Sensors> &data)
 bool HandleThreshold(const Measurements::Sensors *sensor,
                      Core::SThreshold threshold)
 {
-  auto parseSign = [](const double lhs, const double rhs,
-                      const Core::Sign sign) {
+  auto parseSign = [](const double lhs, const double rhs, const Core::Sign sign)
+  {
     switch (sign)
     {
     case Core::Sign::LE:
