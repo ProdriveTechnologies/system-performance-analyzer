@@ -8,7 +8,7 @@
 #include <unistd.h> // getpid()
 
 #include "Helpers.h"
-#include "src/benchmarks/Linux/xavier_sensors.h"
+#include "src/benchmarks/linux/xavier_sensors.h"
 #include "src/helpers/synchronizer.h"
 #include "src/linux/filesystem.h"
 

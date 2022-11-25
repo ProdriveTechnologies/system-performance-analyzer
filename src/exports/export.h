@@ -6,7 +6,7 @@
 #include "export_struct.h"
 #include "exports_base.h"
 #include "file_writer.h"
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 
 namespace Exports
 {

@@ -7,8 +7,8 @@
 
 #include "src/processes_struct.h"
 // #include "modules/filestream/filestream.h"
-#include "src/benchmarks/Linux/perf_measurements.h"
-#include "src/benchmarks/Linux/xavier_sensors.h"
+#include "src/benchmarks/linux/perf_measurements.h"
+#include "src/benchmarks/linux/xavier_sensors.h"
 // #include "src/gstreamer/handler.h"
 #include "src/helpers/helper_functions.h"
 #include "src/helpers/logger.h"

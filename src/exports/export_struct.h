@@ -7,8 +7,8 @@
 
 #include "src/benchmarks/gstreamer_identifier.h"
 #include "src/json_config/sensor_config/config.h"
-//#include "src/benchmarks/Linux/xavier_sensors.h"
-#include "src/benchmarks/Linux/struct_sensors.h"
+//#include "src/benchmarks/linux/xavier_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/linux/filesystem.h"
 
 namespace Exports

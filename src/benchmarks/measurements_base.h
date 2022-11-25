@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 
 namespace Measurements

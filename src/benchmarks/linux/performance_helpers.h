@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/json_config/config.h"
 

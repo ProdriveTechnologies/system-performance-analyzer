@@ -8,7 +8,7 @@
 #include <string>
 
 #include "gstreamer_identifier.h"
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/gstreamer/measurement_types.h"
 #include "src/helpers/helper_functions.h"

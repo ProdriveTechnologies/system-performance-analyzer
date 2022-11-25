@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/benchmarks/Linux/xavier_sensors.h"
+#include "src/benchmarks/linux/xavier_sensors.h"
 #include "src/linux/path_parser_base.h"
 
 namespace Linux

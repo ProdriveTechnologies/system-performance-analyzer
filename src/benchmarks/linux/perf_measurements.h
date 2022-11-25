@@ -15,7 +15,7 @@
 #include "src/json_config/config.h"
 #include "src/json_config/sensor_config/config.h"
 // #include "xavier_sensors_live.h"
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/benchmarks/pipeline_measurements.h"
 #include "src/benchmarks/process_measurements.h"
 #include "src/benchmarks/system_measurements.h"

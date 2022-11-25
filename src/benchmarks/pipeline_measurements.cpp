@@ -4,7 +4,7 @@
 #include <map>
 #include <stdexcept>
 
-#include "src/benchmarks/Linux/performance_helpers.h"
+#include "src/benchmarks/linux/performance_helpers.h"
 #include "src/gstreamer/handler.h"
 #include "src/json_config/sensor_config/config.h"
 

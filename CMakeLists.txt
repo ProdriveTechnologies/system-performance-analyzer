@@ -31,13 +31,13 @@ include(ExternalProject) # To be able to download Git repos with the FetchConten
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Set the sources
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.cpp
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/pipe_comm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/config_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/helper_functions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/trace_parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/xavier_sensors.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/xavier_sensors.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/synchronizer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/process_runner/run_process_base.cpp
@@ -45,10 +45,10 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/file_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_csv.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/sensor_config/config_parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/proc_handler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/proc_handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/summary_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/summary_generator.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/performance_helpers.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/performance_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/json_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/pipeline_measurements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/system_measurements.cpp

@@ -4,8 +4,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "src/benchmarks/Linux/proc_handler.h"
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/proc_handler.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/helpers/helper_functions.h"
 #include "src/json_config/sensor_config/config.h"

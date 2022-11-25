@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "export_struct.h"
-#include "src/benchmarks/Linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h"
 #include "src/json_config/sensor_config/config.h"
 
 namespace Exports

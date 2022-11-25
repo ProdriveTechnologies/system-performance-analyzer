@@ -1,7 +1,7 @@
 #include "process_measurements.h"
 
-#include "Linux/xavier_sensors.h"
-#include "src/benchmarks/Linux/performance_helpers.h"
+#include "linux/xavier_sensors.h"
+#include "src/benchmarks/linux/performance_helpers.h"
 #include "src/json_config/sensor_config/config_parser.h"
 
 #include "src/benchmarks/linux/struct_sensors.h"

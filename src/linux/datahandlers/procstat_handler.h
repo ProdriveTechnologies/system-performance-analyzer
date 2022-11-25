@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/benchmarks/Linux/proc_handler.h"
+#include "src/benchmarks/linux/proc_handler.h"
 #include "src/helpers/helper_functions.h"
 #include "src/linux/filesystem.h"
 #include "src/linux/path_parser_base.h"
