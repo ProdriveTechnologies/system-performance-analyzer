@@ -13,7 +13,7 @@ namespace Linux
 class RunProcess : public ProcessRunner::Base
 {
 public:
-  RunProcess(Synchronizer *synchronizer);
+  RunProcess(Synchronizer *synchronizer, const Core::SProcess &userProcessInfo);
   RunProcess(const RunProcess &gstreamer);
   ~RunProcess();
 

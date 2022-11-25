@@ -38,32 +38,8 @@ void CProcessMeasurements::Initialize(
   SetProcesses(); // Get the PIDs of the applications so they can be checked
   // Reset the proc-stat variables because they accumulate over-time
   // procHandler_.ParseProcStat();
-  auto datahandlerMap = GetDatahandlerMap();
+  auto datahandlerMap = Linux::GetDatahandlerMap(dataHandlers_, "$PID$");
   dataHandler_.Initialize(datahandlerMap, measureFieldsDefinition_);
-}
-
-/**
- * @brief creates a map with the format necessary for initializing the
- * CDataHandler class
- */
-std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
-CProcessMeasurements::GetDatahandlerMap()
-{
-  std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config> result;
-  for (auto &e : dataHandlers_)
-  {
-    Linux::CDataHandler::Config config;
-
-    // Get the pointer to the correct object in the variant
-    std::visit(
-        Overload{
-            [&config](auto &handler) { config.parserObj = handler.get(); },
-        },
-        e.datahandler);
-    config.replacementTag = "$PID$";
-    result.insert(std::make_pair(e.type, config));
-  }
-  return result;
 }
 
 void CProcessMeasurements::SetDataHandlers()

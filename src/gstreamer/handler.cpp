@@ -15,15 +15,16 @@
 #include "trace_parser.h"
 
 CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer,
+                                     const Core::SProcess &userProcessInfo,
                                      const int processId)
-    : ProcessRunner::Base{synchronizer}, threadSync_{synchronizer},
-      processId_{processId}, running_{false}, gstPipeline_{nullptr},
-      gstBus_{nullptr}, gstMsg_{nullptr}, gstErrorMsg_{nullptr}, traceHandler_{
-                                                                     &pipe_}
+    : ProcessRunner::Base{synchronizer, userProcessInfo},
+      threadSync_{synchronizer}, processId_{processId}, running_{false},
+      gstPipeline_{nullptr}, gstBus_{nullptr}, gstMsg_{nullptr},
+      gstErrorMsg_{nullptr}, traceHandler_{&pipe_}
 {
 }
 CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler &gstreamer)
-    : ProcessRunner::Base{gstreamer.threadSync_},
+    : ProcessRunner::Base{gstreamer.threadSync_, gstreamer.userProcessInfo_},
       threadSync_{gstreamer.threadSync_}, processId_{gstreamer.processId_},
       running_{false}, gstPipeline_{nullptr}, gstBus_{nullptr},
       gstMsg_{nullptr}, gstErrorMsg_{nullptr}, traceHandler_{&pipe_}
@@ -211,6 +212,8 @@ CGstreamerHandler::PipelineInitialization(const std::string &pipelineStr)
 
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for gstreamer");
   ChildWaitProcess();
+  std::this_thread::sleep_for(
+      std::chrono::milliseconds(userProcessInfo_.startDelay));
   return loop;
 }
 

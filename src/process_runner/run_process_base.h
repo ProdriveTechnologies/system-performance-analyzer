@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 
+#include "src/json_config/config.h"
 #include "src/linux/pipe_comm.h"
 // #include "src/helpers/synchronizer.h"
 class Synchronizer;
@@ -14,7 +15,7 @@ namespace ProcessRunner
 class Base
 {
 public:
-  Base(Synchronizer *processSync);
+  Base(Synchronizer *processSync, const Core::SProcess &userProcessInfo);
   ~Base();
   Base(const Base &base);
   virtual void StartThread(const std::string &command) = 0;
@@ -25,6 +26,7 @@ protected:
   Synchronizer *processSync_;
   std::thread pipelineThread_;
   Linux::PipeCommunicator pipe_;
+  const Core::SProcess userProcessInfo_;
 
   inline static const std::string waitMessage_ = "$WAIT$";
   inline static const std::string waitDoneMsg_ = "$DONE$";

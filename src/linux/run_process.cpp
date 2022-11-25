@@ -13,12 +13,14 @@
 
 namespace Linux
 {
-RunProcess::RunProcess(Synchronizer *synchronizer)
-    : ProcessRunner::Base{synchronizer}, running_{false}
+RunProcess::RunProcess(Synchronizer *synchronizer,
+                       const Core::SProcess &userProcessInfo)
+    : ProcessRunner::Base{synchronizer, userProcessInfo}, running_{false}
 {
 }
-RunProcess::RunProcess(const RunProcess &gstreamer)
-    : ProcessRunner::Base{gstreamer.processSync_}, running_{false}
+RunProcess::RunProcess(const RunProcess &process)
+    : ProcessRunner::Base{process.processSync_, process.userProcessInfo_},
+      running_{false}
 
 {
 }
@@ -61,6 +63,8 @@ void RunProcess::ChildExecProcess(const std::string &command)
   processName_ = command;
   CLogger::Log(CLogger::Types::INFO, "Child writing into pipe 2");
   ChildWaitProcess();
+  std::this_thread::sleep_for(
+      std::chrono::milliseconds(userProcessInfo_.startDelay));
   // auto execvArgs{parameters};
   CLogger::Log(CLogger::Types::INFO, "Executing linux command: ", command);
   std::vector<std::string> parameters = Helpers::Split(command, ' ');
@@ -69,11 +73,7 @@ void RunProcess::ChildExecProcess(const std::string &command)
   // Child process
   execv(parameters.front().c_str(),
         const_cast<char *const *>(parametersCStr.data()));
-  // Stop the child when it returns (and close pipes accordingly)
-  // close(moduleConfig.readPipeParent);
-  // close(moduleConfig.writePipeParent);
-  //   ChildWaitProcess(); This code is all never executed... Which is a design
-  //   flaw
+  // This code is never executed, also not when the process quits
   exit(EXIT_SUCCESS);
 }
 

@@ -12,10 +12,6 @@
 #include "src/linux/data_handler.h"
 #include "src/linux/run_process.h"
 
-#include "src/linux/datahandlers/direct_handler.h"
-#include "src/linux/datahandlers/pidstat_handler.h"
-#include "src/linux/datahandlers/pidstatm_handler.h"
-
 namespace Measurements
 {
 /**
@@ -32,7 +28,6 @@ namespace Measurements
 class CProcessMeasurements
 {
 public:
-  //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CProcessMeasurements(const std::string &configFile);
 
   void Initialize(std::vector<Exports::ExportData> *allData,
@@ -122,7 +117,5 @@ private:
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
   Linux::FileSystem::Stat GetProcStat(const int procId);
   void SetDataHandlers();
-  std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
-  GetDatahandlerMap();
 };
 } // namespace Measurements

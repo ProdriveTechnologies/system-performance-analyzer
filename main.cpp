@@ -68,13 +68,13 @@ int main(int argc, char *argv[])
   {
     if (e.type == "linux_command")
     {
-      processes.push_back(ProcessInfo{e, Linux::RunProcess{&synchronizer}});
+      processes.push_back(ProcessInfo{e, Linux::RunProcess{&synchronizer, e}});
       CLogger::Log(CLogger::Types::INFO, "Added linux process: ", e.command);
     }
     else if (e.type == "gstreamer")
     {
       processes.push_back(
-          ProcessInfo{e, CGstreamerHandler{&synchronizer, e.processId}});
+          ProcessInfo{e, CGstreamerHandler{&synchronizer, e, e.processId}});
       CLogger::Log(CLogger::Types::INFO,
                    "Added GStreamer pipeline: ", e.command);
     }

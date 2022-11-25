@@ -3,11 +3,15 @@
 #include <string>
 #include <vector>
 
-#include "src/benchmarks/linux/proc_handler.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/helpers/helper_functions.h"
 #include "src/json_config/sensor_config/config.h"
+#include "src/linux/data_handler.h"
+
+#include "src/linux/datahandlers/direct_handler.h"
+#include "src/linux/datahandlers/pidstat_handler.h"
+#include "src/linux/datahandlers/pidstatm_handler.h"
 
 namespace Measurements
 {
@@ -42,8 +46,9 @@ public:
 
 private:
   const std::string configFile_;
-  Measurements::ProcHandler procHandler_;
   std::vector<Exports::ExportData> *allData_;
+  Linux::CDataHandler dataHandler_;
+  std::vector<Linux::SDataHandlers> dataHandlers_;
 
   using MeasureFieldsDefType = std::vector<PlatformConfig::SDatafields>;
   MeasureFieldsDefType measureFieldsDefinition_;
@@ -94,8 +99,7 @@ private:
   MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields &dataField);
   MeasureCombo ParseArray(const PlatformConfig::SDatafields &data);
   MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
-  std::vector<Exports::MeasuredItem>
-  GetMeasurements(const MeasureFieldsType &measureFields);
+  void SetDataHandlers();
   PlatformConfig::SDatafields GetDatafield(const std::string &className) const
   {
     for (const auto &datafield : measureFieldsDefinition_)

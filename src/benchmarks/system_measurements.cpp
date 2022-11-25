@@ -4,20 +4,40 @@
 #include "src/benchmarks/linux/performance_helpers.h"
 #include "src/json_config/sensor_config/config_parser.h"
 
+#include "src/linux/datahandlers/direct_handler.h"
+#include "src/linux/datahandlers/procmeminfo_handler.h"
+#include "src/linux/datahandlers/procstat_handler.h"
+
 namespace Measurements
 {
 CSensors::CSensors(const std::string &configFile) : configFile_{configFile} {}
 
 void CSensors::Initialize(std::vector<Exports::ExportData> *allData)
 {
+  SetDataHandlers();
   allData_ = allData;
   auto parsed = PlatformConfig::Parse(configFile_);
   auto measureFields =
       GetFields(parsed.sensors, &CSensors::GetMeasureFields, this);
   measureFields_ = measureFields.fields;
   measureFieldsDefinition_ = measureFields.definition;
-  // Reset the proc-stat variables because they accumulate over-time
-  procHandler_.ParseProcStat();
+
+  auto datahandlerMap = Linux::GetDatahandlerMap(dataHandlers_);
+  dataHandler_.Initialize(datahandlerMap, measureFieldsDefinition_);
+}
+
+void CSensors::SetDataHandlers()
+{
+  dataHandlers_.push_back(Linux::SDataHandlers{
+      PlatformConfig::Types::DIRECT,
+      std::make_unique<Linux::CDirectHandler>(Linux::CDirectHandler())});
+  dataHandlers_.push_back(
+      Linux::SDataHandlers{PlatformConfig::Types::PROC_MEM,
+                           std::make_unique<Linux::CProcMeminfoHandler>(
+                               Linux::CProcMeminfoHandler())});
+  dataHandlers_.push_back(Linux::SDataHandlers{
+      PlatformConfig::Types::PROC_STAT,
+      std::make_unique<Linux::CProcStatHandler>(Linux::CProcStatHandler())});
 }
 
 Exports::MeasurementItem CSensors::GetConfig() const
@@ -103,39 +123,16 @@ CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
 
 std::vector<Exports::MeasuredItem> CSensors::GetMeasurements()
 {
-  procHandler_.ParseMeminfo();
-  return GetMeasurements(measureFields_);
-}
-
-std::vector<Exports::MeasuredItem>
-CSensors::GetMeasurements(const MeasureFieldsType &measureFields)
-{
-  procHandler_.ParseProcStat();
   std::vector<Exports::MeasuredItem> measuredItems;
-  for (const auto &e : measureFields)
+  auto returnSuccess = dataHandler_.ParseMeasurements();
+  if (returnSuccess)
   {
-    switch (e.type)
-    {
-    case PlatformConfig::Types::DIRECT:
-      measuredItems.push_back(
-          CXavierSensors::ParseDirect(e)); // ParseDirect(e);
-      break;
-    case PlatformConfig::Types::PROC_STAT:
-    {
-      auto definition = GetFieldDef(e.id);
-      measuredItems.push_back(procHandler_.ParseProcField(definition, e.path));
-    }
-    break;
-    case PlatformConfig::Types::PROC_MEM:
-    {
-      auto definition = GetFieldDef(e.id);
-      measuredItems.push_back(procHandler_.ParseMemField(definition));
-    }
-    break;
-    default:
-      throw std::runtime_error(
-          "Software Error! Incorrect type in the performance measurements!");
-    }
+    measuredItems = dataHandler_.GetMeasurements();
+  }
+  else
+  {
+    CLogger::Log(CLogger::Types::WARNING,
+                 "Could not measure system measurements!");
   }
   return measuredItems;
 }

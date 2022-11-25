@@ -16,7 +16,7 @@ System resource usage values: 1
                     "type": "DIRECT",
                     "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq",
                     "suffix": "Mhz",
-                    "multiplier": 0.000001
+                    "multiplier": 0.001
                 },
                 {
                     "name": "Current Frequency",
@@ -24,7 +24,7 @@ System resource usage values: 1
                     "type": "DIRECT",
                     "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_cur_freq",
                     "suffix": "Mhz",
-                    "multiplier": 0.000001
+                    "multiplier": 0.001
                 },
                 {
                     "name": "Min Frequency",
@@ -32,7 +32,7 @@ System resource usage values: 1
                     "type": "DIRECT",
                     "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_min_freq",
                     "suffix": "Mhz",
-                    "multiplier": 0.000001
+                    "multiplier": 0.001
                 },
                 {
                     "name": "Max Frequency",
@@ -40,7 +40,7 @@ System resource usage values: 1
                     "type": "DIRECT",
                     "path": "/sys/devices/system/cpu/cpu$INDEX$/cpufreq/cpuinfo_max_freq",
                     "suffix": "Mhz",
-                    "multiplier": 0.000001
+                    "multiplier": 0.001
                 },
                 {
                     "name": "CPU utilization per core",
@@ -50,7 +50,7 @@ System resource usage values: 1
                     "compared_to": "all",
                     "path": "cpu$INDEX$",
                     "suffix": "%",
-                    "multplier": 100
+                    "multiplier": 100
                 },
                 {
                     "name": "CPU IO time",
@@ -60,7 +60,7 @@ System resource usage values: 1
                     "compared_to": "all",
                     "path": "cpu$INDEX$",
                     "suffix": "%",
-                    "multplier": 100
+                    "multiplier": 100
                 }
             ]
         },
@@ -72,7 +72,7 @@ System resource usage values: 1
             "value": "all_excl_idle",
             "path": "cpu",
             "suffix": "%",
-            "multplier": 100
+            "multiplier": 100
         },
         {
             "name": "CPU IO time",
@@ -82,7 +82,7 @@ System resource usage values: 1
             "value": "iowait",
             "path": "cpu",
             "suffix": "%",
-            "multplier": 100
+            "multiplier": 100
         },
         {
             "name": "Memory usage",
@@ -90,7 +90,7 @@ System resource usage values: 1
             "type": "PROCMEM",
             "value": "MemFree",
             "suffix": "MB",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Memory utilization",
@@ -99,7 +99,7 @@ System resource usage values: 1
             "value": "MemFree",
             "compared_to": "MemTotal",
             "suffix": "%",
-            "multplier": 100
+            "multiplier": 100
         },
         // {
         //     "name": "Memory usage",
@@ -117,7 +117,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone0/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "GPU temperature",
@@ -125,7 +125,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone1/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "AUX temperature",
@@ -133,7 +133,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone2/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Always On thermal zone",
@@ -141,7 +141,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone3/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "PMIC-Die temperature",
@@ -149,7 +149,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone4/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Board temperature",
@@ -157,7 +157,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone5/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Diode temperature",
@@ -165,7 +165,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone6/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "FAN temperature",
@@ -173,7 +173,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/thermal/thermal_zone7/temp",
             "suffix": "C",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         /*******************************************/
         /**
@@ -185,7 +185,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/hwmon/hwmon2/in1_input",
             "suffix": "V",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Current GPU",
@@ -200,7 +200,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/hwmon/hwmon2/in2_input",
             "suffix": "V",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Current CPU",
@@ -215,7 +215,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/hwmon/hwmon2/in3_input",
             "suffix": "V",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Current SOC",
@@ -234,7 +234,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/hwmon/hwmon3/in1_input",
             "suffix": "V",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Current Computer-vision components",
@@ -249,7 +249,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/hwmon/hwmon3/in2_input",
             "suffix": "V",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Current VDDRQ",
@@ -264,7 +264,7 @@ System resource usage values: 1
             "type": "DIRECT",
             "path": "/sys/class/hwmon/hwmon3/in3_input",
             "suffix": "V",
-            "multplier": 0.001
+            "multiplier": 0.001
         },
         {
             "name": "Current SYS5V",
@@ -290,6 +290,121 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/actmon_avg_activity/mc_all"
+        },
+        /*******************************************/
+        /**
+        * @brief EMC information
+        */
+        {
+            "name": "Encoder 1 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/bpmp/debug/clk/nvenc/rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "Encoder 2 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/bpmp/debug/clk/nvenc1/rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "Decoder 1 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/bpmp/debug/clk/nvdec/rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "Decoder 2 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/bpmp/debug/clk/nvdec1/rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "JPEG Processing block frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/bpmp/debug/clk/nvjpg/rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "Video Image Compositor (VIC) frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/clk/vic/clk_rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "Video Image Compositor (VIC) activity",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/vic/actmon_avg_norm",
+            "suffix": ""
+        },
+        {
+            "name": "DLA core 0 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/clk/dla0_core/clk_rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "DLA core 1 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/clk/dla1_core/clk_rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "PVA core 0 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/clk/pva0_vps0/clk_rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "PVA core 1 frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/clk/pva1_vps0/clk_rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "CVNAS Frequency",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/kernel/debug/clk/cvnas/clk_rate",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "GPU load",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/devices/platform/gpu.0/load",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
+        },
+        {
+            "name": "GPU load 2",
+            "class": 1,
+            "type": "DIRECT",
+            "path": "/sys/devices/gpu.0/load",
+            "suffix": "Mhz",
+            "multiplier": 0.000001
         }
     ]
 }

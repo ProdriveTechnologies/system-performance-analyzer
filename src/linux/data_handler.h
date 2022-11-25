@@ -70,4 +70,8 @@ private:
 
   std::vector<Exports::MeasuredItem> lastMeasurements_;
 };
+
+std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
+GetDatahandlerMap(const std::vector<Linux::SDataHandlers> &dataHandlers,
+                  const std::string &replacementTag = "");
 } // namespace Linux

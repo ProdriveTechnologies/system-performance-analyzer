@@ -5,8 +5,9 @@
 
 namespace ProcessRunner
 {
-Base::Base(Synchronizer *processSync)
-    : processSync_{processSync}, pipelineThread_{}
+Base::Base(Synchronizer *processSync, const Core::SProcess &userProcessInfo)
+    : processSync_{processSync}, pipelineThread_{}, userProcessInfo_{
+                                                        userProcessInfo}
 {
 }
 Base::~Base()

@@ -23,6 +23,18 @@ public:
                         const std::string &path,
                         [[maybe_unused]] const std::string &replacement = "")
   {
+    if (!datafield.enabledPath.empty())
+    {
+      auto enabledCheck =
+          CXavierSensors::ParseDirect(PlatformConfig::SMeasureField{
+              datafield.id, datafield.enabledPath, datafield.type});
+      if (enabledCheck.measuredValue == DISABLED)
+      {
+        // Disabled, thus set on 0
+        item_ = Exports::MeasuredItem{datafield.id, 0.0};
+        return true;
+      }
+    }
     item_ = CXavierSensors::ParseDirect(
         PlatformConfig::SMeasureField{datafield.id, path, datafield.type});
     if (item_.id == datafield.id)
@@ -31,5 +43,6 @@ public:
   }
 
 private:
+  static constexpr int DISABLED = 0;
 };
 } // namespace Linux

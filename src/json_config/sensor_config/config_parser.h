@@ -24,6 +24,9 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
   if (j.contains("path"))
     j.at("path").get_to(p.path);
 
+  if (j.contains("enabled_path"))
+    j.at("enabled_path").get_to(p.enabledPath);
+
   if (j.contains("class"))
   {
     int classNr;

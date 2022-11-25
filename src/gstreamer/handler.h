@@ -13,7 +13,8 @@ class Synchronizer;
 class CGstreamerHandler : public ProcessRunner::Base
 {
 public:
-  CGstreamerHandler(Synchronizer *synchronizer, const int processId);
+  CGstreamerHandler(Synchronizer *synchronizer,
+                    const Core::SProcess &userProcessInfo, const int processId);
   CGstreamerHandler(const CGstreamerHandler &gstreamer);
   ~CGstreamerHandler();
 

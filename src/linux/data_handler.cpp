@@ -2,6 +2,31 @@
 
 namespace Linux
 {
+/**
+ * @brief creates a map with the format necessary for initializing the
+ * CDataHandler class
+ */
+std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>
+GetDatahandlerMap(const std::vector<Linux::SDataHandlers> &dataHandlers,
+                  const std::string &replacementTag)
+{
+  std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config> result;
+  for (auto &e : dataHandlers)
+  {
+    Linux::CDataHandler::Config config;
+
+    // Get the pointer to the correct object in the variant
+    std::visit(
+        Overload{
+            [&config](auto &handler) { config.parserObj = handler.get(); },
+        },
+        e.datahandler);
+    config.replacementTag = replacementTag;
+    result.insert(std::make_pair(e.type, config));
+  }
+  return result;
+}
+
 void CDataHandler::Initialize(
     std::unordered_map<PlatformConfig::Types, Config> parsers,
     const std::vector<PlatformConfig::SDatafields> &datafields)
