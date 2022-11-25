@@ -148,7 +148,7 @@ struct ProcStatData
     Cpu() = default;
     bool Add(const std::vector<std::string> &cpuRow)
     {
-      if (cpuRow.size() != 9 || StartsWithCpu(cpuRow.at(0)))
+      if (cpuRow.size() < 9 || !StartsWithCpu(cpuRow.at(0)))
         return false;
       jiffiesUser = std::stol(cpuRow.at(1));
       jiffiesNice = std::stol(cpuRow.at(2));
