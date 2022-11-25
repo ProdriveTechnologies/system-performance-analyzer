@@ -4,6 +4,7 @@
 
 #include "export_struct.h"
 #include "src/benchmarks/linux/struct_sensors.h"
+#include "src/json_config/config.h"
 #include "src/json_config/sensor_config/config.h"
 
 #include "src/benchmarks/analysis/correlation.h"
@@ -26,6 +27,7 @@ public:
   virtual ~CBase() {}
 
   void SetApplicationName(const std::string &filename) { filename_ = filename; }
+  void SetSettings(const Core::SConfig &settings) { settings_ = settings; }
   // virtual std::string
   // InitExport(const std::vector<PlatformConfig::SDatafields> &config) = 0;
   // virtual std::string ParseData(const ExportData &data) = 0;
@@ -37,6 +39,7 @@ public:
 
 protected:
   std::string filename_;
+  Core::SConfig settings_;
 };
 
 } // namespace Exports

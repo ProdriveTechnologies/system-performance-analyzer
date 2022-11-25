@@ -169,7 +169,8 @@ void CPerfMeasurements::ExecuteExport(
   try
   {
     ExportType exportTypeClass{};
-    Exports::CExport exportGenericClass{&exportTypeClass, filename, false};
+    Exports::CExport exportGenericClass{&exportTypeClass, filename, config_,
+                                        false};
     exportGenericClass.FullExport(items, pMeasurementsData_.get(), allSensors,
                                   correlationResults);
   }

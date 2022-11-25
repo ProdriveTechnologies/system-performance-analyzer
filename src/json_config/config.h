@@ -52,6 +52,7 @@ struct SThreshold
 struct SSettings
 {
   bool verbose;
+  bool verboseSummary = false;
   bool enableLogs;
   int measureLoopMs;
   bool enableProcTime = false;

@@ -39,6 +39,7 @@ struct PipelineInfo
   int pipelineId;
   std::vector<MeasuredItem> measuredItems;
 };
+
 inline std::vector<MeasuredItem>
 GetMeasuredItems(const std::vector<PipelineInfo> &data)
 {

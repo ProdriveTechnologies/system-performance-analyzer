@@ -59,6 +59,8 @@ inline void from_json(const nlohmann::json &j, SSettings &p)
   if (j.contains("enable_proctime"))
     j.at("enable_proctime").get_to(p.enableProcTime);
   j.at("verbose").get_to(p.verbose);
+  if (j.contains("enable_verbose_summary"))
+    j.at("enable_verbose_summary").get_to(p.verboseSummary);
   j.at("enable_logs").get_to(p.enableLogs);
 }
 

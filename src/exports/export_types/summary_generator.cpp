@@ -6,6 +6,7 @@
 #include "src/exports/translations.h"
 // #include <infoware/cpu.hpp>
 #include "src/helpers/logger.h"
+#include <cmath>
 #include <iostream>
 
 namespace Exports
@@ -41,7 +42,7 @@ void CSummaryGenerator::PrintCorrelations(
   bool correlation = false;
   for (const auto &e : correlationResults)
   {
-    if (e.correlation > 0.75 || e.correlation < -0.75)
+    if (std::abs(e.correlation) >= Globals::strongCorrelation)
     {
       correlation = true;
       SummaryWriter::PrintRow(
@@ -172,7 +173,8 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
     {
       for (const auto &sensor : systemRscSensors.sensors)
       {
-        if (sensor.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE)
+        if (sensor.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE &&
+            !settings_.settings.verboseSummary)
           continue;
         PrintValue(SummaryTranslations::average, sensor,
                    Measurements::ValueTypes::AVERAGE);
@@ -191,8 +193,9 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
                                      std::to_string(processGroup.processId));
       for (const auto &sensor : processGroup.sensors)
       {
-        // if (sensor.classType != PlatformConfig::Class::)
-        //   continue;
+        if (sensor.classType != PlatformConfig::Class::SYS_RESOURCE_USAGE &&
+            !settings_.settings.verboseSummary)
+          continue;
         PrintValue(SummaryTranslations::average, sensor,
                    Measurements::ValueTypes::AVERAGE);
       }
@@ -211,10 +214,13 @@ void CSummaryGenerator::PrintSystemSummary(const AllSensors &allSensors)
                                      std::to_string(pipelineGroup.processId));
       for (const auto &sensor : pipelineGroup.sensors)
       {
+        if (settings_.settings.verboseSummary || sensor.measuredRaw == false)
+        {
+          PrintValue(SummaryTranslations::average, sensor,
+                     Measurements::ValueTypes::AVERAGE);
+        }
         // if (sensor.classType != PlatformConfig::Class::)
         //   continue;
-        PrintValue(SummaryTranslations::average, sensor,
-                   Measurements::ValueTypes::AVERAGE);
       }
       SummaryWriter::PrintRow();
     }

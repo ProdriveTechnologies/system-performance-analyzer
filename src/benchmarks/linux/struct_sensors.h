@@ -183,6 +183,20 @@ struct AllSensors
     return {};
   }
 
+  Classification GetClassification(const int uniqueId) const
+  {
+    for (const auto &classification : allClasses)
+    {
+      auto sensors = GetSensors(classification);
+      for (const auto &sensor : sensors)
+      {
+        if (uniqueId == sensor.uniqueId)
+          return classification;
+      }
+    }
+    throw std::runtime_error("Unknown unique ID inserted!");
+  }
+
   /**
    * @brief Returns all process IDs
    */
