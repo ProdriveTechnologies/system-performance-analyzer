@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "src/helpers/helper_functions.h"
+#include "src/helpers/logger.h"
 #include "src/helpers/synchronizer.h"
 
 namespace Linux
@@ -55,9 +56,12 @@ void RunProcess::StartThread(const std::string &command)
 
 void RunProcess::ChildExecProcess(const std::string &command)
 {
+  CLogger::Log(CLogger::Types::INFO, "Child writing into pipe");
   ChildWaitProcess();
+  CLogger::Log(CLogger::Types::INFO, "Child writing into pipe 2");
   ChildWaitProcess();
   // auto execvArgs{parameters};
+  CLogger::Log(CLogger::Types::INFO, "Executing linux command: ", command);
   std::vector<std::string> parameters = Helpers::Split(command, ' ');
   auto parametersCStr = Helpers::ToCString(parameters);
   parametersCStr.push_back(NULL);
@@ -95,6 +99,8 @@ void RunProcess::ParentWaitProcess()
 
     if (strcmp(readMsg, "WAIT") == 0)
     {
+      CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1,
+                   " for child");
       processSync_->WaitForProcess();
       waitCount++;
       strcpy(readMsg, "    ");

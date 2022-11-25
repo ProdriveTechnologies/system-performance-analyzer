@@ -10,11 +10,13 @@
 #include "src/benchmarks/Linux/xavier_sensors.h"
 #include "src/gstreamer/handler.h"
 #include "src/helpers/helper_functions.h"
+#include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
 #include "src/helpers/synchronizer.h"
 #include "src/json_config/config_parser.h"
 #include "src/linux/run_process.h"
 #include "src/linux/shared_memory.h"
+
 // #include "src/modules/unit_handler.h"
 
 template <typename... Ts> // (7)
@@ -45,6 +47,8 @@ int main()
   }
 
   auto config = Core::ConfigParser::Parse("json_example.json");
+  CLogger::Enable(true, true);
+  CLogger::Log(CLogger::Types::INFO, "Started application");
   Synchronizer synchronizer{config.processes.size() +
                             1}; // + 1 because of monitoring thread
   // CGstreamerHandler gstreamer{&synchronizer}; //{config.gstreamerPipeline};
@@ -76,10 +80,13 @@ int main()
     if (e.type == "linux_command")
     {
       processes.push_back(ProcessInfo{e, Linux::RunProcess{&synchronizer}});
+      CLogger::Log(CLogger::Types::INFO, "Added linux process: ", e.command);
     }
     else if (e.type == "gstreamer")
     {
       processes.push_back(ProcessInfo{e, CGstreamerHandler{&synchronizer}});
+      CLogger::Log(CLogger::Types::INFO,
+                   "Added GStreamer pipeline: ", e.command);
     }
   }
   // Start the threads

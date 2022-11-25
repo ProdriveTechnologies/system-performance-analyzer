@@ -14,6 +14,7 @@
 #include "src/exports/export.h"
 #include "src/exports/export_types/export_csv.h"
 
+#include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
 namespace Linux
 {
@@ -25,6 +26,7 @@ CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer)
 void CPerfMeasurements::Start(const Core::SConfig &config)
 {
   using Path = Linux::FileSystem::Path;
+  CLogger::Log(CLogger::Types::INFO, "Starting synchronize for benchmarks");
   threadSync_->WaitForProcess();
   config_ = config;
   Stopwatch stopwatch;
@@ -42,6 +44,7 @@ void CPerfMeasurements::Start(const Core::SConfig &config)
   std::vector<std::string> monitoredThreads;
   // Sync before start, when synced, will start
   //    directly
+  CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for benchmarks");
   threadSync_->WaitForProcess();
   stopwatch.Start();
   while (!threadSync_->AllCompleted())
@@ -178,7 +181,7 @@ std::string CPerfMeasurements::ReadLocation(const std::string &path)
   std::ifstream fileObj(path);
   if (!fileObj.is_open() || !fileObj.good())
   {
-    throw std::runtime_error("Monitoring: Path doesn't exist!");
+    throw std::runtime_error("Monitoring: Path doesn't exist! Path: " + path);
   }
   fileObj >> dataBuffer;
   fileObj.close();

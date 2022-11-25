@@ -7,6 +7,8 @@
 #include <thread>
 #include <unistd.h>
 
+#include "src/helpers/logger.h"
+
 CGstreamerHandler::CGstreamerHandler(Synchronizer *synchronizer)
     : ProcessRunner::Base{synchronizer},
       threadSync_{synchronizer}, running_{false}, gstPipeline_{nullptr},
@@ -93,6 +95,7 @@ void CGstreamerHandler::RunPipelineThread(const std::string &pipelineStr)
 void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
 {
   threadSync_->setThreadId(gettid());
+  CLogger::Log(CLogger::Types::INFO, "Starting synchronize for gstreamer");
   threadSync_->WaitForProcess();
   running_ = true;
   FreeMemory();
@@ -118,6 +121,7 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   {
     std::cout << "No error occured, what the" << std::endl;
   }
+  CLogger::Log(CLogger::Types::INFO, "Starting synchronize 2 for gstreamer");
   threadSync_->WaitForProcess();
 
   // start playing
