@@ -8,8 +8,9 @@ namespace Measurements
 {
 CSensors::CSensors(const std::string &configFile) : configFile_{configFile} {}
 
-void CSensors::Initialize()
+void CSensors::Initialize(std::vector<Exports::ExportData> *allData)
 {
+  allData_ = allData;
   auto parsed = PlatformConfig::Parse(configFile_);
   auto measureFields =
       GetFields(parsed.sensors, &CSensors::GetMeasureFields, this);
@@ -38,6 +39,18 @@ std::vector<Exports::MeasurementItem> CSensors::GetMeasurementFields() const
     config.type = Exports::Type::INFO;
     config.value = GetDefinitionItems(e);
     result.push_back(config);
+  }
+  return result;
+}
+
+std::vector<Sensors> CSensors::GetSensors() const
+{
+  std::vector<Sensors> result;
+  for (const auto &e : measureFieldsDefinition_)
+  {
+    Sensors sensor{e.name, e.id};
+    sensor.data = PerformanceHelpers::GetSummarizedDataSensors(allData_, e.id);
+    result.push_back(sensor);
   }
   return result;
 }

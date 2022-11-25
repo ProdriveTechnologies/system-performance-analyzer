@@ -15,7 +15,7 @@ inline std::string GetMeasureType(const MeasureType t)
   switch (t)
   {
   case MeasureType::FPS:
-    return "FPS";
+    return "fps";
   case MeasureType::LATENCY:
     return "LATENCY";
   case MeasureType::NONE:

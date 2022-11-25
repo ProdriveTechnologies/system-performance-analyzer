@@ -8,6 +8,7 @@
 #include "src/benchmarks/gstreamer_identifier.h"
 #include "src/json_config/sensor_config/config.h"
 //#include "src/benchmarks/Linux/xavier_sensors.h"
+#include "src/benchmarks/Linux/struct_sensors.h"
 #include "src/linux/filesystem.h"
 
 namespace Exports
@@ -74,10 +75,10 @@ struct ExportData
 
   std::vector<double> coreUtilization;
   // std::vector<Process> runningProcessIds;
-  double memoryUsage;
   // std::vector<CXavierSensors::SCpuCoreInfo> cpuInfo;
   // Linux::FileSystem::ProcStatData cpuUtilization;
-  std::vector<int> pids;
   std::vector<MeasuredItem> measuredItems;
+
+  std::vector<Measurements::Sensors> sensors;
 };
 } // namespace Exports

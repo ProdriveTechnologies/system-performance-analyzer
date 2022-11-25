@@ -15,6 +15,7 @@
 #include "src/json_config/config.h"
 #include "src/json_config/sensor_config/config.h"
 // #include "xavier_sensors_live.h"
+#include "src/benchmarks/Linux/struct_sensors.h"
 #include "src/benchmarks/gstreamer_measurements.h"
 #include "src/benchmarks/sensor_measurements.h"
 #include "src/processes_struct.h"
@@ -32,8 +33,8 @@ public:
     double temperature;
   };
 
-  CPerfMeasurements(Synchronizer *synchronizer,
-                    const std::string &sensorConfig);
+  CPerfMeasurements(Synchronizer *synchronizer, const std::string &sensorConfig,
+                    const std::vector<Core::SThreshold> &thresholds);
   void Start(const Core::SConfig &config, std::vector<ProcessInfo> *processes);
 
   // SCpuInfo GetCPUInfo();
@@ -83,7 +84,7 @@ private:
   GStreamer::CProcessMeasurements gstMeasurements_;
   Exports::ExportConfig exportConfig_;
   Measurements::CSensors sensorMeasurements_;
-
+  std::vector<Core::SThreshold> thresholds_;
   // PlatformConfig::SDatafields GetFieldDef(const int id)
   // {
   //   for (const auto &e : measureFieldsDefinition_)
@@ -137,7 +138,10 @@ private:
   void MeasureProcesses(const std::vector<int> processIds);
 
   void InitExports(const MeasureFieldsDefType &config);
-  void SendExportsData(const Exports::ExportData &data);
+  // void SendExportsData(const Exports::ExportData &data);
+
+  void SetThresholdResults(Measurements::AllSensors allSensors);
+
   // MeasureCombo GetFields(
   //     std::vector<PlatformConfig::SDatafields> &sensorConfig,
   //     const std::function<MeasureCombo(CPerfMeasurements *,

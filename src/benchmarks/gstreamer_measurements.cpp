@@ -9,8 +9,9 @@
 
 namespace GStreamer
 {
-void CProcessMeasurements::Initialize()
+void CProcessMeasurements::Initialize(std::vector<Exports::ExportData> *allData)
 {
+  allData_ = allData;
   // Initialize the uniqueIds_ vector
   for (size_t i = 0; i < streams_.size(); ++i)
   {
@@ -116,7 +117,30 @@ Exports::MeasurementItem CProcessMeasurements::GetPipelineConfig2() const
  *
  * @return Measurements::Sensors
  */
-// Measurements::Sensors GetSensors() const {}
+std::vector<Measurements::Sensors> CProcessMeasurements::GetSensors() const
+{
+  std::vector<Measurements::Sensors> result;
+  for (size_t pipelineNr = 0; pipelineNr < uniqueIds_.size(); ++pipelineNr)
+  {
+    const auto &pipeline = uniqueIds_.at(pipelineNr);
+
+    for (const auto &e : pipeline)
+    {
+      std::string sensorName =
+          CreateSensorName(pipelineNr, e.first.moduleName, e.first.type);
+      Measurements::Sensors sensor{sensorName, e.second};
+      sensor.data = PerformanceHelpers::GetSummarizedData(allData_, e.second);
+      result.push_back(sensor);
+    }
+  }
+  for (const auto &e : predefinedSensors)
+  {
+    auto uniqueIdsSet = GetUniqueIdsByType(e);
+    result.push_back(
+        PerformanceHelpers::GetGstCategoriesSummary(allData_, uniqueIdsSet, e));
+  }
+  return result;
+}
 
 std::vector<Exports::MeasurementItem>
 CProcessMeasurements::GetPipelineConfig(const size_t pipelineNr) const
@@ -141,8 +165,7 @@ CProcessMeasurements::GetMeasurementLabels(const size_t pipelineNr) const
     Exports::MeasurementItem item;
     item.name = "Label";
     item.type = Exports::Type::LABEL;
-    item.value = std::to_string(pipelineNr) + "." + e.first.moduleName + "." +
-                 GetMeasureType(e.first.type);
+    item.value = CreateSensorName(pipelineNr, e.first.moduleName, e.first.type);
     mapResult.insert(std::make_pair(e.second, item));
   }
 
@@ -201,5 +224,18 @@ int CProcessMeasurements::GetUniqueId(const size_t pipelineId,
     idsMap.insert(std::make_pair(id, assignedId));
     return assignedId;
   }
+}
+
+/**
+ * @brief Create a Sensor Name object
+ *
+ * @param pipelineNr should be the number from the pipeline, indexed from 0
+ */
+std::string CProcessMeasurements::CreateSensorName(const int pipelineNr,
+                                                   const std::string moduleName,
+                                                   MeasureType type) const
+{
+  return std::to_string(pipelineNr + 1) + "." + moduleName + "." +
+         GetMeasureType(type);
 }
 } // namespace GStreamer

@@ -42,7 +42,7 @@ std::string CJson::FinishExport()
 }
 
 bool CJson::FullExport(const std::vector<MeasurementItem> &config,
-                       const FullMeasurement data)
+                       const FullMeasurement data, const AllSensors &allSensors)
 {
   std::string labels;
   nlohmann::json jsonObject;
@@ -67,9 +67,9 @@ bool CJson::FullExport(const std::vector<MeasurementItem> &config,
     //   }
     // }
   }
-  std::string name = "exportedjson";
-  name += EXTENSION;
-  FileWriter fileWriter{name};
+  // std::string filename = filename_;
+  // filename += EXTENSION;
+  FileWriter fileWriter{filename_ + EXTENSION};
   fileWriter.AddRow(jsonObject.dump());
 
   return true;

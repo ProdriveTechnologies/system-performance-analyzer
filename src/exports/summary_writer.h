@@ -10,6 +10,8 @@
 class SummaryWriter
 {
 public:
+  SummaryWriter() = default;
+  ~SummaryWriter() = default;
   static void PrintSection(const std::string_view &section);
   static void PrintSubSection(const std::string_view &subsection);
   static void PrintTitle(const std::string_view &title);

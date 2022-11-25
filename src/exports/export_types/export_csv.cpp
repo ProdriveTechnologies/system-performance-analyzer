@@ -97,7 +97,7 @@ std::string CCsv::FinishExport()
 }
 
 bool CCsv::FullExport(const std::vector<MeasurementItem> &config,
-                      const FullMeasurement data)
+                      const FullMeasurement data, const AllSensors &allSensors)
 {
   std::string labels;
 
@@ -123,6 +123,7 @@ bool CCsv::FullExport(const std::vector<MeasurementItem> &config,
 
   return true;
 }
+
 /**
  * @brief Loops through the items and retrieves the labels out of them
  *

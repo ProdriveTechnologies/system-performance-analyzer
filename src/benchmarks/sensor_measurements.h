@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "src/benchmarks/Linux/proc_handler.h"
+#include "src/benchmarks/Linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/helpers/helper_functions.h"
 #include "src/json_config/sensor_config/config.h"
@@ -25,11 +26,13 @@ public:
   //   CProcessMeasurements(std::vector<CGstreamerHandler *> gstreamerStream);
   CSensors(const std::string &configFile);
 
-  void Initialize();
+  void Initialize(std::vector<Exports::ExportData> *allData);
 
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
   std::vector<Exports::MeasuredItem> GetMeasurements();
+
+  std::vector<Sensors> GetSensors() const;
 
   // Should be removed
   std::vector<PlatformConfig::SDatafields> GetDefinition() const
@@ -40,6 +43,7 @@ public:
 private:
   const std::string configFile_;
   Measurements::ProcHandler procHandler_;
+  std::vector<Exports::ExportData> *allData_;
 
   using MeasureFieldsDefType = std::vector<PlatformConfig::SDatafields>;
   MeasureFieldsDefType measureFieldsDefinition_;

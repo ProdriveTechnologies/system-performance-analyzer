@@ -30,13 +30,14 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_csv.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/sensor_config/config_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/proc_handler.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/stdout_export/summary_writer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/stdout_export/summary_generator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/summary_writer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/summary_generator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/performance_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/json_helpers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/gstreamer_measurements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/sensor_measurements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_json.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler.cpp
 )
 message(" - Enabling static code analyser: clang-tidy")
 

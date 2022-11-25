@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <chrono>
-#include <getopt.h>
 #include <sys/wait.h>
 #include <thread>
 #include <variant>
@@ -15,38 +14,12 @@
 #include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
 #include "src/helpers/synchronizer.h"
+#include "src/input_handler.h"
 #include "src/json_config/config_parser.h"
 #include "src/linux/filesystem.h"
-// #include "src/linux/run_process.h"
 
-void print_func() { std::cout << "Printing the world" << std::endl; }
-
-enum class Arguments : char
-{
-  HELP = 'h',
-  CONFIG = 'c',
-  SENSORS = 's'
-};
-struct SUserArgs
-{
-  std::string configFile;
-  std::string sensorInfoFile = "sensor_config.json";
-};
-
-void ParseArguments(const Arguments arg, SUserArgs *userArgs,
-                    char *extraArg = nullptr)
-{
-  switch (arg)
-  {
-  case Arguments::SENSORS:
-    userArgs->sensorInfoFile = extraArg;
-    break;
-  case Arguments::CONFIG:
-    userArgs->configFile = extraArg;
-    break;
-  default:; // Do nothing
-  }
-}
+int VerifyArguments(const bool incorrectArgs, const int argc,
+                    const CInputHandler::SUserArgs &userArgs);
 
 void print_info()
 {
@@ -67,91 +40,23 @@ void print_info()
 }
 int main(int argc, char *argv[])
 {
-  SUserArgs userArgs;
-  option longopts[] = {{"config", required_argument, NULL, 0},
-                       {"sensors", required_argument, NULL, 0},
-                       {"help", no_argument, NULL, 0},
-                       {NULL, 0, NULL, 3}};
-  int optionIndex{0};
-  int c;
-  while ((c = getopt_long(argc, argv, "hc:s:", longopts, &optionIndex)) != -1)
-  {
-    bool incorrectArgs = false;
-    switch (c)
-    {
-    case 0:
-      if (optarg)
-      {
-        if (strcmp(optarg, "help") == 0)
-        {
-          incorrectArgs = true;
-        }
-        else if (strcmp(longopts[optionIndex].name, "config") == 0)
-        {
-          ParseArguments(Arguments::CONFIG, &userArgs, optarg);
-        }
-        else if (strcmp(longopts[optionIndex].name, "sensors") == 0)
-        {
-          ParseArguments(Arguments::SENSORS, &userArgs, optarg);
-        }
-      }
-      break;
-    case 'h':
-      incorrectArgs = true;
-      break;
-    case 'c':
-      if (optarg)
-        ParseArguments(Arguments::CONFIG, &userArgs, optarg);
-      break;
-    case 's':
-      if (optarg)
-        ParseArguments(Arguments::SENSORS, &userArgs, optarg);
-      break;
-    case '?':
-      std::cout << "Unknown option: " << optopt << std::endl;
-      incorrectArgs = true;
-      break;
-    case ':':
-      std::cout << "Missing option for: " << optopt << std::endl;
-      incorrectArgs = true;
-      break;
-    default:
-      incorrectArgs = true;
-    }
+  // Input checks
+  CInputHandler inputHandler;
+  bool incorrectArgs = inputHandler.Parse(argc, argv);
+  auto userArgs = inputHandler.GetUserArguments();
+  if (VerifyArguments(incorrectArgs, argc, userArgs) == -1)
+    return -1; // Terminate application, arguments are incorrect
 
-    if (argc < 2 || incorrectArgs)
-    {
-      print_info();
-      return -1;
-    }
-  }
-  if (argc < 2 || userArgs.configFile.empty())
-  {
-    print_info();
-    return -1;
-  }
-
-  if (!Helpers::FileExists(userArgs.sensorInfoFile))
-  {
-    std::cout << "Sensor config file not found: " << userArgs.sensorInfoFile
-              << std::endl;
-    print_info();
-    return -1;
-  }
-  else if (!Helpers::FileExists(userArgs.configFile))
-  {
-    std::cout << "Config file not found: " << userArgs.configFile << std::endl;
-    print_info();
-    return -1;
-  }
-
-  auto config = Core::ConfigParser::Parse(userArgs.configFile);
+  // Enabling/disabling logger components
   CLogger::Enable(false, true);
+  // Parsing user configuration
+  auto config = Core::ConfigParser::Parse(userArgs.configFile);
   CLogger::Log(CLogger::Types::INFO, "Started application");
   Synchronizer synchronizer{config.processes.size() +
                             1}; // + 1 because of monitoring thread
   // CGstreamerHandler gstreamer{&synchronizer}; //{config.gstreamerPipeline};
-  Linux::CPerfMeasurements measurements{&synchronizer, userArgs.sensorInfoFile};
+  Linux::CPerfMeasurements measurements{&synchronizer, userArgs.sensorInfoFile,
+                                        config.thresholds};
   // std::vector<std::variant<CGstreamerHandler>> processes;
 
   std::vector<ProcessInfo> processes;
@@ -181,4 +86,35 @@ int main(int argc, char *argv[])
   }
 
   measurements.Start(config, &processes);
+}
+
+/**
+ * @brief Verifies the arguments
+ *
+ * @return int(-1): incorrect arguments
+ *         int(0): correct arguments
+ */
+int VerifyArguments(const bool incorrectArgs, const int argc,
+                    const CInputHandler::SUserArgs &userArgs)
+{
+  if (incorrectArgs || argc < 2 || userArgs.configFile.empty())
+  {
+    print_info();
+    return -1;
+  }
+
+  if (!Helpers::FileExists(userArgs.sensorInfoFile))
+  {
+    std::cout << "Sensor config file not found: " << userArgs.sensorInfoFile
+              << std::endl;
+    print_info();
+    return -1;
+  }
+  else if (!Helpers::FileExists(userArgs.configFile))
+  {
+    std::cout << "Config file not found: " << userArgs.configFile << std::endl;
+    print_info();
+    return -1;
+  }
+  return 0; // Arguments are correct
 }

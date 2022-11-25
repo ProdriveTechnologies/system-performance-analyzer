@@ -5,12 +5,13 @@
 
 #include "src/benchmarks/Linux/perf_measurements.h"
 #include "src/exports/export_struct.h"
+#include "src/exports/exports_base.h"
 #include "src/json_config/sensor_config/config.h"
 // #include "src/linux/filesystem.h"
 
 namespace Exports
 {
-class CSummaryGenerator
+class CSummaryGenerator : public CBase
 {
 public:
   bool
@@ -20,12 +21,22 @@ public:
       const std::vector<Linux::CPerfMeasurements::ProcessesMeasure>
           &measuredProcesses);
 
+  bool FullExport(const std::vector<MeasurementItem> &config,
+                  const FullMeasurement data, const AllSensors &allSensors);
+
 private:
   // Static info based on the host system
   void PrintApplicationInfo();
   void PrintSystemInfo();
   void PrintCacheInfo();
   void PrintPcieInfo();
+  std::string PrintValues(const Measurements::SensorData data)
+  {
+    std::string result;
+    for (const auto &e : data.summarizedValues)
+      result += "\t" + ToString(e.type) + ": " + std::to_string(e.value) + "\n";
+    return result;
+  }
 
   double GetAverage(const std::vector<Exports::ExportData> &measurementsData,
                     const int id);
@@ -34,12 +45,6 @@ private:
   void PrintSystemSummary(
       const std::vector<Exports::ExportData> &measurementsData,
       const std::vector<PlatformConfig::SDatafields> &measurementsDef);
-
-  // static std::string GetCacheType(const iware::cpu::cache_type_t cache);
-  // static std::string
-  // GetArchitecture(const iware::cpu::architecture_t architecture);
-  static constexpr int lowestCacheNr = 0;
-  static constexpr int highestCacheNr = 10;
 };
 
 } // namespace Exports

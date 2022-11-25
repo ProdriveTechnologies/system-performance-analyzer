@@ -50,14 +50,28 @@ private:
 inline void from_json(const nlohmann::json &j, SThreshold &p)
 {
   j.at("name").get_to(p.name);
-  j.at("group").get_to(p.group);
-  j.at("value").get_to(p.value);
+  std::string typeBuffer;
+  j.at("type").get_to(typeBuffer);
+  p.type = GetThresholdType(typeBuffer);
+  std::string signBuffer;
+  j.at("sign").get_to(signBuffer);
+  p.sign = GetSign(signBuffer);
+  // When no process_id is present, it becomes -1
+  p.processId = j.contains("process_id") ? j.at("process_id").get<int>() : -1;
+  j.at("threshold").get_to(p.value);
 }
 
 inline void from_json(const nlohmann::json &j, SProcess &p)
 {
   j.at("type").get_to(p.type);
   j.at("command").get_to(p.command);
+  j.at("id").get_to(p.processId);
+  if (p.processId < 0)
+  {
+    throw std::runtime_error(
+        "Process IDs may not be negative! Please change the process ID for " +
+        p.command);
+  }
 }
 
 inline void from_json(const nlohmann::json &j, SSettings &p)
@@ -74,6 +88,7 @@ inline void from_json(const nlohmann::json &j, SConfig &p)
   j.at("id").get_to(p.id);
   j.at("version").get_to(p.version);
   // j.at("tasks").get_to(p.tasks);
+  j.at("thresholds").get_to(p.thresholds);
   j.at("processes").get_to(p.processes);
   j.at("settings").get_to(p.settings);
 }

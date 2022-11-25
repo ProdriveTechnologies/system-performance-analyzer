@@ -2,13 +2,50 @@
 
 #include "src/globals.h"
 
-#include "summary_writer.h"
-#include "translations.h"
+#include "src/exports/summary_writer.h"
+#include "src/exports/translations.h"
 // #include <infoware/cpu.hpp>
 #include <iostream>
 
 namespace Exports
 {
+/**
+ * @brief Generates the full summary in the console
+ *
+ * @param config
+ * @param data
+ * @return true
+ * @return false
+ */
+bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
+                                   const FullMeasurement data,
+                                   const AllSensors &allSensors)
+{
+  // Generic info, not specific to the measurements
+  SummaryWriter::PrintTitle(SummaryTranslations::headerName);
+  PrintApplicationInfo();
+
+  for (const auto &e : config)
+  {
+  }
+  const auto sensors = allSensors.CreateMap();
+
+  SummaryWriter::PrintSubSection("Thresholds:");
+  for (const auto &e : sensors)
+  {
+    if (e.second->thresholdExceeded)
+    {
+      SummaryWriter::PrintRow("theshold exceeded");
+      SummaryWriter::PrintRow(std::to_string(e.second->uniqueId));
+      SummaryWriter::PrintRow("ID: " + e.second->userId);
+      SummaryWriter::PrintRow(
+          "Threshold for " + e.second->userId + " was exceeded for group " +
+          e.second->userId +
+          ". The values were: " + PrintValues(e.second->data));
+    }
+  }
+}
+
 bool CSummaryGenerator::Generate(
     const std::vector<Exports::ExportData> &measurementsData,
     const std::vector<PlatformConfig::SDatafields> &measurementsDef)

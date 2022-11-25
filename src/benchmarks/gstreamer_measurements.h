@@ -37,7 +37,8 @@ public:
     streams_ = gstreamerStream;
   }
 
-  void Initialize();
+  void Initialize(std::vector<Exports::ExportData> *allData);
+  void ConcludeMeasurement();
 
   std::vector<Exports::PipelineInfo> ProcessGstreamer();
   std::vector<Exports::PipelineConfig> GetPipelineConfig() const;
@@ -50,14 +51,35 @@ public:
   GetPipelineMeasurements(const size_t pipelineNr) const;
   std::vector<Exports::PipelineInfo>
   SortData(const std::vector<Exports::PipelineInfo> &data);
-  // Measurements::Sensors GetSensors() const;
+  std::vector<Measurements::Sensors> GetSensors() const;
 
 private:
+  std::vector<Exports::ExportData> *allData_;
   std::vector<CGstreamerHandler *> streams_;
   std::vector<std::unordered_map<Identifier, int>> uniqueIds_;
 
   int GetUniqueId(const size_t pipelineId, const Identifier &id);
   std::unordered_map<int, Identifier>
   GetPluginNames(const size_t pipelineId) const;
+
+  std::string CreateSensorName(const int pipelineNr,
+                               const std::string moduleName,
+                               MeasureType type) const;
+  inline std::unordered_set<int>
+  GetUniqueIdsByType(const MeasureType type) const
+  {
+    std::unordered_set<int> result;
+    for (const auto &e : uniqueIds_)
+    {
+      for (const auto &e2 : e)
+      {
+        if (e2.first.type == type)
+          result.insert(e2.second);
+      }
+    }
+    return result;
+  }
+
+  static inline std::vector<MeasureType> predefinedSensors = {MeasureType::FPS};
 };
 } // namespace GStreamer

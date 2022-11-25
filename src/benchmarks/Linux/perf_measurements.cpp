@@ -24,16 +24,17 @@
 // #include "xavier_sensors_live.h"
 
 #include "performance_helpers.h"
-#include "src/stdout_export/summary_generator.h"
+#include "src/exports/export_types/summary_generator.h"
 
 namespace Linux
 {
 // TODO: Make cpuUtilizationTimer_ configurable through the JSON
-CPerfMeasurements::CPerfMeasurements(Synchronizer *synchronizer,
-                                     const std::string &sensorConfig)
+CPerfMeasurements::CPerfMeasurements(
+    Synchronizer *synchronizer, const std::string &sensorConfig,
+    const std::vector<Core::SThreshold> &thresholds)
     : threadSync_{synchronizer}, sensorConfigFile_{sensorConfig},
       cpuUtilizationTimer_{std::chrono::milliseconds{1000}},
-      sensorMeasurements_{sensorConfig} //,
+      sensorMeasurements_{sensorConfig}, thresholds_{thresholds} //,
 // liveFilesystemData_{std::chrono::milliseconds{1000}, XAVIER_CORES}
 {
 }
@@ -78,7 +79,6 @@ void CPerfMeasurements::Start(const Core::SConfig &config,
  */
 void CPerfMeasurements::Initialize()
 {
-  sensorMeasurements_.Initialize();
   // auto parsed = PlatformConfig::Parse(sensorConfigFile_);
   // auto measureFields =
   //     GetFields(parsed.sensors, &CPerfMeasurements::GetMeasureFields, this);
@@ -92,12 +92,14 @@ void CPerfMeasurements::Initialize()
 
   GetProcessPids();
   OrganizeGstreamerPipelines();
-  gstMeasurements_.Initialize();
 
   pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
   pCpuData_ = std::make_unique<std::vector<Linux::FileSystem::ProcStatData>>();
   pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
 
+  // Must happen after the creation of the pMeasurementsData_ memory block
+  sensorMeasurements_.Initialize(pMeasurementsData_.get());
+  gstMeasurements_.Initialize(pMeasurementsData_.get());
   // Thread exists now, store threads that already exist for the monitoring. The
   // newly added ones are from gstreamer and need to be monitored
   // std::cerr << "Monitoring thread: " << threadSync_->getThreadId();
@@ -197,8 +199,8 @@ void CPerfMeasurements::InitExports(const MeasureFieldsDefType &config)
   if (config_.settings.enableLogs)
   {
     pExportObj_ = std::make_unique<Exports::CExport>(new Exports::CJson{},
-                                                     "csvfile.csv", true);
-    pExportObj_->InitExport(config);
+                                                     "jsonfile.json", true);
+    // pExportObj_->InitExport(config);
   }
 }
 
@@ -207,10 +209,10 @@ void CPerfMeasurements::InitExports(const MeasureFieldsDefType &config)
  *
  * @param data the measurements data
  */
-void CPerfMeasurements::SendExportsData(const Exports::ExportData &data)
-{
-  pExportObj_->DataExport(data);
-}
+// void CPerfMeasurements::SendExportsData(const Exports::ExportData &data)
+// {
+//   pExportObj_->DataExport(data);
+// }
 
 void CPerfMeasurements::MeasureThread(const std::string &threadProcLoc)
 {
@@ -221,16 +223,17 @@ void CPerfMeasurements::MeasureThread(const std::string &threadProcLoc)
 
 void CPerfMeasurements::ExportData()
 {
-  for (const auto &e : *pMeasurementsData_)
-  {
-    SendExportsData(e);
-  }
+  // for (const auto &e : *pMeasurementsData_)
+  // {
+  //   SendExportsData(e);
+  // }
 
   // Do the full export with all data
   std::vector<Exports::MeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
   items.push_back(gstMeasurements_.GetPipelineConfig2());
-  pExportObj_->FullExport(items, pMeasurementsData_.get());
+  pExportObj_->FullExport(items, pMeasurementsData_.get(),
+                          Measurements::AllSensors{});
 }
 
 /**
@@ -290,10 +293,46 @@ void CPerfMeasurements::AnalyzeData()
    */
 
   // CheckThresholds();
+  // Collect all sensors
+  auto gstSensors = gstMeasurements_.GetSensors();
+  auto sysSensors = sensorMeasurements_.GetSensors();
+  Exports::AllSensors allSensors;
+  allSensors.AddSensors(Measurements::Classification::PIPELINE, gstSensors);
+  allSensors.AddSensors(Measurements::Classification::SYSTEM, sysSensors);
 
+  // Check thresholds
+  SetThresholdResults(allSensors);
+  // SetThresholdResults(sysSensorsMap);
+
+  std::cout << gstSensors.at(0).thresholdExceeded << std::endl;
+  // pExportObj_ = std::make_unique<Exports::CExport>(
+  //     new Exports::CSummaryGenerator{}, "filename", true);
   Exports::CSummaryGenerator generator;
   generator.Generate(*pMeasurementsData_, sensorMeasurements_.GetDefinition());
   generator.GenerateProcesses(*pProcessesData_);
+
+  std::vector<Exports::MeasurementItem> items;
+  items.push_back(sensorMeasurements_.GetConfig());
+  items.push_back(gstMeasurements_.GetPipelineConfig2());
+  generator.FullExport(items, pMeasurementsData_.get(), allSensors);
+}
+
+void CPerfMeasurements::SetThresholdResults(Measurements::AllSensors allSensors)
+// std::unordered_map<std::string, Measurements::Sensors> &sensorMap)
+{
+  auto sensorMap = allSensors.CreateMap();
+  for (const auto &e : thresholds_)
+  {
+    auto sensor = sensorMap.find(e.name);
+    if (sensor == sensorMap.end())
+    {
+      CLogger::Log(CLogger::Types::WARNING, "Threshold name: \"", e.name,
+                   "\" not found!");
+      continue; // Couldn't check any thresholds, doesn't exist
+    }
+    sensor->second->thresholdExceeded =
+        PerformanceHelpers::HandleThreshold(sensor->second, e);
+  }
 }
 
 // void CPerfMeasurements::CheckTresholds() { for (const) }

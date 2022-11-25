@@ -24,7 +24,7 @@ public:
                         const std::vector<MeasuredItem> &items);
   std::string FinishExport();
   bool FullExport(const std::vector<MeasurementItem> &config,
-                  const FullMeasurement data);
+                  const FullMeasurement data, const AllSensors &allSensors);
 
 private:
   static constexpr char EXTENSION[] = ".json";
