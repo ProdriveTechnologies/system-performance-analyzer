@@ -1,12 +1,7 @@
 #include "correlation.h"
 
+#include <cmath>
 #include <set>
-
-#if BOOST_VERSION / 100 >= 1072
-#include <boost/math/statistics/bivariate_statistics.hpp>
-#else
-#include <boost/math/tools/bivariate_statistics.hpp>
-#endif
 
 namespace Measurements
 {
@@ -235,14 +230,42 @@ CCorrelation::GetSensors(const std::vector<Sensors> &sensors,
  * as a fraction. The higher the value, the more correlated the data is or the
  * lower the value, the higher the inversed correlation is
  */
-double CCorrelation::GetCorrelationCoefficient(const std::vector<double> &u,
-                                               const std::vector<double> &v)
+double CCorrelation::GetCorrelationCoefficient(const std::vector<double> &arrU,
+                                               const std::vector<double> &arrV)
 {
-#if BOOST_VERSION / 100 >= 1072
-  return boost::math::statistics::correlation_coefficient(u, v);
-#else
-  return boost::math::tools::correlation_coefficient(u, v);
-#endif
+  if (arrU.size() != arrV.size())
+  {
+    throw std::runtime_error(
+        "Correlation failed! Vectors are not equal length!");
+  }
+
+  double sum_U = 0, sum_V = 0, sum_UV = 0;
+  double squareSum_U = 0, squareSum_V = 0;
+
+  size_t arrLength = arrU.size();
+  for (size_t i = 0; i < arrLength; i++)
+  {
+    auto u = arrU.at(i);
+    auto v = arrV.at(i);
+    // sum of elements of array X.
+    sum_U += u;
+
+    // sum of elements of array Y.
+    sum_V += v;
+
+    // sum of X[i] * Y[i].
+    sum_UV += (u * v);
+
+    // sum of square of array elements.
+    squareSum_U += (u * u);
+    squareSum_V += (v * v);
+  }
+  // use formula for calculating correlation coefficient.
+  double corr = ((arrLength * sum_UV) - (sum_U * sum_V)) /
+                sqrt(((arrLength * squareSum_U) - (sum_U * sum_U)) *
+                     ((arrLength * squareSum_V) - (sum_V * sum_V)));
+
+  return corr;
 }
 
 std::pair<CCorrelation::SSensorMeasurements, CCorrelation::SSensorMeasurements>
