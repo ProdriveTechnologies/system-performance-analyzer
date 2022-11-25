@@ -21,8 +21,10 @@ public:
   std::string ParseData(const std::string &timeStr,
                         const std::vector<MeasuredItem> &items);
   std::string FinishExport();
-  bool FullExport(const std::vector<MeasurementItem> &config,
-                  const FullMeasurement data, const AllSensors &allSensors);
+  bool FullExport(
+      const std::vector<MeasurementItem> &config, const FullMeasurement data,
+      const AllSensors &allSensors,
+      const std::vector<Measurements::CCorrelation::SResult> &correlations);
 
 private:
   enum class CsvIndex : size_t

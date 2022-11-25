@@ -15,6 +15,7 @@
 #include "src/json_config/config.h"
 #include "src/json_config/sensor_config/config.h"
 // #include "xavier_sensors_live.h"
+
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/benchmarks/pipeline_measurements.h"
 #include "src/benchmarks/process_measurements.h"
@@ -128,10 +129,14 @@ private:
   template <typename ExportClass>
   void ExecuteExport(const std::string &filename,
                      const std::vector<Exports::MeasurementItem> &items,
-                     const Exports::AllSensors &allSensors);
+                     const Exports::AllSensors &allSensors,
+                     const std::vector<Measurements::CCorrelation::SResult>
+                         &correlationResults);
   void Initialize();
   void StartMeasurementsLoop();
-  void ExportData(const Exports::AllSensors &sensors);
+  void ExportData(const Exports::AllSensors &sensors,
+                  const std::vector<Measurements::CCorrelation::SResult>
+                      &correlationResults);
   void AnalyzeData();
 
   void CheckTresholds();
@@ -152,34 +157,21 @@ private:
   }
 
   void SetThresholdResults(Measurements::AllSensors allSensors);
-
-  // MeasureCombo GetFields(
-  //     std::vector<PlatformConfig::SDatafields> &sensorConfig,
-  //     const std::function<MeasureCombo(CPerfMeasurements *,
-  //                                      const PlatformConfig::SDatafields &)>
-  //         parserFunction,
-  //     CPerfMeasurements *memberPtr);
-  // MeasureCombo GetMeasureFields(const PlatformConfig::SDatafields &e);
-  // MeasureCombo GetProcessFields(const PlatformConfig::SDatafields
-  // &dataField);
-
-  // MeasureCombo ParseArray(const PlatformConfig::SDatafields &data);
-  // MeasureComboSingular ParseField(const PlatformConfig::SDatafields &data);
-  // std::vector<Exports::MeasuredItem>
-  // GetMeasuredItems(const MeasureFieldsType &measureFields);
 };
 
 template <typename ExportType>
 void CPerfMeasurements::ExecuteExport(
     const std::string &filename,
     const std::vector<Exports::MeasurementItem> &items,
-    const Exports::AllSensors &allSensors)
+    const Exports::AllSensors &allSensors,
+    const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
 {
   try
   {
     ExportType exportTypeClass{};
     Exports::CExport exportGenericClass{&exportTypeClass, filename, false};
-    exportGenericClass.FullExport(items, pMeasurementsData_.get(), allSensors);
+    exportGenericClass.FullExport(items, pMeasurementsData_.get(), allSensors,
+                                  correlationResults);
   }
   catch (const std::exception &err)
   {

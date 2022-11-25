@@ -52,7 +52,7 @@ std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
 
       const auto &rawRscVec = ConvertToRaw(rscVectorCorrected);
       const auto &rawPerfVec = ConvertToRaw(perfVectorCorrected);
-      if (rawRscVec.size() > 1)
+      if (rawRscVec.size() >= 25)
       {
         SResult correlationResult;
         correlationResult.sensor1 = perfVectorCorrected.sensor;

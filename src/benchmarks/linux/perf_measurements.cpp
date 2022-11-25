@@ -163,15 +163,18 @@ void CPerfMeasurements::StartMeasurementsLoop()
   exportConfig_.pipelineConfig = gstMeasurements_.GetPipelineConfig();
 }
 
-void CPerfMeasurements::ExportData(const Exports::AllSensors &sensors)
+void CPerfMeasurements::ExportData(
+    const Exports::AllSensors &sensors,
+    const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
 {
   std::vector<Exports::MeasurementItem> items;
   items.push_back(sensorMeasurements_.GetConfig());
   items.push_back(gstMeasurements_.GetPipelineConfig2());
   items.push_back(processMeasurements_.GetConfig());
 
-  ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors);
-  ExecuteExport<Exports::CCsv>("filename", items, sensors);
+  ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors,
+                                            correlationResults);
+  ExecuteExport<Exports::CCsv>("filename", items, sensors, correlationResults);
 }
 
 /**
@@ -216,20 +219,10 @@ void CPerfMeasurements::AnalyzeData()
   auto corrResults = Measurements::CCorrelation::GetCorrelation(
       allSensors, pMeasurementsData_.get());
 
-  for (const auto &e : corrResults)
-  {
-    if (e.correlation >= 0.75 || e.correlation <= -0.75)
-    {
-      std::cout << "THESE SENSORS ARE CORRELATED!::" << std::endl;
-      std::cout << "Correlation between " << e.sensor1.userId << " and "
-                << e.sensor2.userId << " is: " << e.correlation << std::endl;
-    }
-  }
-
   // Check thresholds
   SetThresholdResults(allSensors);
 
-  ExportData(allSensors);
+  ExportData(allSensors, corrResults);
 }
 
 void CPerfMeasurements::SetThresholdResults(Measurements::AllSensors allSensors)

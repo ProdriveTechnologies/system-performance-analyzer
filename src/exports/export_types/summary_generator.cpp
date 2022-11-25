@@ -18,9 +18,10 @@ namespace Exports
  * @return true
  * @return false
  */
-bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
-                                   const FullMeasurement data,
-                                   const AllSensors &allSensors)
+bool CSummaryGenerator::FullExport(
+    const std::vector<MeasurementItem> &config, const FullMeasurement data,
+    const AllSensors &allSensors,
+    const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
 {
   // Generic info, not specific to the measurements
   SummaryWriter::PrintTitle(SummaryTranslations::headerName);
@@ -29,8 +30,27 @@ bool CSummaryGenerator::FullExport(const std::vector<MeasurementItem> &config,
 
   PrintSystemSummary(allSensors);
   PrintThresholds(allSensors);
-
+  PrintCorrelations(correlationResults);
   return true;
+}
+
+void CSummaryGenerator::PrintCorrelations(
+    const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
+{
+  SummaryWriter::PrintSection(SummaryTranslations::correlationTitle);
+  bool correlation = false;
+  for (const auto &e : correlationResults)
+  {
+    if (e.correlation > 0.75 || e.correlation < -0.75)
+    {
+      correlation = true;
+      SummaryWriter::PrintRow(
+          "Pearsons correlation of " + std::to_string(e.correlation) +
+          " for the sensors " + e.sensor1.userId + " and " + e.sensor2.userId);
+    }
+  }
+  if (!correlation)
+    SummaryWriter::PrintSection(SummaryTranslations::correlationNone);
 }
 
 void CSummaryGenerator::PrintThresholds(const AllSensors &allSensors)

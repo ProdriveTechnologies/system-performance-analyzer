@@ -6,6 +6,7 @@
 #include "export_struct.h"
 #include "exports_base.h"
 #include "file_writer.h"
+#include "src/benchmarks/analysis/correlation.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 
 namespace Exports
@@ -22,8 +23,10 @@ public:
   // bool DataExport(const ExportData &data);
   // bool FinishExport();
 
-  bool FullExport(const std::vector<MeasurementItem> &config,
-                  const FullMeasurement data, const AllSensors &allSensors);
+  bool FullExport(
+      const std::vector<MeasurementItem> &config, const FullMeasurement data,
+      const AllSensors &allSensors,
+      const std::vector<Measurements::CCorrelation::SResult> &correlations);
 
 private:
   FileWriter file_;
@@ -64,11 +67,12 @@ inline void CExport::SetApplicationName(const std::string &name)
   pExportObj_->SetApplicationName(name);
 }
 
-inline bool CExport::FullExport(const std::vector<MeasurementItem> &config,
-                                const FullMeasurement data,
-                                const AllSensors &allSensors)
+inline bool CExport::FullExport(
+    const std::vector<MeasurementItem> &config, const FullMeasurement data,
+    const AllSensors &allSensors,
+    const std::vector<Measurements::CCorrelation::SResult> &correlations)
 {
-  return pExportObj_->FullExport(config, data, allSensors);
+  return pExportObj_->FullExport(config, data, allSensors, correlations);
 }
 
 } // namespace Exports

@@ -22,7 +22,9 @@ public:
   //         &measuredProcesses);
 
   bool FullExport(const std::vector<MeasurementItem> &config,
-                  const FullMeasurement data, const AllSensors &allSensors);
+                  const FullMeasurement data, const AllSensors &allSensors,
+                  const std::vector<Measurements::CCorrelation::SResult>
+                      &correlationResults);
 
 private:
   // Static info based on the host system
@@ -31,6 +33,8 @@ private:
   void PrintCacheInfo();
   void PrintPcieInfo();
   void PrintThresholds(const AllSensors &allSensors);
+  void PrintCorrelations(const std::vector<Measurements::CCorrelation::SResult>
+                             &correlationResults);
   std::string GetTotalTime(const FullMeasurement &fullMeasurement)
   {
     if (fullMeasurement->empty())

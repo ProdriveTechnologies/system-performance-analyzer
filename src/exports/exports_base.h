@@ -6,6 +6,8 @@
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/json_config/sensor_config/config.h"
 
+#include "src/benchmarks/analysis/correlation.h"
+
 namespace Exports
 {
 using FullMeasurement = std::vector<Exports::ExportData> *;
@@ -28,9 +30,10 @@ public:
   // InitExport(const std::vector<PlatformConfig::SDatafields> &config) = 0;
   // virtual std::string ParseData(const ExportData &data) = 0;
   // virtual std::string FinishExport() = 0;
-  virtual bool FullExport(const std::vector<MeasurementItem> &config,
-                          const FullMeasurement data,
-                          const Measurements::AllSensors &allSensors) = 0;
+  virtual bool FullExport(
+      const std::vector<MeasurementItem> &config, const FullMeasurement data,
+      const Measurements::AllSensors &allSensors,
+      const std::vector<Measurements::CCorrelation::SResult> &correlations) = 0;
 
 protected:
   std::string filename_;

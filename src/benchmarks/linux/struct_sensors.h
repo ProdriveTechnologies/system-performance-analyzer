@@ -169,7 +169,7 @@ struct AllSensors
       if (!allPipelines.empty())
         return allPipelines;
     }
-    throw std::runtime_error("Couldn't find sensor in map!");
+    return {};
   }
 
   /**

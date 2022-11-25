@@ -41,8 +41,10 @@ std::string CJson::FinishExport()
   return ""; // Don't have anything to write when finishing
 }
 
-bool CJson::FullExport(const std::vector<MeasurementItem> &config,
-                       const FullMeasurement data, const AllSensors &allSensors)
+bool CJson::FullExport(
+    const std::vector<MeasurementItem> &config, const FullMeasurement data,
+    const AllSensors &allSensors,
+    const std::vector<Measurements::CCorrelation::SResult> &correlations)
 {
   std::string labels;
   nlohmann::json jsonObject;
