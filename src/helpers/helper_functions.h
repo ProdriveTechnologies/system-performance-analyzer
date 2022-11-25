@@ -43,7 +43,9 @@ inline bool isNumber(const std::string &str)
     if (std::isdigit(c) == 0)
       return false;
   }
-  return true;
+  if (!str.empty())
+    return true;
+  return false;
 }
 
 std::vector<std::string> Split(const std::string &text, char delimiter);
@@ -100,8 +102,8 @@ std::vector<VectorType> CombineVectors(const std::vector<VectorType> &a,
   return ab;
 }
 
-void replaceStr(std::string &data, const std::string &toReplace,
-                const std::string &replacementStr);
+void replaceStr(std::string &data, const std::string toReplace,
+                const std::string replacementStr);
 
 int DecimalsToInt(const std::string &data, const unsigned int decimals);
 

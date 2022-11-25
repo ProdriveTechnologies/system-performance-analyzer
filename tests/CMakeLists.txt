@@ -20,7 +20,8 @@ add_executable(
     ../src/benchmarks/analysis/correlation.cpp
     ../src/helpers/helper_functions.cpp
     ../src/benchmarks/linux/struct_sensors.cpp
-     ../src/benchmarks/linux/synchronizer.cpp
+
+    # ../src/benchmarks/linux/synchronizer.cpp
 )
 target_compile_features(tests PRIVATE cxx_std_17)
 target_link_libraries(

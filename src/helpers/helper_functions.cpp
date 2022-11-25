@@ -1,6 +1,7 @@
 #include "helper_functions.h"
 
 #include <fstream>
+
 namespace Helpers
 {
 bool FileExists(const std::string &fileName)
@@ -43,8 +44,8 @@ std::vector<const char *> ToCString(const std::vector<std::string> &text)
   return cStr;
 }
 
-void replaceStr(std::string &data, const std::string &toReplace,
-                const std::string &replacementStr)
+void replaceStr(std::string &data, const std::string toReplace,
+                const std::string replacementStr)
 {
   size_t pos = data.find(toReplace);
 
@@ -67,10 +68,10 @@ void replaceStr(std::string &data, const std::string &toReplace,
  */
 int DecimalsToInt(const std::string &data, const unsigned int decimals)
 {
-  if (data.size() == 0)
+  if (data.size() == 0 || decimals == 0)
     return 0;
 
-  size_t largestIndex = data.size() - 1 < decimals ? data.size() - 1 : decimals;
+  size_t largestIndex = data.size() < decimals ? data.size() : decimals;
 
   return std::stoi(data.substr(0, largestIndex));
 }

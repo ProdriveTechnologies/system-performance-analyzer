@@ -2,6 +2,10 @@
 
 #include "src/benchmarks/analysis/correlation.h"
 
+void AddPoints(
+    std::vector<Measurements::SMeasurementsData> *alldata,
+    Measurements::SMeasuredItem item1,
+    Measurements::SMeasuredItem item2 = Measurements::SMeasuredItem{});
 /**
  * @brief Test the correlation function for perfectly correlated vectors
  *
@@ -45,4 +49,54 @@ TEST(Correlation, LowCorrelation)
   auto res = correlation.GetCorrelationCoefficient(data, data2);
   EXPECT_GT(res, -0.5);
   EXPECT_LT(res, 0.5);
+}
+
+/**
+ * @brief Test the correlation function for non/barely correlated vectors
+ *
+ */
+TEST(Correlation, CorrelationFull)
+{
+  Measurements::AllSensors allsensors;
+  Measurements::Sensors sensor{"name", 1,
+                               PlatformConfig::Class::PIPELINE_MEASUREMENTS};
+  sensor.performanceIndicator = true;
+  Measurements::Sensors sensor2{"name", 2};
+  sensor2.performanceIndicator = false;
+
+  std::vector<Measurements::SMeasurementsData> alldata;
+  using _Item = Measurements::SMeasuredItem;
+
+  for (size_t i = 0; i < 25; i++)
+  {
+    auto i_d = static_cast<double>(i);
+    // Remove half of the values for the 2nd item, to see whether the
+    // correlation function can handle unequal vector lengths
+    if (i % 2 == 0)
+      AddPoints(&alldata, _Item{1, i_d}, _Item{2, i_d * 3});
+    else
+      AddPoints(&alldata, _Item{1, i_d});
+  }
+
+  allsensors.AddSensors(Measurements::Classification::PIPELINE,
+                        {sensor, sensor2});
+
+  auto res = Measurements::CCorrelation::GetCorrelation(allsensors, &alldata);
+
+  EXPECT_EQ(res.size(), 1);
+  EXPECT_EQ(res.at(0).correlation, 1);
+}
+
+void AddPoints(std::vector<Measurements::SMeasurementsData> *alldata,
+               Measurements::SMeasuredItem item1,
+               Measurements::SMeasuredItem item2)
+{
+  using _Item = Measurements::SMeasuredItem;
+  Measurements::SMeasurementsData data;
+  if (item2.id != -1)
+    data.AddMeasurements(Measurements::Classification::PIPELINE,
+                         {item1, item2});
+  else
+    data.AddMeasurements(Measurements::Classification::PIPELINE, {item1});
+  alldata->push_back(data);
 }
