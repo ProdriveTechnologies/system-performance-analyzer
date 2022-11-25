@@ -48,7 +48,18 @@ inline void from_json(const nlohmann::json &j, SDatafields &p)
   if (j.contains("minimum"))
     j.at("minimum").get_to(p.minimumValue);
   if (j.contains("show_in_live"))
-    j.at("show_in_live").get_to(p.showInLive);
+  {
+    if (!j.contains("maximum"))
+    {
+      CLogger::Log(CLogger::Types::WARNING,
+                   "Live mode requires a maximum for metric: " + p.name +
+                       " , live mode disabled!");
+    }
+    else
+    {
+      j.at("show_in_live").get_to(p.showInLive);
+    }
+  }
 }
 
 inline void from_json(const nlohmann::json &j, SConfig &p)

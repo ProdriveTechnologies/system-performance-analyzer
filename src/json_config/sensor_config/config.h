@@ -75,7 +75,7 @@ struct SDatafields
   bool showInLive = false;
 
   double maximumValue = -1.0;
-  double minimumValue = -1.0;
+  double minimumValue = 0;
 
   // Required for type: PROC or DIRECT
   std::string path;
