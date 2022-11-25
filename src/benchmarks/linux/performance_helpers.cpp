@@ -50,7 +50,7 @@ GetSummarizedData(const std::vector<Exports::ExportData> *data,
 Measurements::Sensors
 GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
                         const std::unordered_set<int> uniqueIds,
-                        const GStreamer::MeasureType type)
+                        const GStreamer::MeasureType type, const int pipelineId)
 {
   Measurements::CSummarizeData summarizedData;
   // This is the loop for each measurement
@@ -59,6 +59,8 @@ GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
     // This is the loop for the datapoints, only the uniqueId datapoint is used
     for (const auto &e2 : e.pipelineInfo)
     {
+      if (e2.pipelineId != pipelineId)
+        continue;
       for (const auto &e3 : e2.measuredItems)
       {
         if (uniqueIds.find(e3.id) != uniqueIds.end())

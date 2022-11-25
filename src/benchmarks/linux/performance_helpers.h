@@ -21,7 +21,8 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
 Measurements::Sensors
 GetGstCategoriesSummary(const std::vector<Exports::ExportData> *data,
                         const std::unordered_set<int> uniqueIds,
-                        const GStreamer::MeasureType type);
+                        const GStreamer::MeasureType type,
+                        const int pipelineId);
 
 Measurements::SensorData
 GetSummarizedDataSensors(const std::vector<Exports::ExportData> *data,

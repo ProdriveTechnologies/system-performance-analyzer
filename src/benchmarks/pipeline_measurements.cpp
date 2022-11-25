@@ -159,7 +159,7 @@ CPipelineMeasurements::GetSensors() const
     {
       auto uniqueIdsSet = GetUniqueIdsByType(type);
       sensorGroup.sensors.push_back(PerformanceHelpers::GetGstCategoriesSummary(
-          allData_, uniqueIdsSet, type));
+          allData_, uniqueIdsSet, type, pipeline.first));
     }
     result.push_back(sensorGroup);
   }
