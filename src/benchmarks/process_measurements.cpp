@@ -95,11 +95,12 @@ std::vector<AllSensors::SensorGroups> CProcessMeasurements::GetSensors() const
   for (const auto &e : processIds_)
   {
     AllSensors::SensorGroups sensorGroup;
-    sensorGroup.processId = e.processId;
+    sensorGroup.processId = e.userProcessId;
 
     for (const auto &datafield : measureFieldsDefinition_)
     {
       Sensors sensor{datafield};
+      sensor.uniqueId = dataHandler_.GetUniqueId(e.processId, datafield.id);
       sensor.data = PerformanceHelpers::GetSummarizedDataProcesses(
           allData_, datafield.id);
 
@@ -134,8 +135,9 @@ void CProcessMeasurements::SetProcesses()
 {
   for (const auto &process : processes_)
   {
-    processIds_.push_back(
-        ProcessDef{process->GetThreadPid(), process->GetProcessName(), true});
+    processIds_.push_back(ProcessDef{process->GetThreadPid(),
+                                     process->GetProcessName(), true,
+                                     process->GetUserProcessId()});
   }
 }
 
@@ -158,7 +160,8 @@ std::vector<Exports::ProcessInfo> CProcessMeasurements::GetMeasurements()
     Exports::ProcessInfo processData;
     processData.pipelineId = process.processId;
     auto pidReplacement = std::to_string(process.processId);
-    auto returnSuccess = dataHandler_.ParseMeasurements(pidReplacement);
+    auto returnSuccess =
+        dataHandler_.ParseMeasurements(pidReplacement, process.processId);
     if (returnSuccess)
     {
       processData.measuredItems = dataHandler_.GetMeasurements();

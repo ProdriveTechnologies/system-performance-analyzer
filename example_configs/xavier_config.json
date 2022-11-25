@@ -293,13 +293,14 @@ System resource usage values: 1
         },
         /*******************************************/
         /**
-        * @brief EMC information
+        * @brief Different sensors
         */
         {
             "name": "Encoder 1 frequency",
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/bpmp/debug/clk/nvenc/rate",
+            "enabled_path": "/sys/kernel/debug/clk/nvenc/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -308,6 +309,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/bpmp/debug/clk/nvenc1/rate",
+            "enabled_path": "/sys/kernel/debug/clk/nvenc1/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -316,6 +318,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/bpmp/debug/clk/nvdec/rate",
+            "enabled_path": "/sys/kernel/debug/clk/nvdec/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -324,6 +327,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/bpmp/debug/clk/nvdec1/rate",
+            "enabled_path": "/sys/kernel/debug/clk/nvdec1/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -332,6 +336,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/bpmp/debug/clk/nvjpg/rate",
+            "enabled_path": "/sys/kernel/debug/clk/nvjpg/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -340,6 +345,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/clk/vic/clk_rate",
+            "enabled_path": "/sys/kernel/debug/clk/vic/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -348,6 +354,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/vic/actmon_avg_norm",
+            "enabled_path": "",
             "suffix": ""
         },
         {
@@ -355,6 +362,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/clk/dla0_core/clk_rate",
+            "enabled_path": "/sys/kernel/debug/clk/dla0_core/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -363,6 +371,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/clk/dla1_core/clk_rate",
+            "enabled_path": "/sys/kernel/debug/clk/dla1_core/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -371,6 +380,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/clk/pva0_vps0/clk_rate",
+            "enabled_path": "/sys/kernel/debug/clk/pva0_vps0/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -379,6 +389,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/clk/pva1_vps0/clk_rate",
+            "enabled_path": "/sys/kernel/debug/clk/pva1_vps0/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },
@@ -387,6 +398,7 @@ System resource usage values: 1
             "class": 1,
             "type": "DIRECT",
             "path": "/sys/kernel/debug/clk/cvnas/clk_rate",
+            "enabled_path": "/sys/kernel/debug/clk/cvnas/clk_enable_count",
             "suffix": "Mhz",
             "multiplier": 0.000001
         },

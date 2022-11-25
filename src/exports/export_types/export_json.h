@@ -13,16 +13,13 @@ namespace Exports
 class CJson : public CBase
 {
 public:
-  std::string
-  InitExport(const std::vector<PlatformConfig::SDatafields> &config);
-  std::string InitExport(const std::vector<PipelineConfig> &config);
   std::string ParseData(const ExportData &data);
   std::string ParseData(const std::string &time,
                         const std::vector<PipelineInfo> &data);
   std::string ParseDataPipeline(const std::vector<MeasuredItem> &items);
   std::string ParseData(const std::string &timeStr,
                         const std::vector<MeasuredItem> &items);
-  std::string FinishExport();
+
   bool FullExport(
       const std::vector<MeasurementItem> &config, const FullMeasurement data,
       const AllSensors &allSensors,

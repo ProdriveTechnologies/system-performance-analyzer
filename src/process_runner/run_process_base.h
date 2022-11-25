@@ -21,6 +21,7 @@ public:
   virtual void StartThread(const std::string &command) = 0;
 
   void ChildWaitProcess();
+  int GetUserProcessId() const { return userProcessInfo_.processId; }
 
 protected:
   Synchronizer *processSync_;

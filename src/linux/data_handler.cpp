@@ -1,5 +1,6 @@
 #include "data_handler.h"
 
+#include "src/benchmarks/linux/performance_helpers.h"
 namespace Linux
 {
 /**
@@ -39,7 +40,8 @@ void CDataHandler::Initialize(
   }
 }
 
-bool CDataHandler::ParseMeasurements(const std::string &replacement)
+bool CDataHandler::ParseMeasurements(const std::string &replacement,
+                                     const int masterId)
 {
   lastMeasurements_ = std::vector<Exports::MeasuredItem>{};
 
@@ -53,7 +55,7 @@ bool CDataHandler::ParseMeasurements(const std::string &replacement)
   }
 
   // Loop through all measurement fields
-  for (const auto &e : datafields_)
+  for (auto e : datafields_)
   {
     auto parser = parsers_.find(e.type);
     if (parser == parsers_.end())
@@ -64,6 +66,8 @@ bool CDataHandler::ParseMeasurements(const std::string &replacement)
       Helpers::replaceStr(correctedPath, parser->second.replacementTag,
                           replacement);
 
+    auto uniqueId = masterId > 0 ? CreateUniqueId(masterId, e.id) : e.id;
+    e.id = uniqueId;
     bool isSuccesful = parser->second.parserObj->ParseMeasurement(
         e, correctedPath, replacement);
     if (!isSuccesful)
@@ -71,6 +75,41 @@ bool CDataHandler::ParseMeasurements(const std::string &replacement)
     lastMeasurements_.push_back(parser->second.parserObj->GetMeasurement());
   }
   return true;
+}
+
+/**
+ * @brief Adds the unique ID from the map if it doesnt exist, else it just
+ * returns the existing unique id
+ *
+ * @param masterId
+ * @param datafieldId
+ * @return int
+ */
+int CDataHandler::CreateUniqueId(const int masterId, const int datafieldId)
+{
+  auto uniqueIdMap = uniqueIds_.find(SIdentifier{masterId, datafieldId});
+  if (uniqueIdMap != uniqueIds_.end())
+  {
+    return uniqueIdMap->second;
+  }
+  else
+  {
+    int uniqueId = PerformanceHelpers::GetUniqueId();
+    uniqueIds_.insert(
+        std::make_pair(SIdentifier{masterId, datafieldId}, uniqueId));
+    return uniqueId;
+  }
+}
+
+int CDataHandler::GetUniqueId(const int masterId, const int datafieldId) const
+{
+  auto uniqueIdMap = uniqueIds_.find(SIdentifier{masterId, datafieldId});
+  if (uniqueIdMap != uniqueIds_.end())
+  {
+    return uniqueIdMap->second;
+  }
+  else
+    throw std::runtime_error("Could not find the unique id!");
 }
 
 } // namespace Linux

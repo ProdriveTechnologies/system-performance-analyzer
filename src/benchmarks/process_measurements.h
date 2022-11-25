@@ -51,6 +51,7 @@ private:
     int processId;
     std::string name;
     bool active = false;
+    int userProcessId;
   };
   std::vector<Linux::RunProcess *> processes_;
   std::string configFile_;

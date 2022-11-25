@@ -11,16 +11,9 @@ namespace Exports
 class CCsv : public CBase
 {
 public:
-  std::string
-  InitExport(const std::vector<PlatformConfig::SDatafields> &config);
-  std::string InitExport(const std::vector<PipelineConfig> &config);
-  std::string ParseData(const ExportData &data);
-  std::string ParseData(const std::string &time,
-                        const std::vector<PipelineInfo> &data);
-  std::string ParseDataPipeline(const std::vector<MeasuredItem> &items);
   std::string ParseData(const std::string &timeStr,
+                        const std::vector<Measurements::Sensors> &allSensors,
                         const std::vector<MeasuredItem> &items);
-  std::string FinishExport();
   bool FullExport(
       const std::vector<MeasurementItem> &config, const FullMeasurement data,
       const AllSensors &allSensors,
@@ -47,7 +40,7 @@ private:
   std::string InitPipelineConfig(
       const size_t pipelineId,
       const std::unordered_map<int, GStreamer::Identifier> &items);
-  std::string ParseLabel(const MeasurementItem &item);
+  std::string ParseLabel(const std::vector<Measurements::Sensors> &sensors);
 };
 
 } // namespace Exports

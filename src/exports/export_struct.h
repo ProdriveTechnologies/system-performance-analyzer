@@ -20,14 +20,35 @@ struct Process
 };
 struct MeasuredItem
 {
-  int id;
-  double measuredValue;
+  int id = -1;
+  double measuredValue = -1.0;
 };
+static inline MeasuredItem
+FindMeasuredItem(const std::vector<MeasuredItem> &items, const int id)
+{
+  for (const auto &e : items)
+  {
+    if (e.id == id)
+      return e;
+  }
+  return {};
+}
+
 struct PipelineInfo
 {
   int pipelineId;
   std::vector<MeasuredItem> measuredItems;
 };
+inline std::vector<MeasuredItem>
+GetMeasuredItems(const std::vector<PipelineInfo> &data)
+{
+  std::vector<MeasuredItem> resultVec;
+  for (const auto &e : data)
+  {
+    resultVec = Helpers::CombineVectors(resultVec, e.measuredItems);
+  }
+  return resultVec;
+}
 using ProcessInfo = PipelineInfo;
 struct PipelineConfig
 {

@@ -52,23 +52,53 @@ public:
   /**
    * @brief Reads the measurements
    *
-   * @param replacement
+   * @param replacement optional replacement for the replacementTag that is
+   * configured (during Initialization)
    * @return true getting the measurements was succesful
    * @return false getting the measurements failed!
    */
-  bool ParseMeasurements(const std::string &replacement = "");
+  bool ParseMeasurements(const std::string &replacement = "",
+                         const int masterId = -1);
 
   std::vector<Exports::MeasuredItem> GetMeasurements() const
   {
     return lastMeasurements_;
   }
 
+  int GetUniqueId(const int masterId, const int datafieldId) const;
+
 private:
+  struct SIdentifier
+  {
+    int masterId;
+    int datafieldId;
+    inline size_t operator==(const SIdentifier &k) const
+    {
+      return k.masterId == masterId && k.datafieldId == datafieldId;
+    }
+    /**
+     * @brief hash function for SIdentifier (uses a Cantor Pairing function)
+     *
+     * @param k the parameters should be >= 0
+     * @return size_t
+     */
+    inline size_t operator()(const SIdentifier &k) const
+    {
+      // The function for Cantor Pairing according to
+      // https://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way
+      return (k.masterId + k.datafieldId) * (k.masterId + k.datafieldId + 1) /
+                 2 +
+             k.masterId;
+    }
+  };
+
   std::unordered_map<PlatformConfig::Types, Config> parsers_;
   std::vector<Config> configuration_;
   std::vector<PlatformConfig::SDatafields> datafields_;
+  std::unordered_map<SIdentifier, int, SIdentifier> uniqueIds_;
 
   std::vector<Exports::MeasuredItem> lastMeasurements_;
+  int CreateUniqueId(const int masterId, const int datafieldId);
 };
 
 std::unordered_map<PlatformConfig::Types, Linux::CDataHandler::Config>

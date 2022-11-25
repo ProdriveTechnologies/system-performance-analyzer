@@ -8,11 +8,6 @@
 
 namespace Exports
 {
-std::string
-CJson::InitExport(const std::vector<PlatformConfig::SDatafields> &config)
-{
-  return "";
-}
 std::string CJson::ParseData(const ExportData &data) { return ""; }
 
 std::string CJson::ParseData(const std::string &time,
@@ -34,11 +29,6 @@ std::string CJson::ParseData(const std::string &timeStr,
                              const std::vector<MeasuredItem> &items)
 {
   return "";
-}
-
-std::string CJson::FinishExport()
-{
-  return ""; // Don't have anything to write when finishing
 }
 
 bool CJson::FullExport(

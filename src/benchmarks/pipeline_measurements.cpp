@@ -147,6 +147,7 @@ CPipelineMeasurements::GetSensors() const
       std::string sensorName =
           CreateSensorName(e.first.moduleName, e.first.type);
       Measurements::Sensors sensor{sensorName, e.second};
+      sensor.measuredRaw = true;
 
       sensor.performanceIndicator = GetPerformanceIndicator(e.first.type);
       sensor.SetDataInfo(GetMeasureType(e.first.type));
