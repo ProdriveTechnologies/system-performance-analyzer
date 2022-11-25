@@ -88,8 +88,10 @@ CCorrelation::CreateEqualSizedVectors(
   auto resultSystem = GetSensors(
       allSensors, Measurements::Classification::SYSTEM, isPerformanceMetric);
 
-  // Loop through all the sensors and add all the values
-  for (auto &sensor : resultSystem)
+  allSensors.GetSensorGroups(c)
+
+      // Loop through all the sensors and add all the values
+      for (auto &sensor : resultSystem)
   {
     // Loop through all the raw measurements and add them to the correct sensor
     for (auto &measurement : *measuredData)
@@ -106,6 +108,7 @@ CCorrelation::CreateEqualSizedVectors(
     }
   }
 
+  // CreateEqualSizedVector(allSensors.GetMap);
   // Loop through all the sensors and add all the values
   for (auto &sensor : resultPipeline)
   {
@@ -125,6 +128,11 @@ CCorrelation::CreateEqualSizedVectors(
         // Stop checking the other pipelines if found
         if (resMeasurement.isMeasured)
           break;
+      }
+      if (!resMeasurement.isMeasured)
+      {
+        // TODO add the not started functionality here
+        // if (measurement.time < resultPipeline)
       }
       sensor.rawMeasurements.push_back(resMeasurement);
     }

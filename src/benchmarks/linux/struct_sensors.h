@@ -124,6 +124,7 @@ struct SensorIdHash
  */
 struct AllSensors
 {
+  std::vector<Classification> allClasses;
   struct SensorGroups
   {
     int processId; // Only used for Classification::PIPELINE and
@@ -227,10 +228,13 @@ struct AllSensors
         AddMapValues(&mapByProcessId, &e.sensors, e.processId);
     }
   }
-  // std::unordered_map<std::string, Measurements::Sensors *> GetMap() const
-  // {
-  //   return mapByNameId;
-  // }
+  std::vector<SensorGroups> GetSensorGroups(const Classification classification)
+  {
+    auto sensorGroup = data.find(classification);
+    if (sensorGroup == data.end())
+      return {};
+    return sensorGroup->second;
+  }
   SensorMap GetMap(const int processId) const
   {
     auto mapResult = mapByProcessId.find(processId);
