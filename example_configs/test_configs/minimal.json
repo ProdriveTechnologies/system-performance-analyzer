@@ -1,0 +1,59 @@
+{
+    "name": "Minimal test configuration",
+    "description": "This test configuration is made to work with the \"minimal_linux\" sensor config",
+    "id": 1,
+    "version": "1",
+    "limits": {},
+    "thresholds": [
+        {
+            "name": "CPU utilization",
+            "type": "minimum",
+            "sign": "<",
+            "threshold": 40
+        },
+        {
+            "process_id": 1,
+            "name": "fps",
+            "type": "average",
+            "sign": ">",
+            "threshold": 30
+        }
+    ],
+    "settings": {
+        "measure_loop_ms": 1000,
+        "verbose": false,
+        "enable_logs": true,
+        "enable_proctime": false,
+        "enable_livemode": false,
+        "exports": [
+            {
+                "export_type": "json",
+                "enabled": true,
+                "filename": "minimaltest.json"
+            },
+            {
+                "export_type": "graphs",
+                "enabled": false,
+                "foldername": "graphs/"
+            },
+            {
+                "export_type": "terminal",
+                "enabled": true,
+                "filename": ""
+            }
+        ]
+    },
+    "processes": [
+        {
+            "id": 1,
+            "type": "gstreamer",
+            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! queue  ! fakesink sync=true"
+        },
+        {
+            "id": 2,
+            "type": "linux_command",
+            "command": "/usr/bin/sleep 5",
+            "start_delay": 2000
+        }
+    ]
+}

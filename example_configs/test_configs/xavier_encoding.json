@@ -1,0 +1,63 @@
+{
+    "name": "Encoding test for the NVIDIA Jetson AGX Xavier",
+    "description": "4x encoding test (1080p), 2 processes",
+    "id": 1,
+    "version": "1",
+    "thresholds": [
+        {
+            "process_id": 1,
+            "name": "fps",
+            "type": "minimum",
+            "sign": ">",
+            "threshold": 10
+        },
+        {
+            "process_id": 2,
+            "name": "fps",
+            "type": "minimum",
+            "sign": ">",
+            "threshold": 30
+        },
+        {
+            "name": "CPU utilization",
+            "type": "average",
+            "sign": "<",
+            "threshold": 100
+        }
+    ],
+    "settings": {
+        "measure_loop_ms": 1000,
+        "enable_logs": true,
+        "enable_proctime": false,
+        "enable_livemode": false,
+        "exports": [
+            {
+                "export_type": "json",
+                "enabled": true,
+                "filename": "encoding.json"
+            },
+            {
+                "export_type": "graphs",
+                "enabled": false,
+                "foldername": "graphs/"
+            },
+            {
+                "export_type": "terminal",
+                "enabled": true,
+                "filename": ""
+            }
+        ]
+    },
+    "processes": [
+        {
+            "id": 1,
+            "type": "gstreamer",
+            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! nvvidconv ! video/x-raw(memory:NVMM),format=I420 ! queue  ! tee name=t4k t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output1.mp4 t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output2.mp4 t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output3.mp4 t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output4.mp4"
+        },
+        {
+            "id": 2,
+            "type": "gstreamer",
+            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! nvvidconv ! video/x-raw(memory:NVMM),format=I420 ! queue  ! tee name=t4k t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output1.mp4 t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output2.mp4 t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output3.mp4 t4k. ! queue ! nvv4l2h264enc maxperf-enable=true vbv-size=160000000 control-rate=1 bitrate=100000000 ! queue ! h264parse ! qtmux ! queue !  filesink async=false location=output4.mp4"
+        }
+    ]
+}

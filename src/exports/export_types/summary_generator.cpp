@@ -67,10 +67,16 @@ void CSummaryGenerator::PrintThresholds(const AllSensors &allSensors)
     {
       if (sensor.second->thresholdExceeded)
       {
-        SummaryWriter::PrintRow(
-            "Threshold for " + sensor.second->userId +
-            " was exceeded for process id: " + std::to_string(processId) +
-            ". The values were: " + PrintValues(sensor.second->data));
+        // Create the string to show the threshold to the user
+        std::string thresholdStr =
+            "Threshold for " + sensor.second->userId + " was exceeded";
+        if (processId >= 0)
+          thresholdStr += " for process id: " + std::to_string(processId);
+        thresholdStr +=
+            ". The values were: " + PrintValues(sensor.second->data);
+
+        // Print the string to the user
+        SummaryWriter::PrintRow(thresholdStr);
         exceeded = true;
       }
     }

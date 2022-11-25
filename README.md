@@ -23,7 +23,13 @@ To build and execute the tests, execute the following steps:
 
 ## Execution
 
-To execute the tool, two configuration files are necessary. One is the configuration of the metrics that are measured, the other contains the configuration of the test. Examples of these files can be found in `example_configs/`. The `example_configs/laptop_config` can be used on most systems for a default metrics configuration. The `example_configs/simple_test.json` can be used as a simple test. To execute a test with these files, copy these files to the build folder and execute the SPA tool with the command: `./spa -c simple_test.json -s laptop_config`. More information about the supported parameters for the tool can be found by executing: `./spa -h` or `./spa --help`.
+To execute the tool, two configuration files are necessary. One is the configuration of the metrics that are measured, the other contains the configuration of the test. Examples of these files can be found in `example_configs/`. The sensor configuration `example_configs/sensor_configs/linux_config.json` can be used on most systems for a default metrics configuration. The `example_configs/test_configs/minimal.json` can be used as a simple test. 
+
+To execute a test with these files, execute the following steps:
+
+1. Enter the build folder: `cd build`
+2. If the sources are not build yet, execute the [Installation steps](#Installation)
+3. Execute a test: `./spa -c ../example_configs/minimal.json -s ../example_configs/minimal_linux.json` 
 
 In [Section Configuration](#configuration)), the test and metrics files are described how they can be configured for custom systems. 
 

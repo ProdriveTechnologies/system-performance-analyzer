@@ -11,7 +11,6 @@ int VerifyArguments(const bool incorrectArgs, const int argc,
 /**
  * @brief Prints info when a wrong command is inserted or with parameter -h or
  * --help
- *
  */
 void print_info()
 {

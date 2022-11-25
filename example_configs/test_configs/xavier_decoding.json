@@ -1,0 +1,42 @@
+{
+    "name": "Decoding test for the AGX Xavier",
+    "description": "4x decoding test (1080p), 2 processes",
+    "id": 1,
+    "version": "0.1",
+    "thresholds": [],
+    "settings": {
+        "measure_loop_ms": 1000,
+        "enable_logs": true,
+        "enable_proctime": false,
+        "enable_livemode": false,
+        "exports": [
+            {
+                "export_type": "json",
+                "enabled": true,
+                "filename": "decoding.json"
+            },
+            {
+                "export_type": "graphs",
+                "enabled": false,
+                "foldername": "graphs/"
+            },
+            {
+                "export_type": "terminal",
+                "enabled": true,
+                "filename": ""
+            }
+        ]
+    },
+    "processes": [
+        {
+            "id": 1,
+            "type": "gstreamer",
+            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! nvvidconv ! queue  ! tee name=t4k t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true"
+        },
+        {
+            "id": 2,
+            "type": "gstreamer",
+            "command": "videotestsrc num-buffers=2000 is-live=true ! video/x-raw, width=1920, height=1080, format=I420, framerate=60/1 ! nvvidconv ! queue  ! tee name=t4k t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true t4k. ! queue ! nvv4l2decoder capture-io-mode=mmap ! fakesink sync=true"
+        }
+    ]
+}

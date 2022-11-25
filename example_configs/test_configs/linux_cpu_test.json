@@ -1,0 +1,68 @@
+/**
+ * @note This example requires the CPU stress tester: stress
+ * Install by doing (using apt-get): sudo apt-get install stress
+ */
+{
+    "name": "Case study test",
+    "description": "Test which executes the pipelines of the case study",
+    "id": 1,
+    "version": "1.0",
+    "thresholds": [
+        {
+            "name": "CPU utilization per core0",
+            "type": "average",
+            "sign": ">=",
+            "threshold": 0
+        },
+        {
+            "name": "CPU utilization",
+            "type": "average",
+            "sign": "<",
+            "threshold": 100.0
+        }
+    ],
+    "settings": {
+        "measure_loop_ms": 1000,
+        "verbose": false,
+        "enable_logs": true,
+        "enable_proctime": false,
+        "enable_livemode": false,
+        "exports": [
+            {
+                "export_type": "json",
+                "enabled": true,
+                "filename": "linux_cpu_test.json"
+            },
+            {
+                "export_type": "graphs",
+                "enabled": true,
+                "foldername": "graphs/"
+            },
+            {
+                "export_type": "terminal",
+                "enabled": true,
+                "filename": ""
+            }
+        ]
+    },
+    "processes": [
+        {
+            "id": 1,
+            "type": "linux_command",
+            "command": "/usr/bin/stress -c 2 --timeout 15s",
+            "start_delay": 0
+        },
+        {
+            "id": 2,
+            "type": "linux_command",
+            "command": "/usr/bin/stress -i 2 --timeout 15s",
+            "start_delay": 1000
+        },
+        {
+            "id": 3,
+            "type": "linux_command",
+            "command": "/usr/bin/stress -c 4 --timeout 15s",
+            "start_delay": 2000
+        }
+    ]
+}

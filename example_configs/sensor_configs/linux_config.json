@@ -1,0 +1,100 @@
+{
+    "name": "Linux VM",
+    "sensors": [
+        {
+            "name": "cpu",
+            "type": "ARRAY",
+            "size": 16,
+            "data": [
+                {
+                    "name": "cooling",
+                    "id": "cooling",
+                    "type": "DIRECT",
+                    "path": "/sys/class/thermal/cooling_device$INDEX$/cur_state",
+                    "suffix": "",
+                    "multiplier": 3.8
+                },
+                {
+                    "name": "CPU utilization per core",
+                    "id": "cpu",
+                    "type": "PROC",
+                    "value": "all_excl_idle",
+                    "compared_to": "all",
+                    "path": "cpu$INDEX$",
+                    "suffix": "%",
+                    "multplier": 100
+                },
+                {
+                    "name": "CPU IO time",
+                    "type": "PROC",
+                    "value": "iowait",
+                    "compared_to": "all",
+                    "path": "cpu$INDEX$",
+                    "multplier": 100,
+                    "suffix": "%"
+                }
+            ]
+        },
+        {
+            "name": "CPU utilization",
+            "class": 1,
+            "type": "PROC",
+            "compared_to": "all",
+            "value": "all_excl_idle",
+            "path": "cpu",
+            "multiplier": 100,
+            "suffix": "%"
+        },
+        {
+            "name": "CPU IO time",
+            "class": 1,
+            "id": "cpu-io", // Must be an unique identifier
+            "type": "PROC",
+            "compared_to": "all",
+            "value": "iowait",
+            "path": "cpu",
+            "multiplier": 100,
+            "suffix": "%"
+        },
+        {
+            "name": "Memory free",
+            "class": 1,
+            "type": "PROCMEM",
+            "value": "MemFree",
+            "multiplier": 0.001,
+            "suffix": "MB"
+        },
+        {
+            "name": "Memory utilization",
+            "class": 1,
+            "type": "PROCMEM",
+            "value": "MemFree",
+            "compared_to": "MemTotal",
+            "multiplier": 100,
+            "suffix": "%"
+        },
+        {
+            "name": "Size",
+            "class": 1,
+            "type": "PIDSTATM",
+            "path": "/proc/$PID$/stat",
+            "value": "size",
+            "multiplier": 4096, // Page size is often 4k, retrievable by "getconf PAGE_SIZE"
+            "suffix": "KB"
+        },
+        {
+            "name": "usertime",
+            "type": "PIDSTAT",
+            "path": "/proc/$PID$/stat",
+            "value": "utime",
+            "suffix": "clock ticks"
+        },
+        {
+            "name": "kerneltime",
+            "type": "PIDSTAT",
+            "path": "/proc/$PID$/stat",
+            "value": "stime",
+            "suffix": "clock ticks"
+        }
+    ]
+}

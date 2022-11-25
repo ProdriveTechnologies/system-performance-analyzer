@@ -1,9 +1,6 @@
-/** Classification:
-System resource usage values: 1
-
-*/
 {
     "name": "Jetson AGX Xavier",
+    "description": "Configuration for the sensors on the AGX Xavier",
     "sensors": [
         {
             "name": "cpu",

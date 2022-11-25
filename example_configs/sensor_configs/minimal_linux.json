@@ -1,23 +1,12 @@
-/** Classification:
-System resource usage values: 1
-
-*/
 {
-    "name": "Windows VM",
+    "name": "Minimal config",
+    "description": "Configuration which only depends on Linux path locations that nearly almost exist",
     "sensors": [
         {
             "name": "cpu",
             "type": "ARRAY",
             "size": 16,
             "data": [
-                {
-                    "name": "cooling",
-                    "id": "cooling",
-                    "type": "DIRECT",
-                    "path": "/sys/class/thermal/cooling_device$INDEX$/cur_state",
-                    "suffix": "",
-                    "multiplier": 3.8
-                },
                 {
                     "name": "CPU utilization per core",
                     "id": "cpu",
@@ -77,15 +66,6 @@ System resource usage values: 1
             "multiplier": 100,
             "suffix": "%"
         },
-        // {
-        //     "name": "Priority",
-        //     "class": 1,
-        //     "type": "PIDSTAT",
-        //     "path": "/proc/$PID$/stat",
-        //     "value": "priority",
-        //     "compared_to": "stime",
-        //     "suffix": "%"
-        // },
         {
             "name": "Size",
             "class": 1,
