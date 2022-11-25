@@ -68,6 +68,7 @@ struct SSettings
   std::vector<SExports> exports;
   bool enableProcTime = false;
   bool enableLiveMode = false;
+  bool enablePretestZeroes = false; // Used for better bottleneck detection
 };
 struct SConfig
 {

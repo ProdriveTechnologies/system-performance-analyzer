@@ -83,6 +83,9 @@ inline void from_json(const nlohmann::json &j, SSettings &p)
   if (j.contains("enable_livemode"))
     j.at("enable_livemode").get_to(p.enableLiveMode);
 
+  if (j.contains("enable_pretest_zeroes"))
+    j.at("enable_pretest_zeroes").get_to(p.enablePretestZeroes);
+
   j.at("enable_logs").get_to(p.enableLogs);
 }
 

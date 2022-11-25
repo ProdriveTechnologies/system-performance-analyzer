@@ -20,7 +20,8 @@ public:
   };
   static std::vector<SResult> GetCorrelation(
       const Measurements::AllSensors &allSensors,
-      const std::vector<Measurements::SMeasurementsData> *measuredData);
+      const std::vector<Measurements::SMeasurementsData> *measuredData,
+      const bool enablePretestZeroes = false);
 
   static double GetCorrelationCoefficient(const std::vector<double> &u,
                                           const std::vector<double> &v);
@@ -52,7 +53,7 @@ private:
   static std::vector<SSensorMeasurements> CreateEqualSizedVectors(
       const Measurements::AllSensors &allSensors,
       const std::vector<Measurements::SMeasurementsData> *measuredData,
-      const bool isPerformanceMetric);
+      const bool isPerformanceMetric, const bool enablePretestZeroes);
   // static std::vector<SSensorMeasurements> CreateEqualSizedVector(
   //     const std::vector<Measurements::AllSensors::SensorGroups> &allSensors,
   //     const std::vector<Measurements::SMeasurementsData> *measuredData,

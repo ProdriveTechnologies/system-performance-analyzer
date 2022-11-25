@@ -14,7 +14,7 @@ class RunProcess : public ProcessRunner::Base
 {
 public:
   RunProcess(Synchronizer *synchronizer, const Core::SProcess &userProcessInfo);
-  RunProcess(const RunProcess &gstreamer);
+  RunProcess(const RunProcess &process);
   ~RunProcess();
 
   void StartThread(const std::string &command);

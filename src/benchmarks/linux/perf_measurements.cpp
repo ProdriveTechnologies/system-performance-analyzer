@@ -238,7 +238,7 @@ void CPerfMeasurements::AnalyzeData()
 
   // Execute the correlation check here
   auto corrResults = Measurements::CCorrelation::GetCorrelation(
-      allSensors, &measurementsData_);
+      allSensors, &measurementsData_, config_.settings.enablePretestZeroes);
 
   // Check thresholds
   SetThresholdResults(allSensors);

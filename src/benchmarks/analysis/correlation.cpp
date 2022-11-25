@@ -30,12 +30,13 @@ namespace Measurements
  */
 std::vector<CCorrelation::SResult> CCorrelation::GetCorrelation(
     const Measurements::AllSensors &allSensors,
-    const std::vector<Measurements::SMeasurementsData> *measuredData)
+    const std::vector<Measurements::SMeasurementsData> *measuredData,
+    const bool enablePretestZeroes)
 {
-  auto equalVectorsPerf =
-      CreateEqualSizedVectors(allSensors, measuredData, true);
-  auto equalVectorsRsc =
-      CreateEqualSizedVectors(allSensors, measuredData, false);
+  auto equalVectorsPerf = CreateEqualSizedVectors(allSensors, measuredData,
+                                                  true, enablePretestZeroes);
+  auto equalVectorsRsc = CreateEqualSizedVectors(allSensors, measuredData,
+                                                 false, enablePretestZeroes);
   std::vector<SResult> correlationResults;
 
   for (const auto &rscVector : equalVectorsRsc)
@@ -72,7 +73,7 @@ std::vector<CCorrelation::SSensorMeasurements>
 CCorrelation::CreateEqualSizedVectors(
     const Measurements::AllSensors &allSensors,
     const std::vector<Measurements::SMeasurementsData> *measuredData,
-    const bool isPerformanceMetric)
+    const bool isPerformanceMetric, const bool enablePretestZeroes)
 {
   std::vector<CCorrelation::SSensorMeasurements> allCorrelations;
 
@@ -102,7 +103,7 @@ CCorrelation::CreateEqualSizedVectors(
               break;
             }
           }
-          if (!resMeasurement.isMeasured)
+          if (enablePretestZeroes && !resMeasurement.isMeasured)
           {
             if (std::stoll(measurement.time) < sensorGroup.processDelay)
             {
