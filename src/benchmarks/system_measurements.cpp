@@ -121,20 +121,21 @@ CSensors::GetDefinitionItems(const PlatformConfig::SDatafields &field) const
   return result;
 }
 
-std::vector<Exports::MeasuredItem> CSensors::GetMeasurements()
+SMeasurementGroup CSensors::GetMeasurements()
 {
-  std::vector<Exports::MeasuredItem> measuredItems;
+  SMeasurementGroup group;
   auto returnSuccess = dataHandler_.ParseMeasurements();
   if (returnSuccess)
   {
-    measuredItems = dataHandler_.GetMeasurements();
+    group.measuredItems = dataHandler_.GetMeasurements();
   }
   else
   {
     CLogger::Log(CLogger::Types::WARNING,
                  "Could not measure system measurements!");
   }
-  return measuredItems;
+
+  return group;
 }
 
 CSensors::MeasureCombo CSensors::GetFields(

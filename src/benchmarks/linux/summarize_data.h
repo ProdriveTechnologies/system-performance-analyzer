@@ -36,7 +36,7 @@ public:
       sensorData.summarizedValues.push_back(
           SensorData::MeasureValue{ValueTypes::AVERAGE, average_.Get()});
       sensorData.summarizedValues.push_back(
-          SensorData::MeasureValue{ValueTypes::MEAN, GetMean()});
+          SensorData::MeasureValue{ValueTypes::MEDIAN, GetMedian()});
     }
     return sensorData;
   }
@@ -86,7 +86,7 @@ private:
     return *std::max_element(localVector.begin(), localVector.end());
   }
 
-  double GetMean() const
+  double GetMedian() const
   {
     if (!allMeasurements_.empty())
     {

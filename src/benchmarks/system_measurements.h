@@ -13,6 +13,8 @@
 #include "src/linux/datahandlers/pidstat_handler.h"
 #include "src/linux/datahandlers/pidstatm_handler.h"
 
+#include "src/benchmarks/linux/struct_measurements.h"
+
 namespace Measurements
 {
 /**
@@ -34,7 +36,8 @@ public:
 
   std::vector<Exports::PipelineInfo> ProcessMeasurements();
   Exports::MeasurementItem GetConfig() const;
-  std::vector<Exports::MeasuredItem> GetMeasurements();
+  // std::vector<Exports::MeasuredItem> GetMeasurements();
+  SMeasurementGroup GetMeasurements();
 
   std::vector<Sensors> GetSensors() const;
 

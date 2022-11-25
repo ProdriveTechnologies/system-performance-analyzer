@@ -56,6 +56,18 @@ inline void from_json(const nlohmann::json &j, SProcess &p)
   }
 }
 
+inline void from_json(const nlohmann::json &j, SExports &p)
+{
+  std::string exportType;
+  j.at("export_type").get_to(exportType);
+  p.exportType = Exports::GetExportType(exportType);
+  j.at("enabled").get_to(p.exportEnabled);
+  if (p.exportType == Exports::ETypes::GRAPHS)
+    j.at("foldername").get_to(p.filename);
+  else
+    j.at("filename").get_to(p.filename);
+}
+
 inline void from_json(const nlohmann::json &j, SSettings &p)
 {
   j.at("measure_loop_ms").get_to(p.measureLoopMs);
@@ -64,6 +76,10 @@ inline void from_json(const nlohmann::json &j, SSettings &p)
   j.at("verbose").get_to(p.verbose);
   if (j.contains("enable_verbose_summary"))
     j.at("enable_verbose_summary").get_to(p.verboseSummary);
+
+  if (j.contains("exports"))
+    j.at("exports").get_to(p.exports);
+
   j.at("enable_logs").get_to(p.enableLogs);
 }
 

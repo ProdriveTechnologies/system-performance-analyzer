@@ -16,25 +16,9 @@ enum class ValueTypes
   MIN,
   MAX,
   AVERAGE,
-  MEAN
+  MEDIAN
 };
-inline std::string ToString(const ValueTypes t)
-{
-  switch (t)
-  {
-  case ValueTypes::MIN:
-    return "min";
-  case ValueTypes::MAX:
-    return "max";
-  case ValueTypes::AVERAGE:
-    return "average";
-  case ValueTypes::MEAN:
-    return "mean";
-  default:
-    throw std::runtime_error(
-        "ValueTypes not recognised in Measurements::ValueTypes!");
-  }
-}
+std::string ToString(const ValueTypes t);
 struct SensorData
 {
   struct MeasureValue
@@ -53,7 +37,6 @@ struct SensorData
     }
     throw std::runtime_error("Didn't find valuetype!");
   }
-  // int *rawData; // TODO: Change pointer type;
 };
 struct Sensors
 {
@@ -106,19 +89,7 @@ using SensorIdentifier = std::pair<SensorName, SensorProcessId>;
 // Hash function for the Measurements::SensorIdentifier field
 struct SensorIdHash
 {
-  inline size_t operator()(const Measurements::SensorIdentifier &k) const
-  {
-    // computes the hash of a GStreamer::Identifier using a variant
-    // of the Fowler-Noll-Vo hash function
-    // from: https://en.cppreference.com/w/cpp/utility/hash/operator()
-    size_t result = 2166136261;
-
-    for (size_t i = 0, ie = k.first.size(); i != ie; ++i)
-    {
-      result = (result * 16777619) ^ k.first[i];
-    }
-    return result ^ (k.second << 1);
-  }
+  size_t operator()(const Measurements::SensorIdentifier &k) const;
 };
 
 /**
@@ -150,142 +121,28 @@ struct AllSensors
   using SensorMapByProcess = std::unordered_map<ProcessId, SensorMap>;
   SensorMapByProcess mapByProcessId;
 
-  /**
-   * @brief Returns the sensors based on a group classification and
-   * optionally a process ID
-   *
-   * @param c
-   * @param processId the id of the process in the json configuration. If
-   * empty, it will return either the only pipeline that exists, or add the
-   * sensors of the pipelines together and return the combined sensors
-   * @return std::vector<Sensors> the sensors of the wanted pipeline/group
-   * or all pipelines combined
-   */
-  std::vector<Sensors> GetSensors(const Classification c,
-                                  const int processId = -1) const
-  {
-    auto group = data.find(c);
-    if (group != data.end())
-    {
-      if (processId == -1 && group->second.size() == 1)
-        return group->second.front().sensors;
-      std::vector<Sensors> allPipelines;
-      for (const auto &e : group->second)
-      {
-        if (processId == -1)
-          allPipelines = Helpers::CombineVectors(allPipelines, e.sensors);
-        else if (processId == e.processId)
-          return e.sensors;
-      }
-      if (!allPipelines.empty())
-        return allPipelines;
-    }
-    return {};
-  }
+  SensorMap GetMap(const int processId) const;
 
-  Classification GetClassification(const int uniqueId) const
-  {
-    for (const auto &classification : allClasses)
-    {
-      auto sensors = GetSensors(classification);
-      for (const auto &sensor : sensors)
-      {
-        if (uniqueId == sensor.uniqueId)
-          return classification;
-      }
-    }
-    throw std::runtime_error("Unknown unique ID inserted!");
-  }
+  std::vector<Sensors> GetSensors(const Classification c,
+                                  const int processId = -1) const;
+
+  Classification GetClassification(const int uniqueId) const;
 
   /**
    * @brief Returns all process IDs
    */
-  std::unordered_set<int> GetProcesses() const
-  {
-    std::unordered_set<int> result;
-    for (const auto &[classifier, sensors] : data)
-    {
-      for (const auto &processSensors : sensors)
-      {
-        result.insert(processSensors.processId);
-      }
-    }
-    return result;
-  }
+  std::unordered_set<int> GetProcesses() const;
 
   void AddSensors(const Classification c, const std::vector<Sensors> &sensors,
-                  const int processId = -1)
-  {
-    SensorGroups sensorGroup{processId, sensors};
-
-    auto existingGroup = data.find(c);
-    if (existingGroup != data.end())
-    {
-      existingGroup->second.push_back(sensorGroup);
-      AddMapValues(&mapByProcessId, &existingGroup->second.back().sensors,
-                   processId);
-    }
-    else
-    {
-      std::vector<SensorGroups> groups{sensorGroup};
-      data.insert(std::make_pair(c, groups));
-      allClasses.push_back(c);
-      AddMapValues(&mapByProcessId, &data.find(c)->second.back().sensors,
-                   processId);
-    }
-  }
+                  const int processId = -1);
   void AddSensors(const Classification c,
-                  const std::vector<SensorGroups> &sensors)
-  {
-    auto existingGroup = data.find(c);
-
-    if (existingGroup != data.end())
-    {
-      existingGroup->second = sensors;
-      for (auto &e : existingGroup->second)
-        AddMapValues(&mapByProcessId, &e.sensors, e.processId);
-    }
-    else
-    {
-      data.insert(std::make_pair(c, sensors));
-      allClasses.push_back(c);
-      for (auto &e : data.find(c)->second)
-        AddMapValues(&mapByProcessId, &e.sensors, e.processId);
-    }
-  }
+                  const std::vector<SensorGroups> &sensors);
   std::vector<SensorGroups>
-  GetSensorGroups(const Classification classification) const
-  {
-    auto sensorGroup = data.find(classification);
-    if (sensorGroup == data.end())
-      return {};
-    return sensorGroup->second;
-  }
-  SensorMap GetMap(const int processId) const
-  {
-    auto mapResult = mapByProcessId.find(processId);
-    if (mapResult == mapByProcessId.end())
-    {
-      throw std::runtime_error("Process ID not existent!");
-    }
-    return mapResult->second;
-  }
+  GetSensorGroups(const Classification classification) const;
 
 private:
   void AddMapValues(SensorMapByProcess *mapObj, std::vector<Sensors> *sensors,
-                    const int processId) const
-  {
-    auto mapResult = mapObj->find(processId);
-    if (mapResult == mapObj->end())
-    {
-      mapObj->insert(std::make_pair(processId, SensorMap{}));
-      mapResult = mapObj->find(processId);
-    }
-    for (auto &e : *sensors)
-    {
-      mapResult->second.insert(std::make_pair(e.userId, &e));
-    }
-  }
+                    const int processId) const;
 };
 
 } // namespace Measurements

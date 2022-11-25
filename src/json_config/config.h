@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "src/exports/export_types.h"
+
 namespace Core
 {
 struct SProcess
@@ -21,7 +23,7 @@ enum class ThresholdType
   MIN,
   MAX,
   AVERAGE,
-  MEAN
+  MEDIAN
 };
 enum class Sign
 {
@@ -50,12 +52,20 @@ struct SThreshold
   int processId;
   double value;
 };
+struct SExports
+{
+  Exports::ETypes exportType;
+  bool exportEnabled = false;
+  std::string filename;
+};
+
 struct SSettings
 {
   bool verbose;
   bool verboseSummary = false;
   bool enableLogs;
   int measureLoopMs;
+  std::vector<SExports> exports;
   bool enableProcTime = false;
 };
 struct SConfig
@@ -94,8 +104,8 @@ inline ThresholdType GetThresholdType(const std::string &thresholdGroup)
     return ThresholdType::MAX;
   case Helpers::hash("average"):
     return ThresholdType::AVERAGE;
-  case Helpers::hash("mean"):
-    return ThresholdType::MEAN;
+  case Helpers::hash("median"):
+    return ThresholdType::MEDIAN;
   default:
     CLogger::Log(CLogger::Types::ERROR, "Threshold group not recognised!");
     throw std::runtime_error("Threshold group not recognised!");

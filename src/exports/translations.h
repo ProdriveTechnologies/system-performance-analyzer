@@ -37,3 +37,9 @@ constexpr std::string_view correlationNone{
     "measurements (<10)"};
 
 } // namespace SummaryTranslations
+
+namespace TranslationErrors
+{
+const inline std::string errorExportType{
+    "Export type unknown! Supported export types are: "};
+}

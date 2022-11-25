@@ -105,8 +105,8 @@ CreateMapWithId(const std::vector<Measurements::Sensors> &data)
 bool HandleThreshold(const Measurements::Sensors *sensor,
                      Core::SThreshold threshold)
 {
-  auto parseSign = [](const double lhs, const double rhs, const Core::Sign sign)
-  {
+  auto parseSign = [](const double lhs, const double rhs,
+                      const Core::Sign sign) {
     switch (sign)
     {
     case Core::Sign::LE:
@@ -134,9 +134,9 @@ bool HandleThreshold(const Measurements::Sensors *sensor,
     return parseSign(threshold.value,
                      sensor->data.Get(Measurements::ValueTypes::AVERAGE),
                      threshold.sign);
-  case Core::ThresholdType::MEAN:
+  case Core::ThresholdType::MEDIAN:
     return parseSign(threshold.value,
-                     sensor->data.Get(Measurements::ValueTypes::MEAN),
+                     sensor->data.Get(Measurements::ValueTypes::MEDIAN),
                      threshold.sign);
   }
 }

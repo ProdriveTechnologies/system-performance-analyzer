@@ -87,8 +87,7 @@ void CPerfMeasurements::Initialize()
   gstMeasurements_.SetConfig(config_);
 
   pMeasurementsData_ = std::make_unique<std::vector<Exports::ExportData>>();
-  pCpuData_ = std::make_unique<std::vector<Linux::FileSystem::ProcStatData>>();
-  pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
+  // pProcessesData_ = std::make_unique<std::vector<ProcessesMeasure>>();
 
   // Must happen after the creation of the pMeasurementsData_ memory block
   sensorMeasurements_.Initialize(pMeasurementsData_.get());
@@ -97,24 +96,12 @@ void CPerfMeasurements::Initialize()
       GetProcessFromProcesses<RunProcess>();
   processMeasurements_.Initialize(pMeasurementsData_.get(), linuxProcesses);
 
-  // Thread exists now, store threads that already exist for the monitoring. The
-  // newly added ones are from gstreamer and need to be monitored
-  // std::cerr << "Monitoring thread: " << threadSync_->getThreadId();
-
-  // Path processPath;
-  // processPath.AddItems("proc", getpid(), "task");
-  // excludedThreads_ = FileSystem::GetFiles(processPath.GetPath());
-
-  // Initialise proc stat
-  // procHandler_.ParseProcStat();
   cpuUtilizationTimer_.restart();
-  // lastCpuDataAggregated_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
   while (!cpuUtilizationTimer_.elapsed())
   {
     std::this_thread::sleep_for(
         std::chrono::milliseconds(cpuUtilizationTimer_.timeTillElapsed()));
   }
-  // liveFilesystemData_.Init();
 }
 
 /**
@@ -145,10 +132,22 @@ void CPerfMeasurements::StartMeasurementsLoop()
     // Filling the export data
     // procHandler_.ParseMeminfo(); // Parse the /proc/meminfo struct
     Exports::ExportData exportData;
+    Measurements::SMeasurementsData measurementsData;
+
+    measurementsData.time = std::to_string(
+        testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
     exportData.time = std::to_string(
         testRunningTimer_.GetTime<std::milli>()); // Millisecond accuracy
-    exportData.measuredItems = sensorMeasurements_.GetMeasurements();
+
+    // exportData.measuredItems = sensorMeasurements_.GetMeasurements();
+    measurementsData.AddMeasurements(Measurements::Classification::SYSTEM,
+                                     sensorMeasurements_.GetMeasurements());
     exportData.processInfo = processMeasurements_.GetMeasurements();
+    // measurementsData.AddMeasurements(Measurements::Classification::PROCESSES,
+    //                                  processMeasurements_.GetMeasurements());
+
+    // measurementsData.AddMeasurements(Measurements::Classification::PIPELINE,
+    //                                  gstMeasurements_.GetMeasurements());
 
     // Measure data on each GStreamer pipeline
     exportData.pipelineInfo = gstMeasurements_.ProcessGstreamer();
@@ -175,12 +174,19 @@ void CPerfMeasurements::ExportData(
   items.push_back(gstMeasurements_.GetPipelineConfig2());
   items.push_back(processMeasurements_.GetConfig());
 
-  ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors,
-                                            correlationResults);
-  ExecuteExport<Exports::CJson>("filename", items, sensors, correlationResults);
-  ExecuteExport<Exports::CCsv>("filename", items, sensors, correlationResults);
-  ExecuteExport<Exports::CGraphs>("filename", items, sensors,
-                                  correlationResults);
+  Exports::CExport exportGenericClass;
+  Exports::SExportData expData{items, pMeasurementsData_.get(), sensors,
+                               correlationResults};
+  for (const auto &e : config_.settings.exports)
+    exportGenericClass.ExecuteExport(e, expData, config_);
+
+  //       ExecuteExport<Exports::CSummaryGenerator>("filename", items, sensors,
+  //                                                 correlationResults);
+  // ExecuteExport<Exports::CJson>("filename", items, sensors,
+  // correlationResults); ExecuteExport<Exports::CCsv>("filename", items,
+  // sensors, correlationResults); ExecuteExport<Exports::CGraphs>("filename",
+  // items, sensors,
+  //                                 correlationResults);
 }
 
 /**

@@ -57,6 +57,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/process_measurements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/input_handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/data_handler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/struct_sensors.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem/statm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/analysis/correlation.cpp

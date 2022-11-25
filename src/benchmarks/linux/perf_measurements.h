@@ -22,6 +22,8 @@
 #include "src/benchmarks/system_measurements.h"
 #include "src/processes_struct.h"
 
+#include "struct_measurements.h"
+
 class Synchronizer; // pre-definition
 
 namespace Linux
@@ -39,21 +41,16 @@ public:
                     const std::vector<Core::SThreshold> &thresholds);
   void Start(const Core::SConfig &config, std::vector<ProcessInfo> *processes);
 
-  // SCpuInfo GetCPUInfo();
-  // SMemoryInfo GetMemoryInfo();
-  // SBandwidth GetMemoryBandwidth();
-  // SCoreTemperature GetTemperatures();
-
-  struct ProcessMeasurements
-  {
-    int pid = -1;
-    Linux::FileSystem::Stat stats;
-    std::vector<int> threadIds;
-  };
-  struct ProcessesMeasure
-  {
-    std::vector<ProcessMeasurements> processes;
-  };
+  // struct ProcessMeasurements
+  // {
+  //   int pid = -1;
+  //   Linux::FileSystem::Stat stats;
+  //   std::vector<int> threadIds;
+  // };
+  // struct ProcessesMeasure
+  // {
+  //   std::vector<ProcessMeasurements> processes;
+  // };
 
 private:
   std::vector<ProcessInfo> *processes_;
@@ -63,75 +60,24 @@ private:
   Core::SConfig config_;
   const std::string sensorConfigFile_;
   // CXavierSensors xavierSensors_;
-  static constexpr int XAVIER_CORES = 8;
   Timer<> cpuUtilizationTimer_;
 
   // Measurements data
   std::unique_ptr<std::vector<Exports::ExportData>> pMeasurementsData_;
+  std::vector<Measurements::SMeasurementsData> measurementsData_;
 
-  // proc/stat measurements
-  std::unique_ptr<std::vector<Linux::FileSystem::ProcStatData>> pCpuData_;
-
-  // std::vector<std::string> excludedThreads_;
-  std::unique_ptr<Exports::CExport> pExportObj_;
-  // FileSystem::CLiveData<> liveFilesystemData_;
-
-  using MeasureFieldsDefType = std::vector<PlatformConfig::SDatafields>;
-  // MeasureFieldsDefType measureFieldsDefinition_;
-  using MeasureFieldsType = std::vector<PlatformConfig::SMeasureField>;
-  // MeasureFieldsType measureFields_;
-
-  // MeasureFieldsDefType processFieldsDef_;
-  // MeasureFieldsType processFields_;
+  // std::unique_ptr<Exports::CExport> pExportObj_;
 
   GStreamer::CPipelineMeasurements gstMeasurements_;
   Exports::ExportConfig exportConfig_;
   Measurements::CSensors sensorMeasurements_;
   Measurements::CProcessMeasurements processMeasurements_;
   std::vector<Core::SThreshold> thresholds_;
-  // PlatformConfig::SDatafields GetFieldDef(const int id)
-  // {
-  //   for (const auto &e : measureFieldsDefinition_)
-  //   {
-  //     if (id == e.id)
-  //       return e;
-  //   }
-  //   throw std::runtime_error("ID not found!");
-  // }
 
-  // Measurements::ProcHandler procHandler_;
   Stopwatch testRunningTimer_;
 
-  // struct MeasureComboSingular
-  // {
-  //   PlatformConfig::SDatafields definition;
-  //   PlatformConfig::SMeasureField field;
-  // };
-  // struct MeasureCombo
-  // {
-  //   MeasureFieldsDefType definition;
-  //   MeasureFieldsType fields;
+  // std::unique_ptr<std::vector<ProcessesMeasure>> pProcessesData_;
 
-  //   void Add(const MeasureComboSingular &data)
-  //   {
-  //     definition.push_back(data.definition);
-  //     fields.push_back(data.field);
-  //   }
-  //   void Add(const MeasureCombo &data)
-  //   {
-  //     definition = Helpers::CombineVectors(definition, data.definition);
-  //     fields = Helpers::CombineVectors(fields, data.fields);
-  //   }
-  // };
-
-  std::unique_ptr<std::vector<ProcessesMeasure>> pProcessesData_;
-
-  template <typename ExportClass>
-  void ExecuteExport(const std::string &filename,
-                     const std::vector<Exports::MeasurementItem> &items,
-                     const Exports::AllSensors &allSensors,
-                     const std::vector<Measurements::CCorrelation::SResult>
-                         &correlationResults);
   void Initialize();
   void StartMeasurementsLoop();
   void ExportData(const Exports::AllSensors &sensors,
@@ -155,26 +101,5 @@ private:
 
   void SetThresholdResults(Measurements::AllSensors allSensors);
 };
-
-template <typename ExportType>
-void CPerfMeasurements::ExecuteExport(
-    const std::string &filename,
-    const std::vector<Exports::MeasurementItem> &items,
-    const Exports::AllSensors &allSensors,
-    const std::vector<Measurements::CCorrelation::SResult> &correlationResults)
-{
-  try
-  {
-    ExportType exportTypeClass{};
-    Exports::CExport exportGenericClass{&exportTypeClass, filename, config_,
-                                        false};
-    exportGenericClass.FullExport(items, pMeasurementsData_.get(), allSensors,
-                                  correlationResults);
-  }
-  catch (const std::exception &err)
-  {
-    CLogger::Log(CLogger::Types::ERROR, "Export failed: ", err.what());
-  }
-}
 
 } // namespace Linux
