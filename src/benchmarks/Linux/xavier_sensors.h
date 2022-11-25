@@ -37,6 +37,7 @@ public:
   struct CoreSensor
   {
     std::string name;
+    std::string prefixLocation;
     ECoreIdentifiers id;
     std::string path;
     std::function<void(CpuCoreInfo *, const std::string &)> storeResultFunction;
@@ -50,5 +51,7 @@ private:
 
   inline static const std::string preCoreNumberPath =
       "/sys/devices/system/cpu/cpu";
+  inline static const std::string preCoreThermalPath =
+      "/sys/class/thermal/thermal_zone";
   inline static const std::string coreEnabled = "";
 };
