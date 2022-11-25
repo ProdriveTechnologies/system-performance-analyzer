@@ -357,6 +357,7 @@ void CGstreamerHandler::RunPipeline(const std::string &pipelineStr)
   gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
 
   g_main_loop_run(loop);
+  g_main_loop_unref(loop);
   // wait until error or EOS ( End Of Stream )
   // gstBus_ = gst_element_get_bus(gstPipeline_);
   // do

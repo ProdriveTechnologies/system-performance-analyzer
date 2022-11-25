@@ -62,7 +62,7 @@ private:
   GetMeasureFields(const PlatformConfig::SConfig &e);
 
   std::vector<PlatformConfig::SDatafields>
-  ParseArray(const PlatformConfig::SSensors &data);
+  ParseArray(const PlatformConfig::SDatafields &data);
   std::vector<Exports::MeasuredItem>
   GetMeasuredItems(const MeasureFieldsType &measureFields);
 

@@ -47,7 +47,7 @@ int main()
   }
 
   auto config = Core::ConfigParser::Parse("json_example.json");
-  CLogger::Enable(true, true);
+  CLogger::Enable(false, false);
   CLogger::Log(CLogger::Types::INFO, "Started application");
   Synchronizer synchronizer{config.processes.size() +
                             1}; // + 1 because of monitoring thread
@@ -102,13 +102,6 @@ int main()
   // gstreamer.RunPipelineThread(config.gstreamerPipeline);
   measurements.Start(config);
 
-  // CXavierSensors xavierSensors{8};
-  // auto result = xavierSensors.GetCoreInfo(1);
-  // std::cout << "Enabled: " << result.enabled << std::endl;
-  // std::cout << "Frequency: " << result.frequency << std::endl;
-  // std::cout << "Temperature: " << result.temperature << std::endl;
-  // std::cout << "Min frequency: " << result.minFrequency << std::endl;
-  // std::cout << "Max frequency: " << result.maxFrequency << std::endl;
   /*
    auto config = Core::ConfigParser::Parse("./json_example.json");
    std::cout << "Done parsing" << std::endl;

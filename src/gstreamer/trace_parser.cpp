@@ -2,6 +2,7 @@
 
 #include "src/helpers/helper_functions.h"
 #include <iostream>
+#include <memory>
 
 namespace GStreamer
 {
@@ -30,15 +31,16 @@ void TraceHandler::TraceCallbackFunction(
   //             << "  and type: " << gst_debug_message_get(message) <<
   //             std::endl;
 
-  GstStructure *gstStructure =
-      gst_structure_from_string(gst_debug_message_get(message), nullptr);
+  std::unique_ptr<GstStructure, decltype(&gst_structure_free)> gstStructure{
+      gst_structure_from_string(gst_debug_message_get(message), nullptr),
+      gst_structure_free};
 
-  if (gstStructure == nullptr)
+  if (!gstStructure)
   {
     // No proper structure included, returning as there is no data to parse
     return;
   }
-  ParseTraceStructure(gstStructure);
+  ParseTraceStructure(gstStructure.get());
 }
 
 void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
@@ -53,11 +55,6 @@ void TraceHandler::ParseTraceStructure(const GstStructure *gstStructure)
     break;
   case Helpers::hash("latency"):
     // std::cout << "L";
-    {
-      static int lat = 0;
-      lat++;
-      std::cout << lat << std::endl;
-    }
     break;
   case Helpers::hash("framerate"):
     std::cout << "Frame rate! : " << gst_structure_to_string(gstStructure)

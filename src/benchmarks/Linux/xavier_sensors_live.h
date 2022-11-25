@@ -24,7 +24,7 @@ public:
   void Init()
   {
     timer_.start(false);
-    aggregatedLatest_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
+    aggregatedLatest_ = Linux::FileSystem::GetProcStat();
     while (!timer_.elapsed())
     {
       std::this_thread::sleep_for(
@@ -38,7 +38,7 @@ public:
     {
       timer_.restart();
       auto previousAggregated = aggregatedLatest_;
-      aggregatedLatest_ = Linux::FileSystem::GetProcStat(XAVIER_CORES);
+      aggregatedLatest_ = Linux::FileSystem::GetProcStat();
       lastResult_ = aggregatedLatest_ - previousAggregated;
     }
     return lastResult_;

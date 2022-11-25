@@ -92,4 +92,7 @@ std::vector<VectorType> CombineVectors(const std::vector<VectorType> &a,
   return ab;
 }
 
+void replaceStr(std::string &data, const std::string &toReplace,
+                const std::string &replacementStr);
+
 } // namespace Helpers

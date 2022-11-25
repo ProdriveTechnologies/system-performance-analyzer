@@ -1,5 +1,6 @@
 #include "perf_measurements.h"
 
+#include <algorithm>
 #include <iostream>
 #include <regex>       // std::regex_replace
 #include <sys/types.h> // getpid()
@@ -14,6 +15,7 @@
 #include "src/exports/export.h"
 #include "src/exports/export_types/export_csv.h"
 
+#include "proc_handler.h"
 #include "src/helpers/logger.h"
 #include "src/helpers/stopwatch.h"
 #include "src/json_config/sensor_config/config_parser.h"
@@ -233,6 +235,10 @@ CPerfMeasurements::GetMeasureFields(const PlatformConfig::SConfig &configFile)
     case Helpers::hash("ARRAY"):
       measureFields = Helpers::CombineVectors(measureFields, ParseArray(e));
       break;
+    case Helpers::hash("PROC"):
+      // measureFields = Helpers::CombineVectors(measureFields, ParseProc(e));
+      std::cout << "Warning: need to be supported" << std::endl;
+      break;
     default:
       throw std::runtime_error(
           "Monitoring: unknown type in the configuration file!");
@@ -242,7 +248,7 @@ CPerfMeasurements::GetMeasureFields(const PlatformConfig::SConfig &configFile)
 }
 
 std::vector<PlatformConfig::SDatafields>
-CPerfMeasurements::ParseArray(const PlatformConfig::SSensors &data)
+CPerfMeasurements::ParseArray(const PlatformConfig::SDatafields &data)
 {
   std::vector<PlatformConfig::SDatafields> measureFields;
   for (size_t i = 0; i < data.size; ++i)
@@ -250,11 +256,8 @@ CPerfMeasurements::ParseArray(const PlatformConfig::SSensors &data)
     for (const auto &e : data.datafields)
     {
       PlatformConfig::SDatafields dataField{e};
-      std::for_each(e.path.begin(), e.path.end(),
-                    [&](const std::string &pathElem) {
-                      dataField.pathStr +=
-                          pathElem == "_INDEX_" ? std::to_string(i) : pathElem;
-                    });
+      dataField.pathStr = e.path;
+      Helpers::replaceStr(dataField.pathStr, "$INDEX$", std::to_string(i));
       measureFields.push_back(dataField);
     }
   }

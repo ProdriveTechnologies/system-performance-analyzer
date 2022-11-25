@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -171,7 +172,7 @@ struct ProcStatData
       jiffiesSoftIrq = std::stol(cpuRow.at(7));
       return true;
     }
-    bool StartsWithCpu(const std::string &cpuString)
+    static bool StartsWithCpu(const std::string &cpuString)
     {
       return cpuString.size() >= 3 && cpuString.substr(0, 3) == "cpu";
     }
@@ -182,19 +183,21 @@ struct ProcStatData
     ProcStatData newResult;
     newResult.totalCpu = this->totalCpu - r.totalCpu;
 
-    for (size_t i = 0; i < cpus.size(); i++)
+    for (const auto &cpuLeft : cpus)
     {
-      const auto &cpuLeft = cpus.at(i);
-      const auto &cpuRight = r.cpus.at(i);
-      newResult.cpus.push_back(cpuLeft - cpuRight);
+      const auto &cpuRight = r.cpus.find(cpuLeft.first);
+      if (cpuRight == r.cpus.end())
+        throw std::runtime_error("Field mismatch with CPUs!");
+      auto newCpuValues = cpuLeft.second - cpuRight->second;
+      newResult.cpus.insert(std::make_pair(cpuLeft.first, newCpuValues));
     }
     return newResult;
   }
   Cpu totalCpu;
-  std::vector<Cpu> cpus;
+  std::map<std::string, Cpu> cpus;
 };
 
-ProcStatData GetProcStat(const int cpus);
+ProcStatData GetProcStat();
 
 } // namespace FileSystem
 } // namespace Linux

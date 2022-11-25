@@ -35,6 +35,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/file_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/exports/export_types/export_csv.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/json_config/sensor_config/config_parser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/Linux/proc_handler.cpp
 )
 
 # add the executable

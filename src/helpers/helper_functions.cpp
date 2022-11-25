@@ -42,4 +42,17 @@ std::vector<const char *> ToCString(const std::vector<std::string> &text)
   }
   return cStr;
 }
+
+void replaceStr(std::string &data, const std::string &toReplace,
+                const std::string &replacementStr)
+{
+  size_t pos = data.find(toReplace);
+
+  while (pos != std::string::npos)
+  {
+    data.replace(pos, toReplace.size(), replacementStr);
+    // Get the next occurrence from the current position
+    pos = data.find(toReplace, pos + replacementStr.size());
+  }
+}
 } // namespace Helpers

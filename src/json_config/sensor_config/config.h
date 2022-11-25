@@ -11,21 +11,24 @@ struct SDatafields
   std::string name;
   int id;
   std::string type;
+
+  // Required for type: PROC or DIRECT
   std::string pathStr;
-  std::vector<std::string> path;
-};
-struct SSensors
-{
-  std::string name;
-  int id;
-  std::string type;
-  size_t size; // optional
+  std::string path;
+
+  // Required for type: PROC
+  std::string field;
+  std::string value;
+  std::string comparedTo;
+
+  // Required for type: ARRAY
+  size_t size;
   std::vector<SDatafields> datafields;
 };
 struct SConfig
 {
   std::string name;
-  std::vector<SSensors> sensors;
+  std::vector<SDatafields> sensors;
 };
 
 } // namespace PlatformConfig

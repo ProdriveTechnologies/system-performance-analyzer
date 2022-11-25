@@ -31,7 +31,7 @@ Stat GetStats(const std::string &statLocation)
   return Stat{statElements};
 }
 
-ProcStatData GetProcStat(const int cpus)
+ProcStatData GetProcStat()
 {
   std::ifstream statFile{"/proc/stat", std::ios_base::in};
   if (!statFile.good())
@@ -47,13 +47,15 @@ ProcStatData GetProcStat(const int cpus)
     statElements.push_back(row);
   }
 
+  const auto &procStatRow = statElements.at(0);
   ProcStatData procStatData;
-  procStatData.totalCpu = ProcStatData::Cpu{statElements.at(0)};
-  for (int i = 1; i <= cpus; ++i)
-    procStatData.cpus.push_back(ProcStatData::Cpu{statElements.at(i)});
+  procStatData.totalCpu = ProcStatData::Cpu{procStatRow};
+
+  auto row = std::make_pair(procStatRow.rowElements.at(0),
+                            ProcStatData::Cpu{procStatRow});
+  procStatData.cpus.insert(row);
 
   return procStatData;
 }
-
 } // namespace FileSystem
 } // namespace Linux
