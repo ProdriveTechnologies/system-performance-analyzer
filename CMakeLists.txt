@@ -167,7 +167,11 @@ message("Downloaded FTXUI")
 find_package(PkgConfig) # finding pkg-config is a helper tool
 
 # using pkg-config to getting Gstreamer
-pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
+pkg_check_modules(GSTREAMER QUIET gstreamer-1.0)
+
+if(NOT GSTREAMER_FOUND)
+  message(FATAL_ERROR "Package missing! Please install: libstreamer1.0-dev")
+endif()
 
 # including GStreamer header files directory
 include_directories(

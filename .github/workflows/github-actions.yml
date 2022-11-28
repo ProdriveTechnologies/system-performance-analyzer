@@ -1,0 +1,22 @@
+name: Build and Test
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest version
+        uses: actions/checkout@v2
+      - name: Install requirement GStreamer
+        run: sudo apt install -y libunwind-dev && sudo apt-get install -y libgstreamer1.0-dev
+      - name: create build folder
+        run: mkdir build 
+      - name: CMake build
+        run: "cmake -D BUILD_TESTS=ON .."
+        working-directory: ./build
+      - name: Build application
+        run: make
+        working-directory: ./build
+      # Run tests
+      - name: Run tests
+        run: ./tests/tests
+        working-directory: ./build
