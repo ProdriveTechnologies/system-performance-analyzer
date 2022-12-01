@@ -9,7 +9,7 @@ This tool can execute any Linux application as well as [GStreamer](https://gstre
 ## Requirements
 To build the tool, the following tools are necessary:
 - CMake 
-- libstreamer1.0-dev 
+- libgstreamer1.0-dev 
 
 Some other necessary libraries are automatically downloaded by running the CMake command in [Installation and usage](#Installation). The libraries that are automatically downloaded are: [nlohmann/json](https://github.com/nlohmann/json) and [FTXUI](https://github.com/ArthurSonzogni/FTXUI).  
 

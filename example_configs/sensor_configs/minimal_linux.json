@@ -5,7 +5,8 @@
         {
             "name": "cpu",
             "type": "ARRAY",
-            "size": 16,
+            // The size defines how much cores are being checked as a sensor. The size must be: size < system core count
+            "size": 4,
             "data": [
                 {
                     "name": "CPU utilization per core",
