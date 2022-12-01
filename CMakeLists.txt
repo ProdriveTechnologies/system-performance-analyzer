@@ -67,7 +67,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/analysis/correlation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/spa.cpp
 )
-message(" - Enabling static code analyser: clang-tidy")
+message(" - Enabling static code analyzer: clang-tidy")
 
 # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=.;-checks=llvm-,clang-analyzer-,modernize-")
 

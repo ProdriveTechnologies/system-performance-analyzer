@@ -1,4 +1,4 @@
-# System Performance Analyser (SPA)
+# System Performance Analyzer (SPA)
 
 The SPA tool tests the performance for Linux based systems. This tool contains resource usage measurements and analysis to find bottlenecks in a system. These systems can relate to anything, but the SPA tool's main focus is on data pipelines such as video streaming pipelines. Additionally, thresholds can be configured to test whether a system is sufficient based on the system's requirements. These thresholds can be based on actual requirements of a project.
 
@@ -29,7 +29,7 @@ To execute a test with these files, execute the following steps:
 
 1. Enter the build folder: `cd build`
 2. If the sources are not build yet, execute the [Installation steps](#Installation)
-3. Execute the test: `./spa -c ../example_configs/minimal.json -s ../example_configs/minimal_linux.json` 
+3. Execute the test: `./spa -c ../example_configs/test_configs/minimal.json -s ../example_configs/sensor_configs/minimal_linux.json` 
 
 In [Section Configuration](#configuration), the test and metrics files are described how they can be configured for custom systems. 
 
