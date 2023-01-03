@@ -34,6 +34,7 @@ public:
     item_ = CXavierSensors::ParseDirect(PlatformConfig::SMeasureField{ datafield.id, path, datafield.type });
     if (item_.id == datafield.id)
       return true;
+    errorMsg_ = "Handler DIRECT: Couldn't find correct ID for datafield: " + datafield.name + " and path: " + path;
     return false;
   }
 

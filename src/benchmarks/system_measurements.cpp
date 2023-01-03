@@ -129,7 +129,9 @@ std::vector<SMeasuredItem> CSystemSensors::GetMeasurements()
   }
   else
   {
-    CLogger::Log(CLogger::Types::WARNING, "Could not measure system measurements!");
+    CLogger::Log(CLogger::Types::WARNING,
+                 "Could not measure system measurements! Error: ",
+                 dataHandler_.GetLastError());
   }
   return items;
 }

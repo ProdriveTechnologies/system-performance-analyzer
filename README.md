@@ -13,6 +13,8 @@ To build the tool, the following tools are necessary:
 
 Some other necessary libraries are automatically downloaded by running the CMake command in [Installation and usage](#Installation). The libraries that are automatically downloaded are: [nlohmann/json](https://github.com/nlohmann/json) and [FTXUI](https://github.com/ArthurSonzogni/FTXUI).  
 
+For running the tool, [GST-Shark](https://developer.ridgerun.com/wiki/index.php/GstShark) is also necessary for the performance measurements on the Gstreamer pipelines. Otherwise, the GStreamer performance cannot be measured and therefore won't be shown.  
+
 ## Installation and usage
 To create the executable, the following steps have to be executed:
 

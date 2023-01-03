@@ -24,7 +24,10 @@ public:
     Helpers::replaceStr(path, "$PID$", replacement);
     Linux::FileSystem::Stat pidStatData{ Linux::FileSystem::GetStats(path) };
     if (!pidStatData.succesful)
+    {
+      errorMsg_ = "Handler /proc/<pid>/stat: Couldn't get stats from the path: " + path;
       return false;
+    }
     pidStatData_.insert(std::make_pair(replacement, std::move(pidStatData)));
     return true;
   }

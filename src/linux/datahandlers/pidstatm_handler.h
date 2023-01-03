@@ -25,7 +25,10 @@ public:
     Linux::FileSystem::Statm pidStatmData;
     auto isSuccesful = pidStatmData.ParseStatm(path);
     if (!isSuccesful)
+    {
+      errorMsg_ = "Handler /proc/<pid>/statm: Couldn't get stats from the path: " + path;
       return false;
+    }
     pidStatmData_.insert(std::make_pair(replacement, pidStatmData));
     return true;
   }

@@ -49,8 +49,10 @@ bool CDataHandler::ParseMeasurements(const std::string& replacement, const int m
   {
     auto isSuccesful = parser.second.parserObj->InitializeRuntime(replacement);
     if (!isSuccesful)
+    {
       error_ = parser.second.parserObj->GetErrorMsg();
-    return false; // Initializing failed, return error
+      return false; // Initializing failed, return error
+    }
   }
 
   // Loop through all measurement fields
