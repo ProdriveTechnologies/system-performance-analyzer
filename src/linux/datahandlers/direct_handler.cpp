@@ -1,7 +1,9 @@
-#include "xavier_sensors.h"
+#include "direct_handler.h"
 
-#include "perf_measurements.h"
+#include "src/benchmarks/linux/perf_measurements.h"
 
+namespace Linux
+{
 /**
  * @brief Returns the numeric value of a file
  *
@@ -10,7 +12,7 @@
  *    [error]: SMeasuredItem{} with ID being -1 (or -2 when datafield.id is -1),
  * thus ID != datafield.id
  */
-Measurements::SMeasuredItem CXavierSensors::ParseDirect(const PlatformConfig::SMeasureField& datafield)
+Measurements::SMeasuredItem CDirectHandler::ParseDirect(const PlatformConfig::SMeasureField& datafield)
 {
   Measurements::SMeasuredItem item;
   item.id = datafield.id;
@@ -31,7 +33,7 @@ Measurements::SMeasuredItem CXavierSensors::ParseDirect(const PlatformConfig::SM
  * @param path the path of the file
  * @return std::string the content of the file
  */
-std::string CXavierSensors::ReadLocation(const std::string& path)
+std::string CDirectHandler::ReadLocation(const std::string& path)
 {
   std::string dataBuffer;
   std::ifstream fileObj(path);
@@ -44,3 +46,5 @@ std::string CXavierSensors::ReadLocation(const std::string& path)
 
   return dataBuffer;
 }
+
+} // namespace Linux

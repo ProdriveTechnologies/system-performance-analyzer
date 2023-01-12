@@ -40,7 +40,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/helper_functions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/trace_parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/xavier_sensors.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/datahandlers/direct_handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/synchronizer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/process_runner/run_process_base.cpp

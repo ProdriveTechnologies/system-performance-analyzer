@@ -32,8 +32,8 @@ constexpr std::string_view thresholdTitle{ "Thresholds" };
 constexpr std::string_view thresholdExceeded{ "No thresholds were exceeded!" };
 
 constexpr std::string_view correlationTitle{ "Correlations" };
-constexpr std::string_view correlationNone{ "No correlations found! This can be caused by having too little data "
-                                            "measurements (<10)" };
+constexpr std::string_view correlationNone{ "No correlations found! This can be caused by having too few data "
+                                            "points (<10)" };
 
 } // namespace SummaryTranslations
 

@@ -5,7 +5,6 @@
 #include "src/linux/path_parser_base.h"
 
 #include <unordered_map>
-#include <utility>
 
 namespace Linux
 {

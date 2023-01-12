@@ -1,18 +1,10 @@
 #include "handler.h"
 
-#include "src/gstreamer/measurement_types.h"
 #include "src/helpers/logger.h"
 #include "src/helpers/synchronizer.h"
-#include "trace_parser.h"
 
-#include <gst/gst.h>
-#include <iostream>
-#include <memory>
-#include <stdlib.h>
-#include <sys/types.h> //gettid()
 #include <thread>
-#include <unistd.h>
-#include <vector>
+#include <unistd.h> // fork
 
 CGstreamerHandler::CGstreamerHandler(Synchronizer* synchronizer,
                                      const Core::SProcess& userProcessInfo,
@@ -90,7 +82,7 @@ CGstreamerHandler::~CGstreamerHandler()
 
 void CGstreamerHandler::FreeMemory()
 {
-  if (gstPipeline_ != nullptr)
+  if (gstPipeline_ != nullptr && GST_OBJECT_REFCOUNT(gstPipeline_) > 0)
   {
     gst_element_set_state(gstPipeline_, GST_STATE_NULL);
     gst_object_unref(gstPipeline_);
@@ -117,6 +109,8 @@ void CGstreamerHandler::StartThread(const std::string& command)
   else if (applicationPid_ == 0)
   {
     pipe_.SetChild();
+    // Register a stop function
+    signal(SIGINT, CGstreamerHandler::StopInterruptHandler);
     RunPipeline(command);
     exit(EXIT_SUCCESS);
   }
@@ -131,32 +125,57 @@ void CGstreamerHandler::StartThread(const std::string& command)
     return;
   }
 }
+
+/**
+ * @brief
+ *
+ */
+void CGstreamerHandler::StopInterruptHandler([[maybe_unused]] int signal)
+{
+  g_main_loop_quit(loop_);
+}
+
 void CGstreamerHandler::ParentWaitProcess()
 {
   int waitCount = 0;
   const int maxWaitCount = 3; // Initial waits are twice
+
   while (waitCount != maxWaitCount)
   {
-    std::string message = pipe_.ReadBetweenChars('$');
-    if (message == waitMessage_)
+    if (pipe_.GetBytesAvailable() > 0)
     {
-      CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1, " for child");
-      processSync_->WaitForProcess();
-      waitCount++;
-      pipe_.Write(waitDoneMsg_);
-      if (waitCount == 1)
+      std::string message = pipe_.ReadBetweenChars('$');
+
+      if (message == waitMessage_)
       {
-        // Initialize GST for the parent, must be separated from the GST
-        // environments from the other processes
-        if (!gst_is_initialized())
-          gst_init(nullptr, nullptr);
+        CLogger::Log(CLogger::Types::INFO, "Starting synchronize ", waitCount + 1, " for child");
+        processSync_->WaitForProcess();
+        waitCount++;
+        pipe_.Write(waitDoneMsg_);
+        if (waitCount == 1)
+        {
+          // Initialize GST for the parent, must be separated from the GST
+          // environments from the other processes
+          if (!gst_is_initialized())
+            gst_init(nullptr, nullptr);
+        }
+      }
+      else
+      {
+        message.pop_back();
+        message.erase(0, 1);
+        traceHandler_.ParseTraceStructure(message);
       }
     }
     else
     {
-      message.pop_back();
-      message.erase(0, 1);
-      traceHandler_.ParseTraceStructure(message);
+      // If the process is not running anymore (terminated for any reason), just stop the test
+      if (kill(applicationPid_, 0) != 0)
+      {
+        processSync_->WaitForProcess();
+        return;
+      }
+      std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
   }
 }
@@ -168,13 +187,13 @@ void CGstreamerHandler::RunPipeline(const std::string& pipelineStr)
   // start playing
   CLogger::Log(CLogger::Types::INFO, "Starting the pipeline for gstreamer");
   gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
-  g_main_loop_run(loop);
-
+  loop_ = loop;
+  g_main_loop_run(loop_);
   ChildWaitProcess();
   // De-initialize
   FreeMemory();
   g_source_remove(busWatchId_);
-  g_main_loop_unref(loop);
+  g_main_loop_unref(loop_);
 
   gst_deinit();
   running_ = false;

@@ -1,24 +1,16 @@
 #pragma once
 
-// #include "src/benchmarks/Monitoring.h"
-
-#include "proc_handler.h"
-#include "src/benchmarks/linux/struct_sensors.h"
+#include "src/benchmarks/linux/struct_sensors.h" // SAllSensors
 #include "src/benchmarks/pipeline_measurements.h"
 #include "src/benchmarks/process_measurements.h"
 #include "src/benchmarks/system_measurements.h"
-#include "src/exports/export.h"
-#include "src/exports/export_struct.h"
+#include "src/exports/export.h" // Measurements::CCorrelation
 #include "src/helpers/stopwatch.h"
-#include "src/helpers/timer.h"
-#include "src/json_config/config.h"
-#include "src/json_config/sensor_config/config.h"
-#include "src/processes_struct.h"
-#include "struct_measurements.h"
+#include "src/json_config/config.h" // core::SThreshold
+#include "src/processes_struct.h"   // ProcessInfo
+#include "struct_measurements.h"    // Measurements::SMeasurementsData
 
-#include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 class Synchronizer; // pre-definition

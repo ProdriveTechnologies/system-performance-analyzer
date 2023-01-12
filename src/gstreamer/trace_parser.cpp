@@ -5,7 +5,7 @@
 #include "src/helpers/helper_functions.h"
 
 #include <iostream>
-#include <memory>
+#include <memory> // unique_ptr
 
 namespace GStreamer
 {

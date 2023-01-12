@@ -1,7 +1,9 @@
 #pragma once
 
-#include "src/benchmarks/linux/xavier_sensors.h"
+#include "src/json_config/sensor_config/config.h"
 #include "src/linux/path_parser_base.h"
+
+#include <string>
 
 namespace Linux
 {
@@ -22,8 +24,8 @@ public:
   {
     if (!datafield.enabledPath.empty())
     {
-      auto enabledCheck = CXavierSensors::ParseDirect(
-        PlatformConfig::SMeasureField{ datafield.id, datafield.enabledPath, datafield.type });
+      auto enabledCheck =
+        ParseDirect(PlatformConfig::SMeasureField{ datafield.id, datafield.enabledPath, datafield.type });
       if (enabledCheck.measuredValue == DISABLED)
       {
         // Disabled, thus set on 0
@@ -31,7 +33,7 @@ public:
         return true;
       }
     }
-    item_ = CXavierSensors::ParseDirect(PlatformConfig::SMeasureField{ datafield.id, path, datafield.type });
+    item_ = ParseDirect(PlatformConfig::SMeasureField{ datafield.id, path, datafield.type });
     if (item_.id == datafield.id)
       return true;
     errorMsg_ = "Handler DIRECT: Couldn't find correct ID for datafield: " + datafield.name + " and path: " + path;
@@ -40,5 +42,8 @@ public:
 
 private:
   static constexpr int DISABLED = 0;
+
+  static Measurements::SMeasuredItem ParseDirect(const PlatformConfig::SMeasureField& datafield);
+  static std::string ReadLocation(const std::string& path);
 };
 } // namespace Linux

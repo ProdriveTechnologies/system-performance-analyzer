@@ -1,27 +1,13 @@
 #include "perf_measurements.h"
 
 #include "performance_helpers.h"
-#include "proc_handler.h"
-#include "src/benchmarks/analysis/correlation.h"
-#include "src/benchmarks/linux/xavier_sensors.h"
+#include "src/benchmarks/analysis/correlation.h" // GetCorrelation
 #include "src/exports/export.h"
-#include "src/exports/export_types/export_csv.h"
-#include "src/exports/export_types/export_graphs.h"
-#include "src/exports/export_types/export_json.h"
-#include "src/exports/export_types/summary_generator.h"
-#include "src/globals.h"
 #include "src/helpers/logger.h"
-#include "src/helpers/stopwatch.h"
 #include "src/helpers/synchronizer.h"
-#include "src/json_config/sensor_config/config_parser.h"
-#include "src/linux/filesystem.h"
 
 #include <algorithm>
-#include <iostream>
-#include <regex>       // std::regex_replace
-#include <sys/types.h> // getpid()
 #include <thread>
-#include <unistd.h> // getpid()
 
 namespace Linux
 {
@@ -136,6 +122,7 @@ void CPerfMeasurements::StartMeasurementsLoop()
 
     std::this_thread::sleep_for(std::chrono::milliseconds(config_.settings.measureLoopMs));
   }
+  CLogger::Log(CLogger::Types::INFO, "Tests fully executed");
   // Sort the pipeline measurements correctly
   for (auto& e : measurementsData_)
   {
@@ -164,6 +151,7 @@ void CPerfMeasurements::ExportData(const Exports::AllSensors& sensors,
  */
 void CPerfMeasurements::AnalyzeData()
 {
+  CLogger::Log(CLogger::Types::INFO, "Starting analysis/export of the data");
   // Collect all sensors
   auto gstSensors = gstMeasurements_.GetSensors();
   auto sysSensors = sensorMeasurements_.GetSensors();
@@ -178,9 +166,11 @@ void CPerfMeasurements::AnalyzeData()
   auto corrResults =
     Measurements::CCorrelation::GetCorrelation(allSensors, &measurementsData_, config_.settings.enablePretestZeroes);
 
+  CLogger::Log(CLogger::Types::INFO, "Getting the maximum and minimum for the thresholds");
   // Check thresholds
   SetThresholdResults(allSensors);
 
+  CLogger::Log(CLogger::Types::INFO, "Generating the exports");
   ExportData(allSensors, corrResults);
 }
 
@@ -190,7 +180,6 @@ void CPerfMeasurements::SetThresholdResults(const Measurements::SAllSensors& all
   for (const auto& processId : allProcessIds)
   {
     auto sensorMap = allSensors.GetMap(processId);
-
     for (const auto& e : thresholds_)
     {
       if (e.processId != processId)
@@ -203,7 +192,6 @@ void CPerfMeasurements::SetThresholdResults(const Measurements::SAllSensors& all
       }
       if (!sensor->second->thresholdExceeded)
         sensor->second->thresholdExceeded = PerformanceHelpers::HandleThreshold(sensor->second, e);
-      // }
     }
   }
 }

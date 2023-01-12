@@ -1,6 +1,7 @@
 #include "data_handler.h"
 
 #include "src/benchmarks/linux/performance_helpers.h"
+
 namespace Linux
 {
 /**

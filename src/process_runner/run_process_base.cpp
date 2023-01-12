@@ -2,7 +2,7 @@
 
 #include "src/helpers/synchronizer.h"
 
-#include <string.h> // strcpy
+#include <string.h> // strcmp
 
 namespace ProcessRunner
 {

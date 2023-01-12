@@ -3,10 +3,8 @@
 #include "src/process_runner/run_process_base.h"
 #include "trace_parser.h"
 
-#include <atomic>
 #include <gst/gst.h>
 #include <string>
-#include <thread>
 
 class Synchronizer;
 
@@ -24,7 +22,6 @@ public:
   void RunPipeline(const std::string& pipelineStr);
   void ParentWaitProcess();
 
-  int GetThreadPid() const { return applicationPid_; }
   std::string GetPipeline() const { return pipelineStr_; }
   bool IsRunning() const { return running_; }
 
@@ -52,11 +49,11 @@ private:
   const Core::SSettings settings_;
   GStreamer::TraceHandler::TracerUserData tracerUserData_;
   GStreamer::TraceHandler traceHandler_;
-
-  pid_t applicationPid_;
+  inline static GMainLoop* loop_ = nullptr;
 
   GMainLoop* PipelineInitialization(const std::string& pipelineStr);
 
   void FreeMemory();
   void SetTracingEnvironmentVars();
+  static void StopInterruptHandler(int signal);
 };

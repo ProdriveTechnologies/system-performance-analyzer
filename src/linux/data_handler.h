@@ -8,7 +8,7 @@
 #include "src/linux/datahandlers/procmeminfo_handler.h"
 #include "src/linux/datahandlers/procstat_handler.h"
 
-#include <memory>
+#include <memory> // unique_ptr
 #include <string>
 #include <unordered_map>
 #include <variant>

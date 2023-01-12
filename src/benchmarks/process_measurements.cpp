@@ -1,6 +1,5 @@
 #include "process_measurements.h"
 
-#include "linux/xavier_sensors.h"
 #include "src/benchmarks/linux/performance_helpers.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/json_config/sensor_config/config_parser.h"
@@ -159,7 +158,7 @@ void CProcessMeasurements::SetProcesses()
   for (const auto& process : processes_)
   {
     processIds_.push_back(
-      ProcessDef{ process->GetThreadPid(), process->GetProcessName(), true, process->GetUserProcessId() });
+      ProcessDef{ process->GetApplicationPid(), process->GetProcessName(), true, process->GetUserProcessId() });
   }
 }
 

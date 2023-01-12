@@ -4,12 +4,10 @@
 #include "src/helpers/logger.h"
 #include "src/helpers/synchronizer.h"
 
-#include <iostream>
-#include <string.h>
-#include <sys/types.h> //gettid()
-#include <sys/wait.h>  // waitpid()
+#include <string.h>   // strcpy and strcmp
+#include <sys/wait.h> // waitpid()
 #include <thread>
-#include <unistd.h>
+#include <unistd.h> // fork and execv
 
 namespace Linux
 {
@@ -95,6 +93,8 @@ void RunProcess::ParentWaitProcess()
   }
   // Waiting until the stress test is fully executes
   waitpid(applicationPid_, NULL, 0);
+  applicationPid_ = 0;
+  // Reset application pid
   processSync_->WaitForProcess();
 }
 

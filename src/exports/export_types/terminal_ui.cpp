@@ -1,10 +1,7 @@
 #include "terminal_ui.h"
 
-#include <cmath>
-#include <iostream>
+#include <iostream> // Adjusting position
 #include <src/globals.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 namespace Exports
 {

@@ -1,15 +1,12 @@
 #pragma once
 
-#include "gstreamer_identifier.h"
+#include "gstreamer_identifier.h" // SIdentifier
 #include "src/benchmarks/linux/struct_measurements.h"
 #include "src/benchmarks/linux/struct_sensors.h"
 #include "src/exports/export_struct.h"
 #include "src/gstreamer/measurement_types.h"
-#include "src/helpers/helper_functions.h"
-#include "src/json_config/config.h"
+#include "src/json_config/config.h" // Core::SConfig
 
-#include <functional>
-#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>

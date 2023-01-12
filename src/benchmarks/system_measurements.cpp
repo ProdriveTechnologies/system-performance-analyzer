@@ -1,6 +1,5 @@
 #include "system_measurements.h"
 
-#include "linux/xavier_sensors.h"
 #include "src/benchmarks/linux/performance_helpers.h"
 #include "src/json_config/sensor_config/config_parser.h"
 #include "src/linux/datahandlers/direct_handler.h"
