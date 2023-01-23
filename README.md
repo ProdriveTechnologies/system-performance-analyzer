@@ -165,8 +165,8 @@ When contributing to this repository, please first discuss the change you wish t
 
 ### **Did you find a bug?**
 * **Ensure the bug was not already reported** by searching on GitHub under
-[Issues](https://github.com/ProdriveTechnologies/SPA/issues).
-* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/ProdriveTechnologies/SPA/issues/new/choose).
+[Issues](https://github.com/ProdriveTechnologies/system-performance-analyzer/issue).
+* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/ProdriveTechnologies/system-performance-analyzer/issues/new/choose).
 Be sure to include a **title and clear description**, as much relevant information as possible.
 * If possible, use the relevant issue templates to create the issue.
 ### **Did you write a patch that fixes a bug?**
@@ -174,12 +174,12 @@ Be sure to include a **title and clear description**, as much relevant informati
 * Ensure the PR description clearly describes the problem and solution. Include the
 relevant issue number if applicable.
 ### **Did you fix whitespace, format code, or make a purely cosmetic patch?**
-Changes that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of SPA will generally not be accepted.
+Changes that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of the SPA tool will generally not be accepted.
 ### **Do you intend to add a new feature or change an existing one?**
 * Suggest your change by opening an issue
 
 ### **Do you have questions about the source code or usage?**
-* Ask any question about how to use voyager by opening a blank issue.
+* Ask any question about how to use the SPA tool by opening a blank issue.
 
 ## License
 [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
