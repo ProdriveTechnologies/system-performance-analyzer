@@ -4,7 +4,7 @@
         {
             "name": "cpu",
             "type": "ARRAY",
-            // The size defines how much cores are being checked as a sensor. The size must be: size < system core count
+            // The size defines how much cores are being checked as a sensor. The size must be: size <= system core count
             "size": 4,
             "data": [
                 {

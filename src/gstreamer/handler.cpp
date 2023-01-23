@@ -38,6 +38,9 @@ CGstreamerHandler::CGstreamerHandler(const CGstreamerHandler& gstreamer)
 {
 }
 
+/**
+ * @brief Error and message handler for GStreamer
+ */
 static gboolean bus_call([[maybe_unused]] GstBus* bus, GstMessage* msg, gpointer data)
 {
   auto* userData = reinterpret_cast<CGstreamerHandler::LogStructure*>(data);
@@ -73,6 +76,9 @@ static gboolean bus_call([[maybe_unused]] GstBus* bus, GstMessage* msg, gpointer
   return TRUE;
 }
 
+/**
+ * @brief Destructor of the CGStreamerHandler class
+ */
 CGstreamerHandler::~CGstreamerHandler()
 {
   FreeMemory();
@@ -80,6 +86,9 @@ CGstreamerHandler::~CGstreamerHandler()
     pipelineThread_.join();
 }
 
+/**
+ * @brief Frees up the used memory of the class
+ */
 void CGstreamerHandler::FreeMemory()
 {
   if (gstPipeline_ != nullptr && GST_OBJECT_REFCOUNT(gstPipeline_) > 0)
@@ -93,6 +102,11 @@ void CGstreamerHandler::FreeMemory()
     g_clear_error(&gstErrorMsg_);
 }
 
+/**
+ * @brief Starts the GStreamer threads and necessary processes
+ *
+ * @param command the GStreamer pipeline as a string
+ */
 void CGstreamerHandler::StartThread(const std::string& command)
 {
   // First, clean up an old thread, if existent
@@ -127,14 +141,18 @@ void CGstreamerHandler::StartThread(const std::string& command)
 }
 
 /**
- * @brief
- *
+ * @brief Stops a GStreamer process during execution
  */
 void CGstreamerHandler::StopInterruptHandler([[maybe_unused]] int signal)
 {
   g_main_loop_quit(loop_);
 }
 
+/**
+ * @brief Thread that waits until the GStreamer process is finished.
+ * This thread checks if the GStreamer process needs to be stopped in case of a SIGINT interrupt
+ * Additionally, it manages the synchronization between the GStreamer process and the other processes
+ */
 void CGstreamerHandler::ParentWaitProcess()
 {
   int waitCount = 0;
@@ -180,14 +198,19 @@ void CGstreamerHandler::ParentWaitProcess()
   }
 }
 
+/**
+ * @brief Executes all the steps to run a GStreamer pipeline and to clean it up when it is done
+ *
+ * @param pipelineStr the GStreamer pipeline as a string
+ */
 void CGstreamerHandler::RunPipeline(const std::string& pipelineStr)
 {
-  GMainLoop* loop = PipelineInitialization(pipelineStr);
+  loop_ = PipelineInitialization(pipelineStr);
 
   // start playing
   CLogger::Log(CLogger::Types::INFO, "Starting the pipeline for gstreamer");
   gst_element_set_state(gstPipeline_, GST_STATE_PLAYING);
-  loop_ = loop;
+
   g_main_loop_run(loop_);
   ChildWaitProcess();
   // De-initialize
@@ -199,6 +222,12 @@ void CGstreamerHandler::RunPipeline(const std::string& pipelineStr)
   running_ = false;
 }
 
+/**
+ * @brief Prepares the GStreamer loop
+ *
+ * @param pipelineStr the GStreamer pipeline as a string
+ * @return GMainLoop* a GStreamer object for the pipeline
+ */
 GMainLoop* CGstreamerHandler::PipelineInitialization(const std::string& pipelineStr)
 {
   CLogger::Log(CLogger::Types::INFO, "Starting synchronize for gstreamer");
@@ -235,7 +264,6 @@ GMainLoop* CGstreamerHandler::PipelineInitialization(const std::string& pipeline
 
 /**
  * @brief Enables the necessary tracers for the system
- *
  */
 void CGstreamerHandler::SetTracingEnvironmentVars()
 {
