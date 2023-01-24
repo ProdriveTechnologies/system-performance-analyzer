@@ -5,8 +5,7 @@
 #include "src/globals.h"
 #include "src/helpers/logger.h"
 
-#include <cmath>
-#include <iostream>
+#include <cmath> // std::abs
 
 namespace Exports
 {
@@ -31,6 +30,7 @@ bool CSummaryGenerator::FullExport([[maybe_unused]] const std::vector<SMeasureme
   PrintSystemSummary(allSensors);
   PrintThresholds(allSensors);
   PrintCorrelations(correlationResults);
+
   return true;
 }
 

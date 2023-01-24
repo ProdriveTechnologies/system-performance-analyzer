@@ -3,9 +3,7 @@
 #include "src/linux/pipe_comm.h"
 #include "src/process_runner/run_process_base.h"
 
-#include <atomic>
 #include <string>
-#include <thread>
 
 class Synchronizer;
 namespace Linux
@@ -19,12 +17,10 @@ public:
 
   void StartThread(const std::string& command);
 
-  int GetThreadPid() const { return applicationPid_; }
   bool IsRunning() const { return running_; }
   std::string GetProcessName() const { return processName_; }
 
 private:
-  pid_t applicationPid_;
   bool running_;
   std::string processName_;
 

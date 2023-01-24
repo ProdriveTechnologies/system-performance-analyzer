@@ -2,6 +2,7 @@
 
 #include "src/exports/translations.h"
 
+#include <stdexcept>
 #include <unordered_map>
 
 namespace Exports

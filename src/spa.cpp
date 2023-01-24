@@ -21,6 +21,7 @@ CSystemPerformanceAnalyzer::CSystemPerformanceAnalyzer(const std::string& config
  */
 void CSystemPerformanceAnalyzer::StartExecution()
 {
+  SetSigIntHandler();
   CreateProcesses();
   ExecuteTest();
 }
@@ -35,11 +36,13 @@ void CSystemPerformanceAnalyzer::CreateProcesses()
     if (e.type == Core::ProcessType::LINUX_PROCESS)
     {
       processes_.push_back(ProcessInfo{ e, Linux::RunProcess{ &synchronizer_, e } });
+      auto process = std::get<Linux::RunProcess>(processes_.back().processes);
       CLogger::Log(CLogger::Types::INFO, "Added linux process: ", e.command);
     }
     else if (e.type == Core::ProcessType::GSTREAMER)
     {
-      processes_.push_back(ProcessInfo{ e, CGstreamerHandler{ &synchronizer_, e, configFile_.settings, e.processId } });
+      auto process2 = CGstreamerHandler{ &synchronizer_, e, configFile_.settings, e.processId };
+      processes_.push_back(ProcessInfo{ e, process2 });
       CLogger::Log(CLogger::Types::INFO, "Added GStreamer pipeline: ", e.command);
     }
   }
@@ -60,4 +63,44 @@ void CSystemPerformanceAnalyzer::ExecuteTest()
   }
   // Start the measurements thread
   measurements_.Start(configFile_, &processes_);
+}
+
+/**
+ * @brief Sets the SIGINT interrupt handler
+ */
+void CSystemPerformanceAnalyzer::SetSigIntHandler()
+{
+  signal(SIGINT, CSystemPerformanceAnalyzer::SigIntHandler);
+}
+
+/**
+ * @brief Catches a signal, stops the test and starts the analysis
+ *
+ * @param s
+ */
+void CSystemPerformanceAnalyzer::SigIntHandler([[maybe_unused]] int s)
+{
+  // Only one instance may execute this code
+  std::lock_guard<std::mutex> guard(mutexObj_);
+  if (executionInterrupted_)
+    return;
+  executionInterrupted_ = true;
+
+  // The tests are separate applications, thus these need to be killed
+  // Necessities to work: All PIDs to kill (that's most likely it)
+  for (const auto& e : processes_)
+  {
+    if (const Linux::RunProcess* pval = std::get_if<Linux::RunProcess>(&e.processes))
+    {
+      auto pid = pval->GetApplicationPid();
+      if (pid == 0)
+        std::cout << "Process ID is 0, thus has stopped" << std::endl;
+      else
+        kill(pid, SIGTERM);
+    }
+    else
+      continue; // Continue to next if its a GStreamerHandler object, as this one receives the signal from within the
+                // process
+  }
+  return;
 }

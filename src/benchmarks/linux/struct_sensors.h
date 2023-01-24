@@ -36,7 +36,7 @@ struct SSensorData
       if (e.type == valueType)
         return e.value;
     }
-    throw std::runtime_error("Didn't find valuetype!");
+    throw std::runtime_error("Didn't find valuetype: " + ToString(valueType) + "!");
   }
   std::string Printable() const
   {

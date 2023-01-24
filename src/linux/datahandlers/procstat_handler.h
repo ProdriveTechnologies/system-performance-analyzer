@@ -1,12 +1,7 @@
 #pragma once
 
 #include "src/benchmarks/linux/proc_handler.h"
-#include "src/helpers/helper_functions.h"
-#include "src/linux/filesystem.h"
 #include "src/linux/path_parser_base.h"
-
-#include <unordered_map>
-#include <utility>
 
 namespace Linux
 {

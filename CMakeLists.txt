@@ -40,7 +40,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/helper_functions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/gstreamer/trace_parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/xavier_sensors.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/datahandlers/direct_handler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/helpers/synchronizer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/filesystem.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/process_runner/run_process_base.cpp
@@ -67,7 +67,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/linux/perf_measurements.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/benchmarks/analysis/correlation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/spa.cpp
 )
-message(" - Enabling static code analyser: clang-tidy")
+message(" - Enabling static code analyzer: clang-tidy")
 
 # set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=.;-checks=llvm-,clang-analyzer-,modernize-")
 
@@ -167,7 +167,11 @@ message("Downloaded FTXUI")
 find_package(PkgConfig) # finding pkg-config is a helper tool
 
 # using pkg-config to getting Gstreamer
-pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
+pkg_check_modules(GSTREAMER QUIET gstreamer-1.0)
+
+if(NOT GSTREAMER_FOUND)
+  message(FATAL_ERROR "Package missing! Please install: libstreamer1.0-dev")
+endif()
 
 # including GStreamer header files directory
 include_directories(

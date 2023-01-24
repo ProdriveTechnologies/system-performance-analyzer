@@ -2,11 +2,9 @@
 
 #include "src/benchmarks/linux/struct_sensors.h"
 
-#include <cmath>
-#include <iostream>
+#include <cmath> // std::abs
 #include <src/globals.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h> // fputs, FILE
 
 namespace Exports
 {

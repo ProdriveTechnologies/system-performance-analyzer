@@ -4,7 +4,6 @@
 #include "src/helpers/helper_functions.h"
 
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <numeric> // std::accumulate
 #include <string>
@@ -338,6 +337,11 @@ struct ProcStatData
     }
     bool Add(const ProcRow& cpuRow) { return Add(cpuRow.rowElements); };
   };
+  /**
+   * @brief Declared variables of the "ProcStatData" struct
+   */
+  Cpu totalCpu;
+  std::map<std::string, Cpu> cpus;
   ProcStatData operator-(const ProcStatData& r)
   {
     ProcStatData newResult;
@@ -353,8 +357,6 @@ struct ProcStatData
     }
     return newResult;
   }
-  Cpu totalCpu;
-  std::map<std::string, Cpu> cpus;
 };
 
 ProcStatData GetProcStat(const std::string& procStatLocation);

@@ -8,7 +8,7 @@
 #include "src/linux/datahandlers/procmeminfo_handler.h"
 #include "src/linux/datahandlers/procstat_handler.h"
 
-#include <memory>
+#include <memory> // unique_ptr
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -61,6 +61,7 @@ public:
   std::vector<Measurements::SMeasuredItem> GetMeasurements() const { return lastMeasurements_; }
 
   int GetUniqueId(const int masterId, const int datafieldId) const;
+  std::string GetLastError() const { return error_; }
 
 private:
   struct SIdentifier
@@ -84,6 +85,8 @@ private:
       return (k.masterId + k.datafieldId) * (k.masterId + k.datafieldId + 1) / 2 + k.masterId;
     }
   };
+
+  std::string error_;
 
   std::unordered_map<PlatformConfig::ETypes, Config> parsers_;
   std::vector<Config> configuration_;

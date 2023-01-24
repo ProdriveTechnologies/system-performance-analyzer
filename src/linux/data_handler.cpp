@@ -1,6 +1,7 @@
 #include "data_handler.h"
 
 #include "src/benchmarks/linux/performance_helpers.h"
+
 namespace Linux
 {
 /**
@@ -49,7 +50,10 @@ bool CDataHandler::ParseMeasurements(const std::string& replacement, const int m
   {
     auto isSuccesful = parser.second.parserObj->InitializeRuntime(replacement);
     if (!isSuccesful)
+    {
+      error_ = parser.second.parserObj->GetErrorMsg();
       return false; // Initializing failed, return error
+    }
   }
 
   // Loop through all measurement fields
@@ -67,7 +71,10 @@ bool CDataHandler::ParseMeasurements(const std::string& replacement, const int m
     e.id = uniqueId;
     bool isSuccesful = parser->second.parserObj->ParseMeasurement(e, correctedPath, replacement);
     if (!isSuccesful)
+    {
+      error_ = parser->second.parserObj->GetErrorMsg();
       return false;
+    }
     lastMeasurements_.push_back(parser->second.parserObj->GetMeasurement());
   }
   return true;

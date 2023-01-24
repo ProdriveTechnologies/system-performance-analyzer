@@ -45,6 +45,9 @@ bool HandleThreshold(const Measurements::SSensors* sensor, Core::SThreshold thre
     }
     throw std::runtime_error("Cannot parse sign! Illegal sign!");
   };
+  // Errorcheck
+  if (sensor->data.summarizedValues.size() == 0)
+    return 0;
 
   switch (threshold.type)
   {

@@ -28,6 +28,7 @@
     "settings": {
         "measure_loop_ms": 1000,
         "enable_logs": true,
+        "verbose": false,
         "enable_proctime": false,
         "enable_livemode": false,
         "exports": [

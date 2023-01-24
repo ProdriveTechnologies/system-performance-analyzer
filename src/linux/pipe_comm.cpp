@@ -1,11 +1,9 @@
 #include "pipe_comm.h"
 
-#include <memory>
-#include <stdexcept>
-#include <string.h>
-#include <sys/ioctl.h> // GetBytesAvailable()
-#include <sys/wait.h>
-#include <unistd.h>
+#include <stdexcept>   // std::runtime_error
+#include <string.h>    // strerror
+#include <sys/ioctl.h> // ioctl in GetBytesAvailable()
+#include <unistd.h>    // read() write() and pipe()
 
 namespace Linux
 {
@@ -78,7 +76,7 @@ std::string PipeCommunicator::Read()
   }
   else
   {
-    std::runtime_error("PipeCommunicator: Read buffer exceeded!");
+    throw std::runtime_error("PipeCommunicator: Read buffer exceeded!");
   }
 
   return charBuff;

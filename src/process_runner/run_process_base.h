@@ -1,13 +1,11 @@
 #pragma once
 
-#include <string>
-// #include <string_view>
 #include "src/json_config/config.h"
 #include "src/linux/pipe_comm.h"
 
+#include <string>
 #include <thread>
-#include <vector>
-// #include "src/helpers/synchronizer.h"
+
 class Synchronizer;
 
 namespace ProcessRunner
@@ -23,12 +21,15 @@ public:
   void ChildWaitProcess();
   int GetUserProcessId() const { return userProcessInfo_.processId; }
   int GetProcessDelay() const { return userProcessInfo_.startDelay; }
+  Core::SProcess GetUserProcessInfo() const { return userProcessInfo_; }
+  pid_t GetApplicationPid() const { return applicationPid_; }
 
 protected:
   Synchronizer* processSync_;
   std::thread pipelineThread_;
   Linux::PipeCommunicator pipe_;
   const Core::SProcess userProcessInfo_;
+  pid_t applicationPid_;
 
   inline static const std::string waitMessage_ = "$WAIT$";
   inline static const std::string waitDoneMsg_ = "$DONE$";

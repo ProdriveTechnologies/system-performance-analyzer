@@ -1,41 +1,53 @@
-# System Performance Analyser (SPA)
+# System Performance Analyzer (SPA)
 
-The SPA tool tests the performance for Linux based systems. This tool contains resource usage measurements and analysis to find bottlenecks in a system. These systems can relate to anything, but the SPA tool's main focus is on data pipelines such as video streaming pipelines. Also, thresholds can be configured to test whether a system is sufficient based on the system's requirements. These thresholds can be based on actual requirements of a project.
+The SPA tool tests the performance for Linux based systems. This tool contains resource usage measurements and analysis to find bottlenecks in a system. These systems can relate to anything, but the SPA tool's main focus is on data pipelines such as video streaming pipelines. Additionally, thresholds can be configured to test whether a system is sufficient based on the system's requirements. These thresholds can be based on actual requirements of a project.
 
 This tool can execute any Linux application as well as [GStreamer](https://gstreamer.freedesktop.org/) pipelines. For GStreamer pipelines, additional data is measured and extra thresholds can be configured.  
 
-## Installation
+![Tool Example Gif](docs/tool_example.gif)
+
+## Requirements
+To build the tool, the following tools are necessary:
+- CMake 
+- libgstreamer1.0-dev 
+
+Some other necessary libraries are automatically downloaded by running the CMake command in [Installation and usage](#Installation). The libraries that are automatically downloaded are: [nlohmann/json](https://github.com/nlohmann/json) and [FTXUI](https://github.com/ArthurSonzogni/FTXUI).  
+
+For running the tool, [GST-Shark](https://developer.ridgerun.com/wiki/index.php/GstShark) is also necessary for the performance measurements on the Gstreamer pipelines. Otherwise, the GStreamer performance cannot be measured and therefore won't be shown.  
+
+## Installation and usage
+To create the executable, the following steps have to be executed:
 
 1. Clone the Git repository: `git clone <repo link>`
 2. Create a build folder and enter it (`mkdir build && cd build`)
 3. Execute the CMake build script: `cmake ..` (this downloads necessary packages automatically)
-4. Build the sources with: `make` (this can be sped up by asigning an X amount of cores: `make -jX`)
-5. The executable `spa` has been built! :)
+4. Build the sources with: `make` 
+5. If no errors occur, the executable `spa` has been built! :)
 
-## Tests
-To build and execute the tests, execute the following steps:
-
-1. Go to the build folder created in the [Installation](#installation) process
-2. Re-execute the CMake command with the parameter `BUILD_TESTS` as follows: `cmake -D BUILD_TESTS=ON ..`
-3. Rebuild the `spa` application including the tests with: `make` (exactly the same as step 4 of the [Installation](#installation)) process
-4. Execute the tests by executing: `./tests/tests`, this will run all tests
-5. The tests should all pass
-
-## Execution
-
+### Usage
 To execute the tool, two configuration files are necessary. One is the configuration of the metrics that are measured, the other contains the configuration of the test. Examples of these files can be found in `example_configs/`. The sensor configuration `example_configs/sensor_configs/linux_config.json` can be used on most systems for a default metrics configuration. The `example_configs/test_configs/minimal.json` can be used as a simple test. 
 
 To execute a test with these files, execute the following steps:
 
 1. Enter the build folder: `cd build`
 2. If the sources are not build yet, execute the [Installation steps](#Installation)
-3. Execute a test: `./spa -c ../example_configs/minimal.json -s ../example_configs/minimal_linux.json` 
+3. Execute the test: `./spa -c ../example_configs/test_configs/minimal.json -s ../example_configs/sensor_configs/minimal_linux.json` 
 
-In [Section Configuration](#configuration)), the test and metrics files are described how they can be configured for custom systems. 
+In [Section Configuration](#configuration), the test and metrics files are described how they can be configured for custom systems. 
 
-## Output
 
-The tool supports multiple output methods, being: `JSON`, `CSV`, `Terminal summary`, `Graphs`. 
+## Tests
+To build and execute the tests, execute the following steps:
+
+1. Go to the build folder created in the [Installation](#Installation) process
+2. Re-execute the CMake command with the parameter `BUILD_TESTS` as follows: `cmake -D BUILD_TESTS=ON ..`
+3. Rebuild the `spa` application including the tests with: `make` (exactly the same as step 4 of the [Installation](#Installation)) process
+4. Execute the tests by executing: `./tests/tests`, this will run all tests
+5. The tests should all pass
+
+## Tool's Output
+
+The tool supports multiple output methods, being: `JSON`, `CSV`, `a summary in the terminal`, or `Graphs generated with Gnuplot`. 
 
 | **Output method** | **Description** | **Config name, see [Export settings](#export-settings)** |
 | --- | --- | --- | 
@@ -77,6 +89,20 @@ JSON Field | Field type | Description | Optional
 measure_loop_ms | Integer | Configures the frequency of measuring the configured metrics in milliseconds | false
 enable_proctime | Boolean | Shows the processing time for each component in a GStreamer pipeline | true
 exports | Array[[JSON Object](#export-settings)] | Configures the exports to execute and the settings of that export type, see [Export settings](#export-settings) for configuring the exports | true
+enable_livemode | Boolean | Enables live output during the test. For certain measurements, the live data is shown in the terminal  | true
+enable_pretest_zeroes | Boolean | By default "false", but this can give better/worse results for finding correlations between measured sensors. For an explanation of this field, see [Pretest zeroes](#pretest-zeroes) | true
+
+##### Pretest zeroes
+For process specific metrics (such as the framerate), the measured values are only stored when the process is active. But for finding correlations between the framerate and a system resource such as the CPU usage, the impact of starting the process can be relevant. To be able to get the correlations on startup, adding zeroes if a test has not been started can be useful for better correlation detection.
+
+To explain it better, the difference for the correlation comparison is shown. The figure below shows the measurements data in a graph. This is the raw measurements data, and it can be seen that the framerate starts at the 5th second. Before the 5th second, no framerate was measured.  
+
+![original.png](docs/original.png)
+
+The image below shows the input data for the correlation analysis with pretest-zeroes enabled or disabled. With the pretest-zeroes disabled, the seconds where no framerate was measured are removed and the analysis is only executed on the existing framerate measurements. When the pretest-zeroes is enabled, zeroes are added to the framerate when there is no framerate measured yet. This can improve the correlation method as the increase between the 4th second and 5th second is now included in the correlation analysis.  
+
+![pretest-zeroes.png](docs/pretest-zeroes.png)
+
 
 ##### Export settings
 To configure the exports, the structure in the table below can be used. When there are no exports configured, no exports are executed.
@@ -96,7 +122,7 @@ JSON Field | Field type | Description | Optional
 process_id | Integer | The process ID this threshold relates to, should be equal to the process ID configured in [Processes configuration](#processes-configuration) | true
 name | String | The name of the metric to which the threshold relates, should be equal to the name configured in the [Metrics file](#metrics-file). For the `fps` and `processing time`, collective names to get the collection of all components are created (as each component in a GStreamer pipeline is separately measured), these collective names are `fps` and `processing time` | false
 type | String | The type of measurement value to use, these types are strictly defined and can be: `minimum`, `maximum`, `median`, and `average` | true
-sign | String | The sign that is used for the threshold comparison, the formula `<measured value> <sign> <threshold> ` is used | true
+sign | String | The sign that is used for the threshold comparison, the formula `<measured value> <sign> <threshold> ` is used, supported signs: "`>`", "`<`", "`>=`", "`<=`" | true
 threshold | Numeric | The threshold for which the process/system resource is checked | false 
 
 ### Metrics file
@@ -132,3 +158,31 @@ JSON Field | Field type | Description | Optional
 name | String | The name of the group | false
 size | Integer | The number of cores to count to, it will count from 0-size | false
 data | Array[[JSON object](#sensors)] | The sensors that will be measured, the `$INDEX$` tag will be replaced by the number of the core | false
+
+## How to contribute
+### TLDR
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change. Please note we have a code of conduct, please follow it in all your interactions with the project.
+
+### **Did you find a bug?**
+* **Ensure the bug was not already reported** by searching on GitHub under
+[Issues](https://github.com/ProdriveTechnologies/system-performance-analyzer/issue).
+* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/ProdriveTechnologies/system-performance-analyzer/issues/new/choose).
+Be sure to include a **title and clear description**, as much relevant information as possible.
+* If possible, use the relevant issue templates to create the issue.
+### **Did you write a patch that fixes a bug?**
+* Open a new GitHub pull request with the patch.
+* Ensure the PR description clearly describes the problem and solution. Include the
+relevant issue number if applicable.
+### **Did you fix whitespace, format code, or make a purely cosmetic patch?**
+Changes that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of the SPA tool will generally not be accepted.
+### **Do you intend to add a new feature or change an existing one?**
+* Suggest your change by opening an issue
+
+### **Do you have questions about the source code or usage?**
+* Ask any question about how to use the SPA tool by opening a blank issue.
+
+## License
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
+
+## Contact
+Feel free to open an issue with your questions or ideas. If there's something that cannot be disclosed through an issue, or example, a vulnerability, then send an email to: [opensource@prodrive-technologies.com](mailto:opensource@prodrive-technologies.com).
